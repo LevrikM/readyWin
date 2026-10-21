@@ -1,0 +1,31 @@
+# Build output
+/build/bin/
+*.exe
+*.zip
+/dist/
+/frontend/dist/
+/frontend/wailsjs/
+/frontend/package.json.md5
+
+# Dependencies
+/frontend/node_modules/
+.npm/
+
+# Logs and temporary files
+*.log
+*.tmp
+*.bak
+Thumbs.db
+desktop.ini
+.DS_Store
+
+# Editors and tools
+.vscode/
+.idea/
+.fleet/
+*.swp
+
+# Environment and secrets
+.env*
+*.pem
+*.key

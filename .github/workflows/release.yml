@@ -1,0 +1,77 @@
+name: Збірка та реліз
+
+on:
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Версія для імені файлу (наприклад 1.0.0)'
+        required: false
+        default: 'dev'
+
+permissions:
+  contents: write
+
+jobs:
+  windows:
+    name: Windows x64
+    runs-on: windows-latest
+    steps:
+      - name: Отримати код
+        uses: actions/checkout@v4
+
+      - name: Go
+        uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+          cache: true
+
+      - name: Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+
+      - name: Wails
+        run: go install github.com/wailsapp/wails/v2/cmd/wails@v2.17.0
+
+      - name: Версія
+        id: meta
+        shell: pwsh
+        run: |
+          $version = '${{ github.event.inputs.version }}'
+          if ('${{ github.ref_type }}' -eq 'tag') { $version = '${{ github.ref_name }}' -replace '^v', '' }
+          if ([string]::IsNullOrWhiteSpace($version)) { $version = 'dev' }
+          "version=$version" >> $env:GITHUB_OUTPUT
+
+      - name: Збірка
+        run: wails build -clean -platform windows/amd64
+
+      - name: Пакування
+        shell: pwsh
+        run: |
+          $version = '${{ steps.meta.outputs.version }}'
+          Copy-Item build/bin/ReadyWin.exe 'ReadyWin.exe' -Force
+          Compress-Archive -Path 'ReadyWin.exe' -DestinationPath "ReadyWin-$version-windows-amd64.zip" -Force
+          Get-ChildItem 'ReadyWin*.exe', 'ReadyWin*.zip' | Format-Table Name, Length
+
+      - name: Артефакт
+        uses: actions/upload-artifact@v4
+        with:
+          name: ReadyWin-windows-amd64
+          path: |
+            ReadyWin.exe
+            ReadyWin-*-windows-amd64.zip
+          if-no-files-found: error
+
+      - name: Реліз
+        if: github.ref_type == 'tag'
+        uses: softprops/action-gh-release@v2
+        with:
+          files: |
+            ReadyWin.exe
+            ReadyWin-*-windows-amd64.zip
+          generate_release_notes: true
