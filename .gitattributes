@@ -1,0 +1,3 @@
+# Catalog signatures cover the exact file bytes, so Git must not rewrite line endings.
+site/catalog.json -text
+site/catalog.sig -text
