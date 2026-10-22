@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"fmt"
 	"net"
 	"os"
@@ -148,8 +149,6 @@ func (a *App) Scan() (ScanResult, error) {
 	system := collectSystemInfo()
 	checks := buildChecks(installed, system, cat)
 
-	system.Winget = installedWingetVersion()
-	system.WebView2 = webViewVersion()
 	for i := range checks {
 		if checks[i].ID == "winget" {
 			if system.Winget == "" {
@@ -595,7 +594,9 @@ func webViewVersion() string {
 }
 
 func installedWingetVersion() string {
-	cmd := exec.Command("winget", "--version")
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+	cmd := exec.CommandContext(ctx, "winget", "--version")
 	cmd.SysProcAttr = hiddenProcess()
 	out, err := cmd.Output()
 	if err != nil {

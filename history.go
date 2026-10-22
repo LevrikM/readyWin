@@ -24,6 +24,7 @@ type HistoryEntry struct {
 	Status      string        `json:"status"`
 	Message     string        `json:"message"`
 	Code        string        `json:"code,omitempty"`
+	Mode        string        `json:"mode,omitempty"`
 	Items       []HistoryItem `json:"items"`
 	Before      int           `json:"before"`
 	After       int           `json:"after"`
@@ -92,7 +93,7 @@ func (a *App) ClearHistory() error {
 	if err != nil {
 		return err
 	}
-	return os.WriteFile(path, []byte("[]\n"), 0o644)
+	return writeFileAtomic(path, []byte("[]\n"), 0o644)
 }
 
 func saveHistory(entry HistoryEntry) error {
@@ -112,11 +113,7 @@ func saveHistory(entry HistoryEntry) error {
 	if err != nil {
 		return err
 	}
-	tmp := path + ".tmp"
-	if err := os.WriteFile(tmp, append(data, '\n'), 0o644); err != nil {
-		return err
-	}
-	return os.Rename(tmp, path)
+	return writeFileAtomic(path, append(data, '\n'), 0o644)
 }
 
 func historyFromState(state InstallState) HistoryEntry {
@@ -162,6 +159,7 @@ func historyFromState(state InstallState) HistoryEntry {
 		Status:      status,
 		Message:     state.Message,
 		Code:        state.Code,
+		Mode:        state.Mode,
 		Items:       items,
 		Before:      state.BaselineCount,
 		After:       after,

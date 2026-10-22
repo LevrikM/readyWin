@@ -1,6 +1,7 @@
 package main
 
 import (
+	"bytes"
 	"errors"
 	"fmt"
 	"os"
@@ -27,7 +28,8 @@ type InstallItem struct {
 	Status   string `json:"status"`
 	ExitCode int    `json:"exitCode,omitempty"`
 	Message  string `json:"message,omitempty"`
-	// Note carries a canonical hint ("installed", "already", "upgraded", "uptodate", "restart", "skipped").
+	// Note carries a canonical hint ("installed", "already", "upgraded", "uptodate",
+	// "removed", "repaired", "notinstalled", "restart", "skipped", "failed").
 	Note string `json:"note,omitempty"`
 }
 
@@ -43,7 +45,7 @@ type InstallState struct {
 	Cancelled  bool          `json:"cancelled"`
 	Message    string        `json:"message,omitempty"`
 	Code       string        `json:"code,omitempty"`
-	// Mode is "install" or "upgrade".
+	// Mode is "install", "upgrade", "uninstall" or "repair".
 	Mode          string            `json:"mode,omitempty"`
 	OKCount       int               `json:"okCount"`
 	FailCount     int               `json:"failCount"`
@@ -74,8 +76,10 @@ type installRun struct {
 }
 
 const (
-	wgInstall = "install"
-	wgUpgrade = "upgrade"
+	wgInstall   = "install"
+	wgUpgrade   = "upgrade"
+	wgUninstall = "uninstall"
+	wgRepair    = "repair"
 )
 
 var wingetIDPattern = regexp.MustCompile(`^[A-Za-z0-9][A-Za-z0-9._+-]*$`)
@@ -90,6 +94,14 @@ func (a *App) StartInstall(ids []string) (InstallState, error) {
 
 func (a *App) StartUpgrade(ids []string) (InstallState, error) {
 	return a.startQueue(wgUpgrade, ids)
+}
+
+func (a *App) StartUninstall(ids []string) (InstallState, error) {
+	return a.startQueue(wgUninstall, ids)
+}
+
+func (a *App) StartRepair(ids []string) (InstallState, error) {
+	return a.startQueue(wgRepair, ids)
 }
 
 func (a *App) startQueue(command string, ids []string) (InstallState, error) {
@@ -170,7 +182,7 @@ func (a *App) startQueue(command string, ids []string) (InstallState, error) {
 	a.mu.Lock()
 	if a.install.Active {
 		a.mu.Unlock()
-		return InstallState{}, errors.New("встановлення вже виконується")
+		return InstallState{}, errors.New("операція вже виконується")
 	}
 	a.install = state
 	a.run = run
@@ -246,28 +258,46 @@ func buildInstallScript(run *installRun, queue []InstallItem) string {
 	b.WriteString("$winget = " + psQuote(winget) + "\r\n")
 	subcommand := wgInstall
 	extra := " --no-upgrade"
-	if run.Command == wgUpgrade {
+	accept := " --accept-package-agreements --accept-source-agreements"
+	alreadyPattern := `already installed|No newer package|No applicable|No available upgrade|already exists`
+	switch run.Command {
+	case wgUpgrade:
 		subcommand = wgUpgrade
 		extra = ""
+	case wgUninstall:
+		subcommand = wgUninstall
+		extra = ""
+		accept = " --accept-source-agreements"
+		alreadyPattern = `No installed package|not installed|No applicable|No available|already uninstalled`
+	case wgRepair:
+		subcommand = wgRepair
+		extra = ""
+		alreadyPattern = `No applicable|already installed|No available|not installed`
 	}
+	b.WriteString("$already = " + psQuote(alreadyPattern) + "\r\n")
 	b.WriteString("try {\r\n")
 	b.WriteString("  foreach ($id in $ids) {\r\n")
 	b.WriteString("    if (Test-Path -LiteralPath $cancel) { Write-FW '::FW_CANCELLED'; break }\r\n")
 	b.WriteString("    Write-FW ('::FW_ITEM_START|' + $id)\r\n")
-	b.WriteString("    $output = @()\r\n")
+	b.WriteString("    $lines = New-Object 'System.Collections.Generic.List[string]'\r\n")
 	b.WriteString("    $code = -1\r\n")
 	b.WriteString("    try {\r\n")
-	b.WriteString("      $output = & $winget " + subcommand + " --id $id --exact --source winget --silent" + extra + " --accept-package-agreements --accept-source-agreements --disable-interactivity 2>&1\r\n")
+	b.WriteString("      & $winget " + subcommand + " --id $id --exact --source winget --silent" + extra + accept + " --disable-interactivity 2>&1 | ForEach-Object {\r\n")
+	b.WriteString("        $line = [string]$_\r\n")
+	b.WriteString("        $lines.Add($line)\r\n")
+	b.WriteString("        Write-FW ('::FW_LOG|' + $id + '|' + $line)\r\n")
+	b.WriteString("      }\r\n")
 	b.WriteString("      $code = $LASTEXITCODE\r\n")
 	b.WriteString("    } catch {\r\n")
-	b.WriteString("      $output = @($_.Exception.Message)\r\n")
+	b.WriteString("      $line = [string]$_.Exception.Message\r\n")
+	b.WriteString("      $lines.Add($line)\r\n")
+	b.WriteString("      Write-FW ('::FW_LOG|' + $id + '|' + $line)\r\n")
 	b.WriteString("      $code = -1\r\n")
 	b.WriteString("    }\r\n")
-	b.WriteString("    foreach ($line in $output) { Write-FW ('::FW_LOG|' + $id + '|' + [string]$line) }\r\n")
-	b.WriteString("    $text = ($output | Out-String)\r\n")
+	b.WriteString("    $text = [string]::Join([Environment]::NewLine, $lines)\r\n")
 	b.WriteString("    if ($code -eq 0 -or $code -eq 3010 -or $code -eq 1641 -or $code -eq -1978335189 -or $code -eq -1978335135 -or $code -eq -1978335216) {\r\n")
 	b.WriteString("      Write-FW ('::FW_ITEM_OK|' + $id + '|' + $code)\r\n")
-	b.WriteString("    } elseif ($text -match 'already installed|No newer package|No applicable|No available upgrade|already exists') {\r\n")
+	b.WriteString("    } elseif ($text -match $already) {\r\n")
 	b.WriteString("      Write-FW ('::FW_ITEM_OK|' + $id + '|' + $code + '|already')\r\n")
 	b.WriteString("    } else {\r\n")
 	b.WriteString("      Write-FW ('::FW_ITEM_FAIL|' + $id + '|' + $code)\r\n")
@@ -325,8 +355,10 @@ func (a *App) runInstall(run *installRun) {
 	processed := 0
 	endSeen := false
 	bootSeen := false
+	tail := &logTailer{path: run.LogPath}
+	defer tail.close()
 	consume := func() {
-		lines, _ := readLogLines(run.LogPath, processed)
+		lines := tail.poll()
 		processed += len(lines)
 		for _, line := range lines {
 			if strings.Contains(line, "::FW_BOOT") {
@@ -344,6 +376,14 @@ func (a *App) runInstall(run *installRun) {
 		select {
 		case err := <-done:
 			consume()
+			for _, line := range tail.flush() {
+				if strings.Contains(line, "::FW_BOOT") {
+					bootSeen = true
+				}
+				if a.handleLogLine(line) {
+					endSeen = true
+				}
+			}
 			a.finishInstall(run, err, endSeen, bootSeen)
 			if launcherLog != nil {
 				launcherLog.Close()
@@ -355,25 +395,79 @@ func (a *App) runInstall(run *installRun) {
 	}
 }
 
-func readLogLines(path string, offset int) ([]string, error) {
-	data, err := os.ReadFile(path)
-	if err != nil {
-		return nil, err
+type logTailer struct {
+	path    string
+	file    *os.File
+	pending []byte
+	failed  bool
+}
+
+// poll reads only the bytes appended since the previous call. The old
+// implementation re-read and re-split the whole log every 300 ms, which is
+// quadratic for long winget runs.
+func (t *logTailer) poll() []string {
+	if t.file == nil && !t.failed {
+		file, err := os.Open(t.path)
+		if err != nil {
+			if os.IsNotExist(err) {
+				return nil
+			}
+			t.failed = true
+			return nil
+		}
+		t.file = file
 	}
-	text := strings.TrimPrefix(string(data), "\ufeff")
-	lines := strings.Split(text, "\n")
-	if len(lines) == 0 {
-		return nil, nil
+	if t.file == nil {
+		return nil
 	}
-	// The final line may still be in flight.
-	lines = lines[:len(lines)-1]
-	for i := range lines {
-		lines[i] = strings.TrimSuffix(strings.TrimSpace(lines[i]), "\r")
+	buf := make([]byte, 64*1024)
+	for {
+		n, err := t.file.Read(buf)
+		if n > 0 {
+			t.pending = append(t.pending, buf[:n]...)
+		}
+		if err != nil || n < len(buf) {
+			break
+		}
 	}
-	if offset >= len(lines) {
-		return nil, nil
+	return t.extract(false)
+}
+
+func (t *logTailer) flush() []string {
+	return t.extract(true)
+}
+
+func (t *logTailer) close() {
+	if t.file != nil {
+		_ = t.file.Close()
+		t.file = nil
 	}
-	return lines[offset:], nil
+}
+
+func (t *logTailer) extract(final bool) []string {
+	var lines []string
+	for {
+		index := bytes.IndexByte(t.pending, '\n')
+		if index < 0 {
+			break
+		}
+		line := string(t.pending[:index])
+		t.pending = t.pending[index+1:]
+		lines = append(lines, cleanLogLine(line))
+	}
+	if final && len(t.pending) > 0 {
+		lines = append(lines, cleanLogLine(string(t.pending)))
+		t.pending = nil
+	} else if len(t.pending) > 1<<20 {
+		// Protect the UI from a malformed log without a newline.
+		lines = append(lines, cleanLogLine(string(t.pending)))
+		t.pending = nil
+	}
+	return lines
+}
+
+func cleanLogLine(line string) string {
+	return strings.TrimSpace(strings.TrimPrefix(line, "\ufeff"))
 }
 
 func (a *App) handleLogLine(line string) bool {
@@ -389,7 +483,7 @@ func (a *App) handleLogLine(line string) bool {
 		if len(parts) >= 2 {
 			a.mu.Lock()
 			a.install.Current = parts[1]
-			a.install.Message = "Встановлення"
+			a.install.Message = modeProgressText(a.install.Mode)
 			for i := range a.install.Items {
 				if a.install.Items[i].ID == parts[1] {
 					a.install.Items[i].Status = "running"
@@ -405,27 +499,14 @@ func (a *App) handleLogLine(line string) bool {
 			if len(parts) >= 3 {
 				code, _ = strconv.Atoi(parts[2])
 			}
-			message := "Встановлено"
-			note := "installed"
 			mode := a.InstallSnapshot().Mode
-			if mode == wgUpgrade {
-				message = "Оновлено"
-				note = "upgraded"
-			}
+			message, note := modeSuccessText(mode)
 			if len(parts) >= 4 && parts[3] == "already" {
-				message = "Уже встановлено"
-				note = "already"
-				if mode == wgUpgrade {
-					message = "Оновлення не потрібне"
-					note = "uptodate"
-				}
+				message, note = modeAlreadyText(mode)
 			}
-			if a.pendingRestart(parts[1]) {
+			if mode != wgUninstall && a.pendingRestart(parts[1]) {
 				note = "restart"
-				message = "Встановлено, потрібен перезапуск"
-				if mode == wgUpgrade {
-					message = "Оновлено, потрібен перезапуск"
-				}
+				message = modeRestartText(mode)
 			}
 			a.updateItem(parts[1], "ok", code, message, note)
 		}
@@ -435,7 +516,7 @@ func (a *App) handleLogLine(line string) bool {
 			if len(parts) >= 3 {
 				code, _ = strconv.Atoi(parts[2])
 			}
-			a.updateItem(parts[1], "failed", code, "Помилка встановлення", "failed")
+			a.updateItem(parts[1], "failed", code, modeFailureText(a.InstallSnapshot().Mode), "failed")
 		}
 	case "::FW_FATAL":
 		text := strings.Join(parts[1:], "|")
@@ -496,6 +577,108 @@ func (a *App) updateItem(id, status string, code int, message, note string) {
 	a.emitInstall(InstallEvent{Type: "state", State: state})
 }
 
+func modeProgressText(mode string) string {
+	switch mode {
+	case wgUpgrade:
+		return "Оновлення"
+	case wgUninstall:
+		return "Видалення"
+	case wgRepair:
+		return "Відновлення"
+	default:
+		return "Встановлення"
+	}
+}
+
+func modeSuccessText(mode string) (string, string) {
+	switch mode {
+	case wgUpgrade:
+		return "Оновлено", "upgraded"
+	case wgUninstall:
+		return "Видалено", "removed"
+	case wgRepair:
+		return "Відновлено", "repaired"
+	default:
+		return "Встановлено", "installed"
+	}
+}
+
+func modeAlreadyText(mode string) (string, string) {
+	switch mode {
+	case wgUpgrade:
+		return "Оновлення не потрібне", "uptodate"
+	case wgUninstall:
+		return "Не було встановлено", "notinstalled"
+	case wgRepair:
+		return "Уже встановлено", "already"
+	default:
+		return "Уже встановлено", "already"
+	}
+}
+
+func modeRestartText(mode string) string {
+	switch mode {
+	case wgUpgrade:
+		return "Оновлено, потрібен перезапуск"
+	case wgRepair:
+		return "Відновлено, потрібен перезапуск"
+	default:
+		return "Встановлено, потрібен перезапуск"
+	}
+}
+
+func modeFailureText(mode string) string {
+	switch mode {
+	case wgUpgrade:
+		return "Помилка оновлення"
+	case wgUninstall:
+		return "Помилка видалення"
+	case wgRepair:
+		return "Помилка відновлення"
+	default:
+		return "Помилка встановлення"
+	}
+}
+
+func modeResultPast(mode string) string {
+	switch mode {
+	case wgUpgrade:
+		return "Оновлено"
+	case wgUninstall:
+		return "Видалено"
+	case wgRepair:
+		return "Відновлено"
+	default:
+		return "Встановлено"
+	}
+}
+
+func modeResultVerb(mode string) string {
+	switch mode {
+	case wgUpgrade:
+		return "оновлено"
+	case wgUninstall:
+		return "видалено"
+	case wgRepair:
+		return "відновлено"
+	default:
+		return "встановлено"
+	}
+}
+
+func modeNoResultText(mode string) string {
+	switch mode {
+	case wgUpgrade:
+		return "Оновлення завершилося без результату. Перевірте журнал."
+	case wgUninstall:
+		return "Видалення завершилося без результату. Перевірте журнал."
+	case wgRepair:
+		return "Відновлення завершилося без результату. Перевірте журнал."
+	default:
+		return "Інсталятор завершився без результату. Перевірте журнал."
+	}
+}
+
 func (a *App) finishInstall(run *installRun, processErr error, endSeen bool, bootSeen bool) {
 	exitData, _ := os.ReadFile(run.ExitPath)
 	exitText := strings.TrimSpace(string(exitData))
@@ -538,18 +721,40 @@ func (a *App) finishInstall(run *installRun, processErr error, endSeen bool, boo
 		case "failed":
 			failCount++
 		case "pending":
-			// Recover lost results: the package may already be on the machine.
-			if after != nil && run.Command != wgUpgrade {
-				if _, ok := after[item.ID]; ok {
-					item.Status = "ok"
-					item.Message = "Уже встановлено"
-					item.Note = "already"
-					if _, wasThere := run.Baseline[item.ID]; !wasThere {
-						item.Message = "Встановлено"
-						item.Note = "installed"
+			// Recover lost results: the package may already be in the desired state.
+			if after != nil {
+				_, exists := after[item.ID]
+				switch run.Command {
+				case wgUpgrade:
+					// Upgrades are not inferable from before/after versions.
+				case wgUninstall:
+					if !exists {
+						item.Status = "ok"
+						item.Message = "Видалено"
+						item.Note = "removed"
+						okCount++
+						continue
 					}
-					okCount++
-					continue
+				case wgRepair:
+					if exists {
+						item.Status = "ok"
+						item.Message = "Відновлено"
+						item.Note = "repaired"
+						okCount++
+						continue
+					}
+				default:
+					if exists {
+						item.Status = "ok"
+						item.Message = "Уже встановлено"
+						item.Note = "already"
+						if _, wasThere := run.Baseline[item.ID]; !wasThere {
+							item.Message = "Встановлено"
+							item.Note = "installed"
+						}
+						okCount++
+						continue
+					}
 				}
 			}
 			item.Status = "skipped"
@@ -564,13 +769,18 @@ func (a *App) finishInstall(run *installRun, processErr error, endSeen bool, boo
 	a.install.OKCount = okCount
 	a.install.FailCount = failCount
 	a.install.SkippedCount = skippedCount
+	past := modeResultPast(run.Command)
+	verb := modeResultVerb(run.Command)
 	switch {
 	case cancelled:
 		a.install.Code = "cancelled"
-		a.install.Message = fmt.Sprintf("Скасовано. Встановлено %d з %d.", okCount, len(a.install.Items))
-	case processErr != nil || exitText == "UAC_CANCELLED":
+		a.install.Message = fmt.Sprintf("Скасовано. %s %d з %d.", past, okCount, len(a.install.Items))
+	case exitText == "UAC_CANCELLED":
 		a.install.Code = "uacCancelled"
 		a.install.Message = "Запуск скасовано. Підтвердіть запит UAC, щоб продовжити."
+	case processErr != nil:
+		a.install.Code = "launcherFailed"
+		a.install.Message = fmt.Sprintf("Не вдалося запустити підвищений процес: %v. Дивіться launcher.log.", processErr)
 	case !logExisted:
 		a.install.Code = "noLog"
 		code := exitText
@@ -580,26 +790,14 @@ func (a *App) finishInstall(run *installRun, processErr error, endSeen bool, boo
 		a.install.Message = fmt.Sprintf("Інсталятор не створив журнал (код %s). Дивіться launcher.log у теці запуску.", code)
 	case failCount > 0:
 		a.install.Code = "withErrors"
-		a.install.Message = fmt.Sprintf("Готово з помилками: %d з %d встановлено.", okCount, len(a.install.Items))
+		a.install.Message = fmt.Sprintf("Готово з помилками: %d з %d %s.", okCount, len(a.install.Items), verb)
 	case okCount == 0:
 		a.install.Code = "noResult"
-		a.install.Message = "Інсталятор завершився без результату. Перевірте журнал."
+		a.install.Message = modeNoResultText(run.Command)
 	default:
 		a.install.Code = "done"
 		a.install.Success = true
-		a.install.Message = fmt.Sprintf("Готово. Встановлено %d з %d.", okCount, len(a.install.Items))
-	}
-	if run.Command == wgUpgrade {
-		switch a.install.Code {
-		case "cancelled":
-			a.install.Message = fmt.Sprintf("Скасовано. Оновлено %d з %d.", okCount, len(a.install.Items))
-		case "withErrors":
-			a.install.Message = fmt.Sprintf("Готово з помилками: %d з %d оновлено.", okCount, len(a.install.Items))
-		case "noResult":
-			a.install.Message = "Оновлення завершилося без результату. Перевірте журнал."
-		case "done":
-			a.install.Message = fmt.Sprintf("Готово. Оновлено %d з %d.", okCount, len(a.install.Items))
-		}
+		a.install.Message = fmt.Sprintf("Готово. %s %d з %d.", past, okCount, len(a.install.Items))
 	}
 	if skippedCount > 0 && !cancelled {
 		a.install.Message += fmt.Sprintf(" Пропущено: %d.", skippedCount)
@@ -610,7 +808,7 @@ func (a *App) finishInstall(run *installRun, processErr error, endSeen bool, boo
 	if len(removed) > 0 {
 		a.install.Message += fmt.Sprintf(" Зникло: %d.", len(removed))
 	}
-	if !bootSeen && len(added) == 0 && !cancelled {
+	if !bootSeen && len(added) == 0 && len(removed) == 0 && !cancelled {
 		a.install.Success = false
 	}
 	state := cloneState(a.install)
@@ -618,6 +816,7 @@ func (a *App) finishInstall(run *installRun, processErr error, endSeen bool, boo
 
 	_ = saveHistory(historyFromState(state))
 	invalidateUpdates()
+	cleanupStorage()
 	a.emitInstall(InstallEvent{Type: "done", State: state})
 }
 

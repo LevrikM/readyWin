@@ -46,9 +46,13 @@ jobs:
           if ('${{ github.ref_type }}' -eq 'tag') { $version = '${{ github.ref_name }}' -replace '^v', '' }
           if ([string]::IsNullOrWhiteSpace($version)) { $version = 'dev' }
           "version=$version" >> $env:GITHUB_OUTPUT
+          $config = Get-Content wails.json -Raw | ConvertFrom-Json
+          $config.info.productVersion = $version
+          $config | ConvertTo-Json -Depth 10 | Set-Content wails.json -Encoding utf8
 
       - name: Збірка
-        run: wails build -clean -platform windows/amd64
+        shell: pwsh
+        run: wails build -clean -platform windows/amd64 -ldflags "-X main.appVersion=${{ steps.meta.outputs.version }}"
 
       - name: Пакування
         shell: pwsh

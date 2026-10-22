@@ -1,0 +1,4722 @@
+{
+  "version": "1.0",
+  "updated": "2026-10-21",
+  "groups": [
+    {
+      "id": "system",
+      "name": "Компоненти",
+      "description": "DirectX, Visual C++ і середовища виконання.",
+      "index": 1,
+      "nameEn": "Components",
+      "descriptionEn": "Runtime components and system tools a clean Windows usually lacks."
+    },
+    {
+      "id": "browsers",
+      "name": "Браузери",
+      "description": "Браузери та приватний доступ.",
+      "index": 2,
+      "nameEn": "Browsers",
+      "descriptionEn": "Mainstream web browsers with sync, extensions and privacy options."
+    },
+    {
+      "id": "communication",
+      "name": "Комунікації",
+      "description": "Месенджери, дзвінки та командні чати.",
+      "index": 3,
+      "nameEn": "Communication",
+      "descriptionEn": "Messengers, video calls and team chat clients."
+    },
+    {
+      "id": "media",
+      "name": "Медіа",
+      "description": "Плеєри, музика, стріми та обробка відео.",
+      "index": 4,
+      "nameEn": "Media",
+      "descriptionEn": "Players, audio editors and video tools for everyday use."
+    },
+    {
+      "id": "gaming",
+      "name": "Ігри",
+      "description": "Лаунчери, бібліотеки та ігрові утиліти.",
+      "index": 5,
+      "nameEn": "Games",
+      "descriptionEn": "Game launchers, stores and streaming clients."
+    },
+    {
+      "id": "development",
+      "name": "Розробка",
+      "description": "Редактори, SDK, контейнери й бази даних.",
+      "index": 6,
+      "nameEn": "Development",
+      "descriptionEn": "Editors, toolchains, containers and database clients."
+    },
+    {
+      "id": "cli",
+      "name": "Консоль",
+      "description": "Командні рядки, пакетні менеджери та CLI-інструменти.",
+      "index": 7,
+      "nameEn": "Console",
+      "descriptionEn": "Shells, package managers and command-line tools."
+    },
+    {
+      "id": "ai",
+      "name": "ШІ",
+      "description": "Асистенти, локальні моделі та середовища для роботи зі ШІ.",
+      "index": 8,
+      "nameEn": "AI",
+      "descriptionEn": "Assistants, local models and environments for working with AI."
+    },
+    {
+      "id": "office",
+      "name": "Офіс",
+      "description": "Документи, нотатки, PDF і бібліографія.",
+      "index": 9,
+      "nameEn": "Office",
+      "descriptionEn": "Documents, notes, PDF readers and reference managers."
+    },
+    {
+      "id": "utilities",
+      "name": "Утиліти",
+      "description": "Файли, диски, мережа та робочий стіл.",
+      "index": 10,
+      "nameEn": "Utilities",
+      "descriptionEn": "Archivers, file managers, monitoring, remote access and encryption tools."
+    },
+    {
+      "id": "creative",
+      "name": "Творчість",
+      "description": "Графіка, 3D, відео та дизайн.",
+      "index": 11,
+      "nameEn": "Creative",
+      "descriptionEn": "Graphics, 3D, video editing and design tools."
+    },
+    {
+      "id": "security",
+      "name": "Безпека",
+      "description": "Антивіруси, шифрування та аналіз мережі.",
+      "index": 12,
+      "nameEn": "Security",
+      "descriptionEn": "Antivirus, encryption and network analysis tools."
+    }
+  ],
+  "presets": [
+    {
+      "id": "base",
+      "name": "База",
+      "description": "Браузер, архіватор, медіа та базові бібліотеки.",
+      "items": [
+        "Google.Chrome",
+        "7zip.7zip",
+        "VideoLAN.VLC",
+        "Telegram.TelegramDesktop",
+        "Bitwarden.Bitwarden",
+        "voidtools.Everything",
+        "Microsoft.DirectX",
+        "Microsoft.VCRedist.2015+.x64",
+        "Microsoft.VCRedist.2015+.x86",
+        "Microsoft.DotNet.DesktopRuntime.8"
+      ],
+      "nameEn": "Base",
+      "descriptionEn": "What a fresh Windows needs first: browser, messenger, player and archiver."
+    },
+    {
+      "id": "development",
+      "name": "Розробка",
+      "description": "Редактор, Git, середовища виконання й контейнери.",
+      "items": [
+        "Microsoft.VisualStudioCode",
+        "Git.Git",
+        "OpenJS.NodeJS.LTS",
+        "Python.Python.3.13",
+        "Microsoft.WindowsTerminal",
+        "Microsoft.PowerShell",
+        "Docker.DockerDesktop",
+        "Postman.Postman",
+        "GitHub.GitHubDesktop",
+        "DBeaver.DBeaver.Community",
+        "Microsoft.WSL",
+        "SST.opencode",
+        "BurntSushi.ripgrep.MSVC",
+        "GitHub.cli",
+        "Microsoft.VCRedist.2015+.x64",
+        "Microsoft.VCRedist.2015+.x86"
+      ],
+      "nameEn": "Development",
+      "descriptionEn": "A working environment for code, containers and databases."
+    },
+    {
+      "id": "gaming",
+      "name": "Ігри",
+      "description": "Лаунчери, бібліотеки та компоненти DirectX.",
+      "items": [
+        "Valve.Steam",
+        "Discord.Discord",
+        "EpicGames.EpicGamesLauncher",
+        "Blizzard.BattleNet",
+        "GOG.Galaxy",
+        "ElectronicArts.EADesktop",
+        "Ubisoft.Connect",
+        "Playnite.Playnite",
+        "PrismLauncher.PrismLauncher",
+        "MoonlightGameStreamingProject.Moonlight",
+        "Microsoft.DirectX",
+        "Microsoft.VCRedist.2015+.x64",
+        "Microsoft.VCRedist.2015+.x86"
+      ],
+      "nameEn": "Games",
+      "descriptionEn": "Launchers and clients for the main game stores."
+    },
+    {
+      "id": "creative",
+      "name": "Творчість",
+      "description": "Графіка, 3D, монтаж відео та звук.",
+      "items": [
+        "GIMP.GIMP",
+        "KDE.Krita",
+        "Inkscape.Inkscape",
+        "BlenderFoundation.Blender",
+        "Figma.Figma",
+        "Meltytech.Shotcut",
+        "KDE.Kdenlive",
+        "dotPDN.PaintDotNet",
+        "OBSProject.OBSStudio",
+        "Audacity.Audacity"
+      ],
+      "nameEn": "Creative",
+      "descriptionEn": "Graphics, 3D and video toolkit for creative work."
+    },
+    {
+      "id": "ai",
+      "name": "ШІ",
+      "description": "Агентні середовища, асистенти та локальні моделі.",
+      "items": [
+        "SST.OpenCodeDesktop",
+        "Google.Antigravity",
+        "Anthropic.Claude",
+        "Ollama.Ollama",
+        "ElementLabs.LMStudio"
+      ],
+      "nameEn": "AI",
+      "descriptionEn": "Agent environments, assistants and local models."
+    }
+  ],
+  "items": [
+    {
+      "id": "Microsoft.DirectX",
+      "name": "DirectX End-User Runtime",
+      "shortName": "DirectX",
+      "publisher": "Microsoft",
+      "description": "Бібліотеки DirectX 9–11 для старих ігор і програм.",
+      "group": "system",
+      "icon": "directx",
+      "tags": [
+        "directx",
+        "runtime",
+        "dx9",
+        "dx10",
+        "dx11",
+        "ігри",
+        "сумісність"
+      ],
+      "sizeMb": 100,
+      "recommended": true,
+      "match": [
+        "DirectX"
+      ],
+      "descriptionEn": "Installs a number of runtime libraries from the legacy DirectX SDK for some games that use D3DX9, D3DX10, D3DX11, XAudio 2.7, XInput 1.3, XACT, and/or Managed DirectX 1.1.",
+      "homepage": "https://www.microsoft.com/en-gb/download/details.aspx?id=35"
+    },
+    {
+      "id": "Microsoft.VCRedist.2015+.x64",
+      "name": "Visual C++ 2015–2022 Redistributable (x64)",
+      "shortName": "Visual C++ x64",
+      "publisher": "Microsoft",
+      "description": "Системні бібліотеки Visual C++ для 64-бітних програм.",
+      "group": "system",
+      "icon": "cpp",
+      "tags": [
+        "visual c++",
+        "vc++",
+        "runtime",
+        "x64",
+        "бібліотеки"
+      ],
+      "sizeMb": 25,
+      "recommended": true,
+      "match": [],
+      "descriptionEn": "The Microsoft Visual C++ v14 Redistributable Package (x64) installs runtime components of Visual C++ Libraries required to run 64-bit applications developed with Visual C++ 2015, 2017, 2019, 2022 and 2026 on a computer that does not have Visual C++ 2015, 2017, 2019, 2022 and 2026 installed.",
+      "homepage": "https://learn.microsoft.com/cpp/windows/latest-supported-vc-redist"
+    },
+    {
+      "id": "Microsoft.VCRedist.2015+.x86",
+      "name": "Visual C++ 2015–2022 Redistributable (x86)",
+      "shortName": "Visual C++ x86",
+      "publisher": "Microsoft",
+      "description": "Системні бібліотеки Visual C++ для 32-бітних програм.",
+      "group": "system",
+      "icon": "cpp",
+      "tags": [
+        "visual c++",
+        "vc++",
+        "runtime",
+        "x86",
+        "бібліотеки"
+      ],
+      "sizeMb": 20,
+      "recommended": true,
+      "match": [],
+      "descriptionEn": "The Microsoft Visual C++ v14 Redistributable Package (x86) installs runtime components of Visual C++ Libraries required to run 32-bit applications developed with Visual C++ 2015, 2017, 2019, 2022 and 2026 on a computer that does not have Visual C++ 2015, 2017, 2019, 2022 and 2026 installed.",
+      "homepage": "https://learn.microsoft.com/cpp/windows/latest-supported-vc-redist"
+    },
+    {
+      "id": "Microsoft.DotNet.DesktopRuntime.8",
+      "name": ".NET Desktop Runtime 8",
+      "shortName": ".NET Desktop 8",
+      "publisher": "Microsoft",
+      "description": "Середовище для запуску десктопних програм на .NET 8.",
+      "group": "system",
+      "icon": "dotnet",
+      "tags": [
+        "net",
+        "dotnet",
+        "runtime",
+        "desktop",
+        "бібліотеки"
+      ],
+      "sizeMb": 60,
+      "recommended": true,
+      "match": [],
+      "descriptionEn": ".NET is a free, cross-platform, open-source developer platform for building many different types of applications.",
+      "homepage": "https://dotnet.microsoft.com"
+    },
+    {
+      "id": "Microsoft.EdgeWebView2Runtime",
+      "name": "Microsoft Edge WebView2 Runtime",
+      "shortName": "WebView2",
+      "publisher": "Microsoft",
+      "description": "Рушій Edge для вбудованих вебпанелей у програмах.",
+      "group": "system",
+      "icon": "webview",
+      "tags": [
+        "webview2",
+        "edge",
+        "runtime",
+        "браузер",
+        "бібліотеки"
+      ],
+      "sizeMb": 150,
+      "recommended": true,
+      "match": [],
+      "descriptionEn": "Embed web content (HTML, CSS, and JavaScript) in your native applications with Microsoft Edge WebView2.",
+      "homepage": "https://developer.microsoft.com/microsoft-edge/webview2/"
+    },
+    {
+      "id": "Microsoft.WindowsTerminal",
+      "name": "Windows Terminal",
+      "shortName": "Windows Terminal",
+      "publisher": "Microsoft",
+      "description": "Сучасний термінал із вкладками, панелями та профілями.",
+      "group": "system",
+      "icon": "terminal",
+      "tags": [
+        "terminal",
+        "термінал",
+        "консоль",
+        "cli",
+        "windows"
+      ],
+      "sizeMb": 50,
+      "recommended": false,
+      "match": [
+        "Windows Terminal"
+      ],
+      "descriptionEn": "The new Windows Terminal, a tabbed command line experience for Windows.",
+      "homepage": "https://docs.microsoft.com/windows/terminal"
+    },
+    {
+      "id": "Microsoft.PowerShell",
+      "name": "PowerShell 7",
+      "shortName": "PowerShell 7",
+      "publisher": "Microsoft",
+      "description": "Кросплатформна командна оболонка та мова скриптів.",
+      "group": "system",
+      "icon": "powershell",
+      "tags": [
+        "powershell",
+        "shell",
+        "консоль",
+        "скрипти",
+        "cli"
+      ],
+      "sizeMb": 100,
+      "recommended": false,
+      "match": [
+        "PowerShell 7"
+      ],
+      "descriptionEn": "PowerShell is a cross-platform (Windows, Linux, and macOS) automation and configuration tool/framework that works well with your existing tools and is optimized for dealing with structured data (e.g. JSON, CSV, XML, etc.), REST APIs, and object models.",
+      "homepage": "https://microsoft.com/PowerShell"
+    },
+    {
+      "id": "Google.Chrome",
+      "name": "Google Chrome",
+      "shortName": "Chrome",
+      "publisher": "Google",
+      "description": "Браузер із профілями, синхронізацією та розширеннями.",
+      "group": "browsers",
+      "icon": "googlechrome",
+      "tags": [
+        "браузер",
+        "browser",
+        "google",
+        "chrome",
+        "інтернет"
+      ],
+      "sizeMb": 120,
+      "recommended": true,
+      "match": [
+        "Google Chrome"
+      ],
+      "descriptionEn": "Chrome is the official web browser from Google, built to be fast, secure, and customizable.",
+      "homepage": "https://www.google.com/chrome/"
+    },
+    {
+      "id": "Mozilla.Firefox",
+      "name": "Mozilla Firefox",
+      "shortName": "Firefox",
+      "publisher": "Mozilla",
+      "description": "Незалежний браузер з відкритим кодом і власним рушієм.",
+      "group": "browsers",
+      "icon": "firefox",
+      "tags": [
+        "браузер",
+        "browser",
+        "mozilla",
+        "firefox",
+        "інтернет"
+      ],
+      "sizeMb": 80,
+      "recommended": false,
+      "match": [
+        "Mozilla Firefox"
+      ],
+      "descriptionEn": "Firefox Browser, also known as Mozilla Firefox or simply Firefox, is a free and open-source web browser developed by the Mozilla Foundation and its subsidiary, the Mozilla Corporation. Firefox uses the Gecko layout engine to render web pages, which implements current and anticipated web…",
+      "homepage": "https://www.mozilla.org/firefox/"
+    },
+    {
+      "id": "Brave.Brave",
+      "name": "Brave",
+      "shortName": "Brave",
+      "publisher": "Brave Software",
+      "description": "Браузер із вбудованим блокуванням реклами та трекерів.",
+      "group": "browsers",
+      "icon": "brave",
+      "tags": [
+        "браузер",
+        "browser",
+        "brave",
+        "приватність",
+        "реклама"
+      ],
+      "sizeMb": 140,
+      "recommended": false,
+      "match": [
+        "Brave"
+      ],
+      "descriptionEn": "The new Brave browser blocks ads and trackers that slow you down and invade your privacy.",
+      "homepage": "https://brave.com/download"
+    },
+    {
+      "id": "Vivaldi.Vivaldi",
+      "name": "Vivaldi",
+      "shortName": "Vivaldi",
+      "publisher": "Vivaldi Technologies",
+      "description": "Гнучкий браузер із бічною панеллю та глибокими налаштуваннями.",
+      "group": "browsers",
+      "icon": "vivaldi",
+      "tags": [
+        "браузер",
+        "browser",
+        "vivaldi",
+        "вкладки"
+      ],
+      "sizeMb": 100,
+      "recommended": false,
+      "match": [
+        "Vivaldi"
+      ],
+      "descriptionEn": "Vivaldi is a web browser. But fun. It comes with a bunch of clever features built-in. It’s super flexible and does not track you.",
+      "homepage": "https://vivaldi.com/desktop/"
+    },
+    {
+      "id": "Opera.Opera",
+      "name": "Opera",
+      "shortName": "Opera",
+      "publisher": "Opera Norway",
+      "description": "Браузер із вбудованими месенджерами та VPN.",
+      "group": "browsers",
+      "icon": "opera",
+      "tags": [
+        "браузер",
+        "browser",
+        "opera",
+        "vpn"
+      ],
+      "sizeMb": 100,
+      "recommended": false,
+      "match": [
+        "Opera"
+      ],
+      "descriptionEn": "Opera is a multi-platform web browser developed by Opera Software. Opera is a Chromium-based browser. It distinguishes itself from other browsers through its user interface, functionality, and other features.",
+      "homepage": "https://www.opera.com/browsers/opera"
+    },
+    {
+      "id": "TorProject.TorBrowser",
+      "name": "Tor Browser",
+      "shortName": "Tor Browser",
+      "publisher": "Tor Project",
+      "description": "Анонімний браузер для доступу до мережі Tor.",
+      "group": "browsers",
+      "icon": "torbrowser",
+      "tags": [
+        "браузер",
+        "browser",
+        "tor",
+        "приватність",
+        "анонімність"
+      ],
+      "sizeMb": 90,
+      "recommended": false,
+      "match": [
+        "Tor Browser"
+      ],
+      "descriptionEn": "The Tor software protects you by bouncing your communications around a distributed network of relays run by volunteers all around the world, it prevents somebody watching your Internet connection from learning what sites you visit, it prevents the sites you visit from learning your physical…",
+      "homepage": "https://www.torproject.org/"
+    },
+    {
+      "id": "Telegram.TelegramDesktop",
+      "name": "Telegram Desktop",
+      "shortName": "Telegram",
+      "publisher": "Telegram",
+      "description": "Месенджер із хмарним сховищем, каналами та ботами.",
+      "group": "communication",
+      "icon": "telegram",
+      "tags": [
+        "месенджер",
+        "telegram",
+        "чат",
+        "канали",
+        "файли"
+      ],
+      "sizeMb": 80,
+      "recommended": true,
+      "match": [
+        "Telegram Desktop"
+      ],
+      "descriptionEn": "A cloud-based mobile and desktop messaging app with a focus on security and speed.",
+      "homepage": "https://desktop.telegram.org/"
+    },
+    {
+      "id": "Discord.Discord",
+      "name": "Discord",
+      "shortName": "Discord",
+      "publisher": "Discord",
+      "description": "Голосові канали, відео та спільноти для ігор.",
+      "group": "communication",
+      "icon": "discord",
+      "tags": [
+        "месенджер",
+        "discord",
+        "голос",
+        "ігри",
+        "спільноти"
+      ],
+      "sizeMb": 110,
+      "recommended": false,
+      "match": [
+        "Discord"
+      ],
+      "descriptionEn": "Discord is the easiest way to talk over voice, video, and text.",
+      "homepage": "https://discord.com/download"
+    },
+    {
+      "id": "Zoom.Zoom",
+      "name": "Zoom Workplace",
+      "shortName": "Zoom",
+      "publisher": "Zoom",
+      "description": "Відеодзвінки, вебінари та запис зустрічей.",
+      "group": "communication",
+      "icon": "zoom",
+      "tags": [
+        "відеодзвінки",
+        "zoom",
+        "зустрічі",
+        "конференції"
+      ],
+      "sizeMb": 90,
+      "recommended": false,
+      "match": [
+        "Zoom Workplace",
+        "Zoom"
+      ],
+      "descriptionEn": "Zoom's secure, reliable video platform powers all of your communication needs, including meetings, chat, phone, webinars, and online events.",
+      "homepage": "https://zoom.us/"
+    },
+    {
+      "id": "SlackTechnologies.Slack",
+      "name": "Slack",
+      "shortName": "Slack",
+      "publisher": "Salesforce",
+      "description": "Командні чати, канали та робочі простори.",
+      "group": "communication",
+      "icon": "slack",
+      "tags": [
+        "чат",
+        "slack",
+        "команда",
+        "робота"
+      ],
+      "sizeMb": 100,
+      "recommended": false,
+      "match": [
+        "Slack"
+      ],
+      "descriptionEn": "Slack is a collaboration hub for work, no matter what work you do. It's a place where conversations happen, decisions are made, and information is always at your fingertips. With Slack, your team is better connected.",
+      "homepage": "https://slack.com/"
+    },
+    {
+      "id": "OpenWhisperSystems.Signal",
+      "name": "Signal",
+      "shortName": "Signal",
+      "publisher": "Signal Foundation",
+      "description": "Приватний месенджер із наскрізним шифруванням.",
+      "group": "communication",
+      "icon": "signal",
+      "tags": [
+        "месенджер",
+        "signal",
+        "шифрування",
+        "приватність"
+      ],
+      "sizeMb": 120,
+      "recommended": false,
+      "match": [
+        "Signal"
+      ],
+      "descriptionEn": "Signal is an encrypted communications application.",
+      "homepage": "https://www.signal.org/"
+    },
+    {
+      "id": "Element.Element",
+      "name": "Element",
+      "shortName": "Element",
+      "publisher": "Element",
+      "description": "Клієнт Matrix для приватних і корпоративних чатів.",
+      "group": "communication",
+      "icon": "element",
+      "tags": [
+        "месенджер",
+        "element",
+        "matrix",
+        "чат"
+      ],
+      "sizeMb": 100,
+      "recommended": false,
+      "match": [
+        "Element"
+      ],
+      "descriptionEn": "Element is a Matrix-based end-to-end encrypted messenger and secure collaboration app. It’s decentralized for digital sovereign self-hosting, or through a hosting service such as Element Matrix Services. Element operates on the open Matrix network to provide interoperability and easy connections.",
+      "homepage": "https://element.io/download"
+    },
+    {
+      "id": "Microsoft.Teams",
+      "name": "Microsoft Teams",
+      "shortName": "Teams",
+      "publisher": "Microsoft",
+      "description": "Чати, дзвінки та зустрічі Microsoft 365.",
+      "group": "communication",
+      "icon": "teams",
+      "tags": [
+        "чат",
+        "teams",
+        "microsoft",
+        "зустрічі",
+        "робота"
+      ],
+      "sizeMb": 150,
+      "recommended": false,
+      "match": [
+        "Microsoft Teams"
+      ],
+      "descriptionEn": "Working together is easier with Microsoft Teams. Tools and files are always available in one place that's designed to help you connect naturally, stay organized and bring ideas to life.",
+      "homepage": "https://www.microsoft.com/microsoft-teams/group-chat-software"
+    },
+    {
+      "id": "Rakuten.Viber",
+      "name": "Viber",
+      "shortName": "Viber",
+      "publisher": "Rakuten",
+      "description": "Месенджер із дзвінками та спільнотами.",
+      "group": "communication",
+      "icon": "viber",
+      "tags": [
+        "месенджер",
+        "viber",
+        "дзвінки",
+        "чат"
+      ],
+      "sizeMb": 100,
+      "recommended": false,
+      "match": [
+        "Viber"
+      ],
+      "descriptionEn": "With Rakuten Viber on your desktop, you can send and receive messages, enjoy group calls, create stickers, and more, as your devices seamlessly sync.",
+      "homepage": "https://www.viber.com/"
+    },
+    {
+      "id": "VideoLAN.VLC",
+      "name": "VLC media player",
+      "shortName": "VLC",
+      "publisher": "VideoLAN",
+      "description": "Плеєр, що відкриває майже будь-який аудіо- та відеоформат.",
+      "group": "media",
+      "icon": "vlcmediaplayer",
+      "tags": [
+        "плеєр",
+        "vlc",
+        "відео",
+        "аудіо",
+        "медіа"
+      ],
+      "sizeMb": 45,
+      "recommended": true,
+      "match": [
+        "VLC media player"
+      ],
+      "descriptionEn": "VLC is a free and open source cross-platform multimedia player and framework",
+      "homepage": "https://www.videolan.org/vlc/"
+    },
+    {
+      "id": "clsid2.mpc-hc",
+      "name": "MPC-HC",
+      "shortName": "MPC-HC",
+      "publisher": "MPC-HC Project",
+      "description": "Легкий плеєр для локальних відеофайлів.",
+      "group": "media",
+      "icon": "mpc",
+      "tags": [
+        "плеєр",
+        "mpc",
+        "відео",
+        "медіа"
+      ],
+      "sizeMb": 20,
+      "recommended": false,
+      "match": [
+        "MPC-HC",
+        "MPC-HC x64"
+      ],
+      "descriptionEn": "Media Player Classic - Home Cinema (MPC-HC) is a free and open-source video and audio player for Windows. It is famous and loved for its simple and effective user interface, providing an excellent user experience. It offers a huge amount of functionality. Being a DirectShow player, it also…",
+      "homepage": "https://github.com/clsid2/mpc-hc"
+    },
+    {
+      "id": "Spotify.Spotify",
+      "name": "Spotify",
+      "shortName": "Spotify",
+      "publisher": "Spotify",
+      "description": "Музика, подкасти та персональні рекомендації.",
+      "group": "media",
+      "icon": "spotify",
+      "tags": [
+        "музика",
+        "spotify",
+        "подкасти",
+        "стрімінг"
+      ],
+      "sizeMb": 120,
+      "recommended": false,
+      "match": [
+        "Spotify"
+      ],
+      "descriptionEn": "With Spotify, it’s easy to find the right music or podcast for every moment – on your phone, your computer, your tablet and more.",
+      "homepage": "https://www.spotify.com/download/windows/"
+    },
+    {
+      "id": "OBSProject.OBSStudio",
+      "name": "OBS Studio",
+      "shortName": "OBS Studio",
+      "publisher": "OBS Project",
+      "description": "Запис екрана та стріми з гнучкими сценами.",
+      "group": "media",
+      "icon": "obsstudio",
+      "tags": [
+        "стрім",
+        "obs",
+        "запис",
+        "відео",
+        "екран"
+      ],
+      "sizeMb": 130,
+      "recommended": false,
+      "match": [
+        "OBS Studio"
+      ],
+      "descriptionEn": "Free and open source software for video recording and live streaming.",
+      "homepage": "https://obsproject.com/"
+    },
+    {
+      "id": "Audacity.Audacity",
+      "name": "Audacity",
+      "shortName": "Audacity",
+      "publisher": "Audacity",
+      "description": "Запис і редагування аудіо.",
+      "group": "media",
+      "icon": "audacity",
+      "tags": [
+        "аудіо",
+        "audacity",
+        "запис",
+        "редактор",
+        "звук"
+      ],
+      "sizeMb": 60,
+      "recommended": false,
+      "match": [
+        "Audacity"
+      ],
+      "descriptionEn": "Audacity is the world’s most popular free software for recording and editing audio. So if you're producing music, a podcast, or just playing around with audio, Audacity is for you.",
+      "homepage": "https://www.audacityteam.org/"
+    },
+    {
+      "id": "HandBrake.HandBrake",
+      "name": "HandBrake",
+      "shortName": "HandBrake",
+      "publisher": "HandBrake",
+      "description": "Конвертація відео для пристроїв і архівів.",
+      "group": "media",
+      "icon": "handbrake",
+      "tags": [
+        "відео",
+        "handbrake",
+        "конвертація",
+        "кодування"
+      ],
+      "sizeMb": 30,
+      "recommended": false,
+      "match": [
+        "HandBrake"
+      ],
+      "descriptionEn": "HandBrake takes videos you already have and makes new ones that work on your mobile phone, tablet, TV media player, game console, computer, or web browser—nearly anything that supports modern video formats.",
+      "homepage": "https://handbrake.fr/"
+    },
+    {
+      "id": "CodecGuide.K-LiteCodecPack.Standard",
+      "name": "K-Lite Codec Pack Standard",
+      "shortName": "K-Lite Codecs",
+      "publisher": "Codec Guide",
+      "description": "Набір кодеків для відтворення рідкісних форматів.",
+      "group": "media",
+      "icon": "klite",
+      "tags": [
+        "кодеки",
+        "k-lite",
+        "відео",
+        "аудіо",
+        "формати"
+      ],
+      "sizeMb": 60,
+      "recommended": false,
+      "match": [
+        "K-Lite Codec Pack"
+      ],
+      "descriptionEn": "The K-Lite Codec Pack is a collection of DirectShow filters, VFW/ACM codecs, and tools. Codecs and DirectShow filters are needed for encoding and decoding audio and video formats. The K-Lite Codec Pack is designed as a user-friendly solution for playing all your audio and movie files. With the…",
+      "homepage": "https://codecguide.com/download_k-lite_codec_pack_standard.htm"
+    },
+    {
+      "id": "Stremio.Stremio",
+      "name": "Stremio",
+      "shortName": "Stremio",
+      "publisher": "Stremio",
+      "description": "Каталог фільмів і серіалів в одному плеєрі.",
+      "group": "media",
+      "icon": "stremio",
+      "tags": [
+        "фільми",
+        "stremio",
+        "серіали",
+        "медіа"
+      ],
+      "sizeMb": 100,
+      "recommended": false,
+      "match": [
+        "Stremio"
+      ],
+      "descriptionEn": "Stremio is a modern media center that's a one-stop solution for your video entertainment. You discover, watch and organize video content from easy to install addons.",
+      "homepage": "https://www.stremio.com/"
+    },
+    {
+      "id": "Plex.Plex",
+      "name": "Plex",
+      "shortName": "Plex",
+      "publisher": "Plex",
+      "description": "Домашня медіатека з доступом із будь-якого пристрою.",
+      "group": "media",
+      "icon": "plex",
+      "tags": [
+        "медіа",
+        "plex",
+        "медіасервер",
+        "фільми"
+      ],
+      "sizeMb": 120,
+      "recommended": false,
+      "match": [
+        "Plex"
+      ],
+      "descriptionEn": "Plex is a global streaming media service and a client–server media player platform, made by Plex, Inc.",
+      "homepage": "https://www.plex.tv/"
+    },
+    {
+      "id": "Valve.Steam",
+      "name": "Steam",
+      "shortName": "Steam",
+      "publisher": "Valve",
+      "description": "Бібліотека ігор, магазин і майстерня модів.",
+      "group": "gaming",
+      "icon": "steam",
+      "tags": [
+        "ігри",
+        "steam",
+        "valve",
+        "магазин",
+        "бібліотека"
+      ],
+      "sizeMb": 5,
+      "recommended": false,
+      "match": [
+        "Steam"
+      ],
+      "descriptionEn": "Steam is the ultimate destination for playing, discussing, and creating games.",
+      "homepage": "https://store.steampowered.com/about/"
+    },
+    {
+      "id": "EpicGames.EpicGamesLauncher",
+      "name": "Epic Games Launcher",
+      "shortName": "Epic Games",
+      "publisher": "Epic Games",
+      "description": "Магазин і бібліотека ігор Epic Games.",
+      "group": "gaming",
+      "icon": "epicgames",
+      "tags": [
+        "ігри",
+        "epic",
+        "лаунчер",
+        "магазин"
+      ],
+      "sizeMb": 150,
+      "recommended": false,
+      "match": [
+        "Epic Games Launcher"
+      ],
+      "descriptionEn": "The Epic Games Launcher provides access to the Epic Games Store and Unreal Engine. The Epic Games Store is a marketplace where you can find, purchase, download and play games.",
+      "homepage": "https://epicgames.com/download"
+    },
+    {
+      "id": "GOG.Galaxy",
+      "name": "GOG Galaxy",
+      "shortName": "GOG Galaxy",
+      "publisher": "GOG",
+      "description": "Ігри без DRM і ретро-каталог.",
+      "group": "gaming",
+      "icon": "gogdotcom",
+      "tags": [
+        "ігри",
+        "gog",
+        "лаунчер",
+        "ретро"
+      ],
+      "sizeMb": 40,
+      "recommended": false,
+      "match": [
+        "GOG Galaxy"
+      ],
+      "descriptionEn": "GOG GALAXY 2.0 allows you to combine multiple game libraries into one and connect with your friends across all gaming platforms, consoles included!",
+      "homepage": "https://www.gog.com/galaxy"
+    },
+    {
+      "id": "ElectronicArts.EADesktop",
+      "name": "EA app",
+      "shortName": "EA app",
+      "publisher": "Electronic Arts",
+      "description": "Лаунчер і бібліотека ігор Electronic Arts.",
+      "group": "gaming",
+      "icon": "ea",
+      "tags": [
+        "ігри",
+        "ea",
+        "лаунчер",
+        "electronic arts"
+      ],
+      "sizeMb": 90,
+      "recommended": false,
+      "match": [
+        "EA app"
+      ],
+      "descriptionEn": "Built on feedback from players like you, the EA Desktop app is the newest iteration of our PC platform. The beta includes new features and overall improvements to power a faster, smarter, more connected desktop app.",
+      "homepage": "https://www.ea.com/ea-app"
+    },
+    {
+      "id": "Ubisoft.Connect",
+      "name": "Ubisoft Connect",
+      "shortName": "Ubisoft Connect",
+      "publisher": "Ubisoft",
+      "description": "Лаунчер, магазин і бібліотека Ubisoft.",
+      "group": "gaming",
+      "icon": "ubisoft",
+      "tags": [
+        "ігри",
+        "ubisoft",
+        "лаунчер",
+        "магазин"
+      ],
+      "sizeMb": 120,
+      "recommended": false,
+      "match": [
+        "Ubisoft Connect"
+      ],
+      "descriptionEn": "The ecosystem of players services for Ubisoft games across all platforms. It aims at giving the best environment for all players to enjoy their games and connect with each other whatever the device.",
+      "homepage": "https://ubisoftconnect.com/"
+    },
+    {
+      "id": "Blizzard.BattleNet",
+      "name": "Battle.net",
+      "shortName": "Battle.net",
+      "publisher": "Blizzard",
+      "description": "Лаунчер Blizzard: World of Warcraft, Diablo, Overwatch.",
+      "group": "gaming",
+      "icon": "battledotnet",
+      "tags": [
+        "ігри",
+        "blizzard",
+        "battle.net",
+        "лаунчер"
+      ],
+      "sizeMb": 20,
+      "recommended": false,
+      "match": [
+        "Battle.net"
+      ],
+      "descriptionEn": "Battle.net is an Internet-based online game, social networking service, digital distribution, and digital rights management platform developed by Blizzard Entertainment.",
+      "homepage": "https://download.battle.net/en-us/desktop"
+    },
+    {
+      "id": "PrismLauncher.PrismLauncher",
+      "name": "Prism Launcher",
+      "shortName": "Prism Launcher",
+      "publisher": "Prism Launcher",
+      "description": "Відкритий лаунчер Minecraft із підтримкою модів.",
+      "group": "gaming",
+      "icon": "prism",
+      "tags": [
+        "ігри",
+        "minecraft",
+        "prism",
+        "моди",
+        "лаунчер"
+      ],
+      "sizeMb": 50,
+      "recommended": false,
+      "match": [
+        "Prism Launcher"
+      ],
+      "descriptionEn": "A custom launcher for Minecraft that allows you to easily manage multiple installations of Minecraft at once",
+      "homepage": "https://github.com/PrismLauncher/PrismLauncher"
+    },
+    {
+      "id": "Playnite.Playnite",
+      "name": "Playnite",
+      "shortName": "Playnite",
+      "publisher": "Playnite",
+      "description": "Єдина бібліотека ігор з усіх лаунчерів.",
+      "group": "gaming",
+      "icon": "playnite",
+      "tags": [
+        "ігри",
+        "playnite",
+        "бібліотека",
+        "лаунчер"
+      ],
+      "sizeMb": 60,
+      "recommended": false,
+      "match": [
+        "Playnite"
+      ],
+      "descriptionEn": "An open source video game library manager and launcher with support for 3rd party libraries like Steam, GOG, Origin, Battle.net and Uplay.",
+      "homepage": "https://playnite.link/"
+    },
+    {
+      "id": "NexusMods.Vortex",
+      "name": "Vortex",
+      "shortName": "Vortex",
+      "publisher": "Nexus Mods",
+      "description": "Менеджер модів для Nexus Mods.",
+      "group": "gaming",
+      "icon": "vortex",
+      "tags": [
+        "ігри",
+        "моди",
+        "vortex",
+        "nexus"
+      ],
+      "sizeMb": 100,
+      "recommended": false,
+      "match": [
+        "Vortex"
+      ],
+      "descriptionEn": "Vortex is the new, modern mod manager from Nexus Mods.",
+      "homepage": "https://github.com/Nexus-Mods/Vortex"
+    },
+    {
+      "id": "Parsec.Parsec",
+      "name": "Parsec",
+      "shortName": "Parsec",
+      "publisher": "Parsec Cloud",
+      "description": "Віддалений доступ до ігор і робочого столу.",
+      "group": "gaming",
+      "icon": "parsec",
+      "tags": [
+        "ігри",
+        "parsec",
+        "стрімінг",
+        "віддалений доступ"
+      ],
+      "sizeMb": 60,
+      "recommended": false,
+      "match": [
+        "Parsec"
+      ],
+      "descriptionEn": "Parsec is a proprietary freeware desktop capturing application primarily used for playing games",
+      "homepage": "https://parsec.app/"
+    },
+    {
+      "id": "MoonlightGameStreamingProject.Moonlight",
+      "name": "Moonlight Game Streaming",
+      "shortName": "Moonlight",
+      "publisher": "Moonlight",
+      "description": "Стрімінг ігор із ПК через NVIDIA GameStream або Sunshine.",
+      "group": "gaming",
+      "icon": "moonlight",
+      "tags": [
+        "ігри",
+        "moonlight",
+        "стрімінг",
+        "nvidia"
+      ],
+      "sizeMb": 20,
+      "recommended": false,
+      "match": [
+        "Moonlight"
+      ],
+      "descriptionEn": "Play games remotely from your NVIDIA GameStream-enabled PC",
+      "homepage": "https://moonlight-stream.org/"
+    },
+    {
+      "id": "Microsoft.VisualStudioCode",
+      "name": "Visual Studio Code",
+      "shortName": "VS Code",
+      "publisher": "Microsoft",
+      "description": "Редактор коду з розширеннями та вбудованим терміналом.",
+      "group": "development",
+      "icon": "vscode",
+      "tags": [
+        "код",
+        "редактор",
+        "vscode",
+        "розробка",
+        "javascript"
+      ],
+      "sizeMb": 100,
+      "recommended": false,
+      "match": [
+        "Microsoft Visual Studio Code",
+        "Visual Studio Code"
+      ],
+      "descriptionEn": "Microsoft Visual Studio Code is a code editor redefined and optimized for building and debugging modern web and cloud applications. Microsoft Visual Studio Code is free and available on your favorite platform - Linux, macOS, and Windows.",
+      "homepage": "https://code.visualstudio.com/"
+    },
+    {
+      "id": "Git.Git",
+      "name": "Git",
+      "shortName": "Git",
+      "publisher": "Git",
+      "description": "Система контролю версій і базові консольні утиліти.",
+      "group": "development",
+      "icon": "git",
+      "tags": [
+        "git",
+        "версії",
+        "розробка",
+        "консоль"
+      ],
+      "sizeMb": 60,
+      "recommended": false,
+      "match": [
+        "Git"
+      ],
+      "descriptionEn": "Git is a free and open source distributed version control system designed to handle everything from small to very large projects with speed and efficiency.",
+      "homepage": "https://gitforwindows.org/"
+    },
+    {
+      "id": "OpenJS.NodeJS.LTS",
+      "name": "Node.js LTS",
+      "shortName": "Node.js LTS",
+      "publisher": "OpenJS Foundation",
+      "description": "Середовище виконання JavaScript (LTS).",
+      "group": "development",
+      "icon": "nodedotjs",
+      "tags": [
+        "node",
+        "javascript",
+        "runtime",
+        "npm",
+        "розробка"
+      ],
+      "sizeMb": 30,
+      "recommended": false,
+      "match": [
+        "Node.js"
+      ],
+      "descriptionEn": "Node.js® is a free, open-source, cross-platform JavaScript runtime environment that lets developers create servers, web apps, command line tools and scripts.",
+      "homepage": "https://nodejs.org/"
+    },
+    {
+      "id": "Python.Python.3.13",
+      "name": "Python 3.13",
+      "shortName": "Python 3.13",
+      "publisher": "Python Software Foundation",
+      "description": "Інтерпретатор Python 3.13 і менеджер пакетів pip.",
+      "group": "development",
+      "icon": "python",
+      "tags": [
+        "python",
+        "runtime",
+        "pip",
+        "розробка"
+      ],
+      "sizeMb": 30,
+      "recommended": false,
+      "match": [
+        "Python 3.13",
+        "Python"
+      ],
+      "descriptionEn": "Python is a programming language that lets you work more quickly and integrate your systems more effectively.",
+      "homepage": "https://www.python.org/"
+    },
+    {
+      "id": "Docker.DockerDesktop",
+      "name": "Docker Desktop",
+      "shortName": "Docker Desktop",
+      "publisher": "Docker",
+      "description": "Контейнери для розробки та локальних сервісів.",
+      "group": "development",
+      "icon": "docker",
+      "tags": [
+        "docker",
+        "контейнери",
+        "розробка",
+        "devops"
+      ],
+      "sizeMb": 600,
+      "recommended": false,
+      "match": [
+        "Docker Desktop"
+      ],
+      "descriptionEn": "Docker Desktop is an application for macOS and Windows machines for the building and sharing of containerized applications. Access Docker Desktop and follow the guided onboarding to build your first containerized application in minutes.",
+      "homepage": "https://www.docker.com/products/docker-desktop"
+    },
+    {
+      "id": "Postman.Postman",
+      "name": "Postman",
+      "shortName": "Postman",
+      "publisher": "Postman",
+      "description": "Тестування та документування API.",
+      "group": "development",
+      "icon": "postman",
+      "tags": [
+        "api",
+        "postman",
+        "розробка",
+        "тестування"
+      ],
+      "sizeMb": 150,
+      "recommended": false,
+      "match": [
+        "Postman"
+      ],
+      "descriptionEn": "Postman is a collaboration platform for API development. Postman's features simplify each step of building an API and streamline collaboration so you can create better APIs — faster.",
+      "homepage": "https://www.postman.com/downloads/"
+    },
+    {
+      "id": "GitHub.GitHubDesktop",
+      "name": "GitHub Desktop",
+      "shortName": "GitHub Desktop",
+      "publisher": "GitHub",
+      "description": "Git-клієнт із графічним інтерфейсом.",
+      "group": "development",
+      "icon": "github",
+      "tags": [
+        "git",
+        "github",
+        "розробка",
+        "клієнт"
+      ],
+      "sizeMb": 120,
+      "recommended": false,
+      "match": [
+        "GitHub Desktop"
+      ],
+      "descriptionEn": "GitHub Desktop is an open-source Electron-based GitHub app. It is written in TypeScript and uses React.",
+      "homepage": "https://github.com/apps/desktop"
+    },
+    {
+      "id": "DBeaver.DBeaver.Community",
+      "name": "DBeaver Community",
+      "shortName": "DBeaver",
+      "publisher": "DBeaver",
+      "description": "Універсальний клієнт для SQL-баз даних.",
+      "group": "development",
+      "icon": "dbeaver",
+      "tags": [
+        "sql",
+        "бази даних",
+        "dbeaver",
+        "розробка"
+      ],
+      "sizeMb": 120,
+      "recommended": false,
+      "match": [
+        "DBeaver"
+      ],
+      "descriptionEn": "DBeaver is free and open source universal database tool for developers and database administrators.",
+      "homepage": "https://dbeaver.io/download/"
+    },
+    {
+      "id": "JetBrains.IntelliJIDEA.Community",
+      "name": "IntelliJ IDEA Community",
+      "shortName": "IntelliJ IDEA",
+      "publisher": "JetBrains",
+      "description": "IDE для Java, Kotlin і JVM-проєктів.",
+      "group": "development",
+      "icon": "intellijidea",
+      "tags": [
+        "java",
+        "kotlin",
+        "ide",
+        "jetbrains",
+        "розробка"
+      ],
+      "sizeMb": 700,
+      "recommended": false,
+      "match": [
+        "IntelliJ IDEA Community Edition",
+        "IntelliJ IDEA"
+      ],
+      "descriptionEn": "IntelliJ IDEA is undoubtedly the top-choice IDE for software developers. It makes Java and Kotlin development a more productive and enjoyable experience.",
+      "homepage": "https://www.jetbrains.com/idea"
+    },
+    {
+      "id": "Google.AndroidStudio",
+      "name": "Android Studio",
+      "shortName": "Android Studio",
+      "publisher": "Google",
+      "description": "Офіційне середовище розробки Android.",
+      "group": "development",
+      "icon": "androidstudio",
+      "tags": [
+        "android",
+        "ide",
+        "google",
+        "мобільна розробка"
+      ],
+      "sizeMb": 1200,
+      "recommended": false,
+      "match": [
+        "Android Studio"
+      ],
+      "descriptionEn": "Android Studio is the official Integrated Development Environment (IDE) for Android app development.",
+      "homepage": "https://developer.android.com/studio"
+    },
+    {
+      "id": "Microsoft.VisualStudio.2022.Community",
+      "name": "Visual Studio 2022 Community",
+      "shortName": "Visual Studio",
+      "publisher": "Microsoft",
+      "description": "Повне IDE Microsoft для .NET і C++.",
+      "group": "development",
+      "icon": "visualstudio",
+      "tags": [
+        "visual studio",
+        "ide",
+        "net",
+        "c++",
+        "microsoft"
+      ],
+      "sizeMb": 2000,
+      "recommended": false,
+      "note": "Під час інсталяції можна вибрати лише потрібні компоненти.",
+      "match": [
+        "Microsoft Visual Studio Community 2022",
+        "Visual Studio Community 2022"
+      ],
+      "descriptionEn": "Everything you need to build modern apps - free for you, built for impact.",
+      "homepage": "https://visualstudio.microsoft.com/"
+    },
+    {
+      "id": "Microsoft.WSL",
+      "name": "Windows Subsystem for Linux",
+      "shortName": "WSL",
+      "publisher": "Microsoft",
+      "description": "Linux-середовище всередині Windows.",
+      "group": "development",
+      "icon": "wsl",
+      "tags": [
+        "linux",
+        "wsl",
+        "ubuntu",
+        "термінал",
+        "розробка"
+      ],
+      "sizeMb": 200,
+      "recommended": false,
+      "match": [],
+      "descriptionEn": "Windows Subsystem for Linux (WSL) is a feature of Windows that allows you to run a Linux environment on your Windows machine, without the need for a separate virtual machine or dual booting. WSL is designed to provide a seamless and productive experience for developers who want to use both…",
+      "homepage": "https://learn.microsoft.com/windows/wsl/"
+    },
+    {
+      "id": "TheDocumentFoundation.LibreOffice",
+      "name": "LibreOffice",
+      "shortName": "LibreOffice",
+      "publisher": "The Document Foundation",
+      "description": "Офісний пакет: документи, таблиці, презентації.",
+      "group": "office",
+      "icon": "libreoffice",
+      "tags": [
+        "офіс",
+        "документи",
+        "таблиці",
+        "libreoffice"
+      ],
+      "sizeMb": 350,
+      "recommended": false,
+      "match": [
+        "LibreOffice"
+      ],
+      "descriptionEn": "LibreOffice is a free and powerful office suite, and a successor to OpenOffice.org (commonly known as OpenOffice). Its clean interface and feature-rich tools help you unleash your creativity and enhance your productivity.",
+      "homepage": "https://www.libreoffice.org/"
+    },
+    {
+      "id": "ONLYOFFICE.DesktopEditors",
+      "name": "ONLYOFFICE Desktop Editors",
+      "shortName": "ONLYOFFICE",
+      "publisher": "ONLYOFFICE",
+      "description": "Редактори документів, таблиць і презентацій.",
+      "group": "office",
+      "icon": "onlyoffice",
+      "tags": [
+        "офіс",
+        "документи",
+        "таблиці",
+        "onlyoffice"
+      ],
+      "sizeMb": 300,
+      "recommended": false,
+      "match": [
+        "ONLYOFFICE"
+      ],
+      "descriptionEn": "Create, view and edit text documents, spreadsheets and presentations of any size and complexity.",
+      "homepage": "https://www.onlyoffice.com/en/desktop.aspx"
+    },
+    {
+      "id": "Obsidian.Obsidian",
+      "name": "Obsidian",
+      "shortName": "Obsidian",
+      "publisher": "Obsidian",
+      "description": "Локальні нотатки у форматі Markdown.",
+      "group": "office",
+      "icon": "obsidian",
+      "tags": [
+        "нотатки",
+        "obsidian",
+        "markdown",
+        "знання"
+      ],
+      "sizeMb": 100,
+      "recommended": false,
+      "match": [
+        "Obsidian"
+      ],
+      "descriptionEn": "Obsidian is the private and flexible writing app that adapts to the way you think.",
+      "homepage": "https://obsidian.md/"
+    },
+    {
+      "id": "Notion.Notion",
+      "name": "Notion",
+      "shortName": "Notion",
+      "publisher": "Notion Labs",
+      "description": "Робочий простір для нотаток, баз і планів.",
+      "group": "office",
+      "icon": "notion",
+      "tags": [
+        "нотатки",
+        "notion",
+        "бази",
+        "планування"
+      ],
+      "sizeMb": 80,
+      "recommended": false,
+      "match": [
+        "Notion"
+      ],
+      "descriptionEn": "A new tool that blends your everyday work apps into one. It's the all-in-one workspace for you and your team.",
+      "homepage": "https://www.notion.com/"
+    },
+    {
+      "id": "Joplin.Joplin",
+      "name": "Joplin",
+      "shortName": "Joplin",
+      "publisher": "Joplin",
+      "description": "Нотатки з синхронізацією та шифруванням.",
+      "group": "office",
+      "icon": "joplin",
+      "tags": [
+        "нотатки",
+        "joplin",
+        "markdown",
+        "синхронізація"
+      ],
+      "sizeMb": 120,
+      "recommended": false,
+      "match": [
+        "Joplin"
+      ],
+      "descriptionEn": "Joplin is a free, open source note taking and to-do application, which can handle a large number of notes organised into notebooks. The notes are searchable, can be copied, tagged and modified either from the applications directly or from your own text editor. The notes are in Markdown format.",
+      "homepage": "https://joplinapp.org/"
+    },
+    {
+      "id": "DigitalScholar.Zotero",
+      "name": "Zotero",
+      "shortName": "Zotero",
+      "publisher": "Digital Scholar",
+      "description": "Менеджер джерел і бібліографії.",
+      "group": "office",
+      "icon": "zotero",
+      "tags": [
+        "наука",
+        "zotero",
+        "бібліографія",
+        "дослідження"
+      ],
+      "sizeMb": 100,
+      "recommended": false,
+      "match": [
+        "Zotero"
+      ],
+      "descriptionEn": "Zotero is a free, easy-to-use tool to help you collect, organize, annotate, cite, and share research.",
+      "homepage": "https://www.zotero.org/"
+    },
+    {
+      "id": "calibre.calibre",
+      "name": "calibre",
+      "shortName": "calibre",
+      "publisher": "Kovid Goyal",
+      "description": "Бібліотека електронних книг і конвертер форматів.",
+      "group": "office",
+      "icon": "calibre",
+      "tags": [
+        "книги",
+        "calibre",
+        "epub",
+        "читання"
+      ],
+      "sizeMb": 150,
+      "recommended": false,
+      "match": [
+        "calibre"
+      ],
+      "descriptionEn": "calibre is an e-book manager. It can view, convert, edit and catalog e-books in all of the major e-book formats. It can also talk to e-book reader devices. It can go out to the internet and fetch metadata for your books. It can download newspapers and convert them into e-books for convenient…",
+      "homepage": "https://calibre-ebook.com/"
+    },
+    {
+      "id": "SumatraPDF.SumatraPDF",
+      "name": "SumatraPDF",
+      "shortName": "SumatraPDF",
+      "publisher": "Krzysztof Kowalczyk",
+      "description": "Швидкий і мінімальний переглядач PDF.",
+      "group": "office",
+      "icon": "pdf",
+      "tags": [
+        "pdf",
+        "sumatra",
+        "документи",
+        "читання"
+      ],
+      "sizeMb": 10,
+      "recommended": false,
+      "match": [
+        "SumatraPDF"
+      ],
+      "descriptionEn": "SumatraPDF is a free PDF, eBook (ePub, Mobi), Comic Book (CBZ/CBR), DjVu, XPS, CHM, image viewer for Windows.",
+      "homepage": "https://github.com/sumatrapdfreader/sumatrapdf"
+    },
+    {
+      "id": "Adobe.Acrobat.Reader.64-bit",
+      "name": "Adobe Acrobat Reader",
+      "shortName": "Acrobat Reader",
+      "publisher": "Adobe",
+      "description": "Перегляд, коментування та заповнення PDF.",
+      "group": "office",
+      "icon": "adobe",
+      "tags": [
+        "pdf",
+        "adobe",
+        "документи",
+        "reader"
+      ],
+      "sizeMb": 300,
+      "recommended": false,
+      "match": [
+        "Adobe Acrobat Reader",
+        "Adobe Acrobat"
+      ],
+      "descriptionEn": "Adobe Acrobat Reader software is the free, trusted global standard for viewing, printing, signing, sharing, and annotating PDFs. It's the only PDF viewer that can open and interact with all types of PDF content – including forms and multimedia.",
+      "homepage": "https://get.adobe.com/reader/"
+    },
+    {
+      "id": "7zip.7zip",
+      "name": "7-Zip",
+      "shortName": "7-Zip",
+      "publisher": "Igor Pavlov",
+      "description": "Архіватор із відкритим кодом для ZIP, RAR, 7z.",
+      "group": "utilities",
+      "icon": "7zip",
+      "tags": [
+        "архів",
+        "7zip",
+        "zip",
+        "rar",
+        "файли"
+      ],
+      "sizeMb": 2,
+      "recommended": true,
+      "match": [
+        "7-Zip"
+      ],
+      "descriptionEn": "A file archiver with a high compression ratio.",
+      "homepage": "https://7-zip.org/download.html"
+    },
+    {
+      "id": "RARLab.WinRAR",
+      "name": "WinRAR",
+      "shortName": "WinRAR",
+      "publisher": "win.rar",
+      "description": "Архіватор RAR і ZIP. Пробний період без обмежень.",
+      "group": "utilities",
+      "icon": "winrar",
+      "tags": [
+        "архів",
+        "winrar",
+        "rar",
+        "zip",
+        "файли"
+      ],
+      "sizeMb": 4,
+      "recommended": false,
+      "note": "Умовно-безкоштовна програма.",
+      "match": [
+        "WinRAR"
+      ],
+      "descriptionEn": "- WinRAR is a powerful compression tool with many integrated additional functions to help you organize your compressed archives.",
+      "homepage": "https://www.win-rar.com/"
+    },
+    {
+      "id": "M2Team.NanaZip",
+      "name": "NanaZip",
+      "shortName": "NanaZip",
+      "publisher": "M2Team",
+      "description": "Сучасний архіватор для Windows 11.",
+      "group": "utilities",
+      "icon": "nanazip",
+      "tags": [
+        "архів",
+        "nanazip",
+        "zip",
+        "rar",
+        "windows 11"
+      ],
+      "sizeMb": 5,
+      "recommended": false,
+      "match": [
+        "NanaZip"
+      ],
+      "descriptionEn": "NanaZip is an open source file archiver intended for the modern Windows experience, forked from the source code of well-known open source file archiver 7-Zip.",
+      "homepage": "https://github.com/M2Team/NanaZip"
+    },
+    {
+      "id": "voidtools.Everything",
+      "name": "Everything",
+      "shortName": "Everything",
+      "publisher": "voidtools",
+      "description": "Миттєвий пошук файлів за іменем.",
+      "group": "utilities",
+      "icon": "everything",
+      "tags": [
+        "пошук",
+        "файли",
+        "everything",
+        "індекс"
+      ],
+      "sizeMb": 2,
+      "recommended": true,
+      "match": [
+        "Everything"
+      ],
+      "descriptionEn": "Everything is a search engine that locates files and folders by filename instantly for Windows. Unlike Windows search Everything initially displays every file and folder on your computer (hence the name Everything). You type in a search filter to limit what files and folders are displayed.",
+      "homepage": "https://www.voidtools.com/"
+    },
+    {
+      "id": "Microsoft.PowerToys",
+      "name": "Microsoft PowerToys",
+      "shortName": "PowerToys",
+      "publisher": "Microsoft",
+      "description": "Набір утиліт Microsoft для продуктивності.",
+      "group": "utilities",
+      "icon": "powertoys",
+      "tags": [
+        "утиліти",
+        "powertoys",
+        "microsoft",
+        "продуктивність"
+      ],
+      "sizeMb": 200,
+      "recommended": false,
+      "match": [
+        "Microsoft PowerToys",
+        "PowerToys"
+      ],
+      "descriptionEn": "Microsoft PowerToys is a set of utilities for power users to tune and streamline their Windows experience for greater productivity.",
+      "homepage": "https://github.com/microsoft/PowerToys"
+    },
+    {
+      "id": "ShareX.ShareX",
+      "name": "ShareX",
+      "shortName": "ShareX",
+      "publisher": "ShareX Team",
+      "description": "Скриншоти, запис екрана та завантаження.",
+      "group": "utilities",
+      "icon": "sharex",
+      "tags": [
+        "скриншот",
+        "sharex",
+        "запис",
+        "екран"
+      ],
+      "sizeMb": 20,
+      "recommended": false,
+      "match": [
+        "ShareX"
+      ],
+      "descriptionEn": "ShareX is a free and open source program that lets you capture or record any area of your screen and share it with a single press of a key. It also allows uploading images, text or other types of files to many supported destinations you can choose from.",
+      "homepage": "https://getsharex.com/"
+    },
+    {
+      "id": "Rufus.Rufus",
+      "name": "Rufus",
+      "shortName": "Rufus",
+      "publisher": "Pete Batard",
+      "description": "Створення завантажувальних USB-носіїв.",
+      "group": "utilities",
+      "icon": "rufus",
+      "tags": [
+        "usb",
+        "rufus",
+        "завантаження",
+        "iso",
+        "флешка"
+      ],
+      "sizeMb": 2,
+      "recommended": false,
+      "match": [
+        "Rufus"
+      ],
+      "descriptionEn": "Rufus is a utility that helps format and create bootable USB flash drives.",
+      "homepage": "https://rufus.ie/"
+    },
+    {
+      "id": "Ventoy.Ventoy",
+      "name": "Ventoy",
+      "shortName": "Ventoy",
+      "publisher": "Ventoy",
+      "description": "Мультизавантажувальна флешка без перезапису.",
+      "group": "utilities",
+      "icon": "ventoy",
+      "tags": [
+        "usb",
+        "ventoy",
+        "iso",
+        "завантаження",
+        "флешка"
+      ],
+      "sizeMb": 10,
+      "recommended": false,
+      "match": [
+        "Ventoy"
+      ],
+      "descriptionEn": "Ventoy is an open source tool to create bootable USB drive for ISO/WIM/IMG/VHD(x)/EFI files.",
+      "homepage": "https://www.ventoy.net/"
+    },
+    {
+      "id": "CrystalDewWorld.CrystalDiskInfo",
+      "name": "CrystalDiskInfo",
+      "shortName": "CrystalDiskInfo",
+      "publisher": "Crystal Dew World",
+      "description": "Стан здоров'я дисків і температура.",
+      "group": "utilities",
+      "icon": "crystal",
+      "tags": [
+        "диск",
+        "ssd",
+        "hdd",
+        "здоров'я",
+        "crystaldiskinfo"
+      ],
+      "sizeMb": 3,
+      "recommended": false,
+      "match": [
+        "CrystalDiskInfo"
+      ],
+      "descriptionEn": "A HDD/SSD utility software which supports parts of USB, Intel RAID and NVMe.",
+      "homepage": "https://crystalmark.info/en/software/crystaldiskinfo/"
+    },
+    {
+      "id": "REALiX.HWiNFO",
+      "name": "HWiNFO",
+      "shortName": "HWiNFO",
+      "publisher": "Martin Malík",
+      "description": "Детальна діагностика заліза та датчиків.",
+      "group": "utilities",
+      "icon": "hwinfo",
+      "tags": [
+        "залізо",
+        "hwinfo",
+        "датчики",
+        "температура",
+        "діагностика"
+      ],
+      "sizeMb": 12,
+      "recommended": false,
+      "match": [
+        "HWiNFO"
+      ],
+      "descriptionEn": "Comprehensive Hardware Analysis, Monitoring and Reporting for Windows and DOS.",
+      "homepage": "https://www.hwinfo.com/download/"
+    },
+    {
+      "id": "AntibodySoftware.WizTree",
+      "name": "WizTree",
+      "shortName": "WizTree",
+      "publisher": "Antibody Software",
+      "description": "Швидкий аналіз зайнятого місця на диску.",
+      "group": "utilities",
+      "icon": "wiztree",
+      "tags": [
+        "диск",
+        "місце",
+        "wiztree",
+        "аналіз",
+        "файли"
+      ],
+      "sizeMb": 5,
+      "recommended": false,
+      "match": [
+        "WizTree"
+      ],
+      "descriptionEn": "WizTree is a hard drive disk space analyser similar to WinDirStat but is MUCH faster.",
+      "homepage": "https://diskanalyzer.com/"
+    },
+    {
+      "id": "Bitwarden.Bitwarden",
+      "name": "Bitwarden",
+      "shortName": "Bitwarden",
+      "publisher": "Bitwarden",
+      "description": "Менеджер паролів із відкритим кодом.",
+      "group": "utilities",
+      "icon": "bitwarden",
+      "tags": [
+        "паролі",
+        "bitwarden",
+        "безпека",
+        "менеджер"
+      ],
+      "sizeMb": 100,
+      "recommended": true,
+      "match": [
+        "Bitwarden"
+      ],
+      "descriptionEn": "A secure and free password manager for all of your devices.",
+      "homepage": "https://bitwarden.com/"
+    },
+    {
+      "id": "LocalSend.LocalSend",
+      "name": "LocalSend",
+      "shortName": "LocalSend",
+      "publisher": "LocalSend",
+      "description": "Передача файлів у локальній мережі.",
+      "group": "utilities",
+      "icon": "localsend",
+      "tags": [
+        "файли",
+        "мережа",
+        "localsend",
+        "передача"
+      ],
+      "sizeMb": 30,
+      "recommended": false,
+      "match": [
+        "LocalSend"
+      ],
+      "descriptionEn": "Share files to nearby devices. Free, open source, cross-platform. An open source cross-platform alternative to AirDrop.",
+      "homepage": "https://localsend.org/"
+    },
+    {
+      "id": "Tailscale.Tailscale",
+      "name": "Tailscale",
+      "shortName": "Tailscale",
+      "publisher": "Tailscale",
+      "description": "Приватна мережа на базі WireGuard.",
+      "group": "utilities",
+      "icon": "tailscale",
+      "tags": [
+        "мережа",
+        "vpn",
+        "tailscale",
+        "wireguard"
+      ],
+      "sizeMb": 50,
+      "recommended": false,
+      "match": [
+        "Tailscale"
+      ],
+      "descriptionEn": "Tailscale is a WireGuard based mesh VPN, used to connect your computers and other devices together securely without proxies.",
+      "homepage": "https://tailscale.com/download"
+    },
+    {
+      "id": "qBittorrent.qBittorrent",
+      "name": "qBittorrent",
+      "shortName": "qBittorrent",
+      "publisher": "qBittorrent Project",
+      "description": "Torrent-клієнт без реклами.",
+      "group": "utilities",
+      "icon": "qbittorrent",
+      "tags": [
+        "torrent",
+        "qbittorrent",
+        "завантаження",
+        "p2p"
+      ],
+      "sizeMb": 30,
+      "recommended": false,
+      "match": [
+        "qBittorrent"
+      ],
+      "descriptionEn": "qBittorrent is a bittorrent client programmed in C++ / Qt that uses libtorrent (sometimes called libtorrent-rasterbar) by Arvid Norberg.",
+      "homepage": "https://www.qbittorrent.org/"
+    },
+    {
+      "id": "AnyDesk.AnyDesk",
+      "name": "AnyDesk",
+      "shortName": "AnyDesk",
+      "publisher": "AnyDesk Software",
+      "description": "Віддалений доступ до комп'ютера.",
+      "group": "utilities",
+      "icon": "anydesk",
+      "tags": [
+        "віддалений доступ",
+        "anydesk",
+        "remote",
+        "підтримка"
+      ],
+      "sizeMb": 30,
+      "recommended": false,
+      "match": [
+        "AnyDesk"
+      ],
+      "descriptionEn": "Connect to a computer remotely, be it from the other end of the office or halfway around the world.",
+      "homepage": "https://anydesk.com/"
+    },
+    {
+      "id": "GIMP.GIMP",
+      "name": "GIMP",
+      "shortName": "GIMP",
+      "publisher": "GIMP Team",
+      "description": "Редактор растрової графіки.",
+      "group": "creative",
+      "icon": "gimp",
+      "tags": [
+        "графіка",
+        "gimp",
+        "фото",
+        "редактор"
+      ],
+      "sizeMb": 300,
+      "recommended": false,
+      "match": [
+        "GIMP"
+      ],
+      "descriptionEn": "GIMP is an acronym for GNU Image Manipulation Program. It is a freely distributed program for such tasks as photo retouching, image composition and image authoring.",
+      "homepage": "https://www.gimp.org/downloads/"
+    },
+    {
+      "id": "KDE.Krita",
+      "name": "Krita",
+      "shortName": "Krita",
+      "publisher": "Krita Foundation",
+      "description": "Малювання та цифровий живопис.",
+      "group": "creative",
+      "icon": "krita",
+      "tags": [
+        "малювання",
+        "krita",
+        "графіка",
+        "планшет"
+      ],
+      "sizeMb": 300,
+      "recommended": false,
+      "match": [
+        "Krita"
+      ],
+      "descriptionEn": "Krita is a FREE and open source painting tool designed for concept artists, illustrators, matte and texture artists, and the VFX industry. Krita has been in development for over 10 years and has had an explosion in growth recently. It offers many common and innovative features to help the…",
+      "homepage": "https://krita.org/"
+    },
+    {
+      "id": "Inkscape.Inkscape",
+      "name": "Inkscape",
+      "shortName": "Inkscape",
+      "publisher": "Inkscape Project",
+      "description": "Редактор векторної графіки SVG.",
+      "group": "creative",
+      "icon": "inkscape",
+      "tags": [
+        "вектори",
+        "svg",
+        "inkscape",
+        "графіка"
+      ],
+      "sizeMb": 150,
+      "recommended": false,
+      "match": [
+        "Inkscape"
+      ],
+      "descriptionEn": "Inkscape is a Free and open source vector graphics editor for GNU/Linux, Windows and macOS. It offers a rich set of features and is widely used for both artistic and technical illustrations such as cartoons, clip art, logos, typography, diagramming and flowcharting. It uses vector graphics to…",
+      "homepage": "https://inkscape.org/release/"
+    },
+    {
+      "id": "BlenderFoundation.Blender",
+      "name": "Blender",
+      "shortName": "Blender",
+      "publisher": "Blender Foundation",
+      "description": "3D-моделювання, анімація та рендеринг.",
+      "group": "creative",
+      "icon": "blender",
+      "tags": [
+        "3d",
+        "blender",
+        "анімація",
+        "рендеринг"
+      ],
+      "sizeMb": 350,
+      "recommended": false,
+      "match": [
+        "Blender"
+      ],
+      "descriptionEn": "Welcome to Blender! Blender is a free and open-source 3D creation suite.",
+      "homepage": "https://www.blender.org/"
+    },
+    {
+      "id": "Figma.Figma",
+      "name": "Figma",
+      "shortName": "Figma",
+      "publisher": "Figma",
+      "description": "Інтерфейсний дизайн і спільна робота.",
+      "group": "creative",
+      "icon": "figma",
+      "tags": [
+        "дизайн",
+        "figma",
+        "ui",
+        "прототипи"
+      ],
+      "sizeMb": 100,
+      "recommended": false,
+      "match": [
+        "Figma"
+      ],
+      "descriptionEn": "Figma is the leading collaborative design tool for building meaningful products. Seamlessly design, prototype, develop, and collect feedback in a single platform.",
+      "homepage": "https://www.figma.com/downloads/"
+    },
+    {
+      "id": "Meltytech.Shotcut",
+      "name": "Shotcut",
+      "shortName": "Shotcut",
+      "publisher": "Meltytech",
+      "description": "Монтаж відео з відкритим кодом.",
+      "group": "creative",
+      "icon": "shotcut",
+      "tags": [
+        "відео",
+        "монтаж",
+        "shotcut",
+        "редактор"
+      ],
+      "sizeMb": 200,
+      "recommended": false,
+      "match": [
+        "Shotcut"
+      ],
+      "descriptionEn": "A free, open source, cross-platform video editor.",
+      "homepage": "https://shotcut.org/"
+    },
+    {
+      "id": "KDE.Kdenlive",
+      "name": "Kdenlive",
+      "shortName": "Kdenlive",
+      "publisher": "KDE",
+      "description": "Багатодоріжковий відеоредактор.",
+      "group": "creative",
+      "icon": "kdenlive",
+      "tags": [
+        "відео",
+        "монтаж",
+        "kdenlive",
+        "редактор"
+      ],
+      "sizeMb": 300,
+      "recommended": false,
+      "match": [
+        "Kdenlive"
+      ],
+      "descriptionEn": "Kdenlive is an acronym for KDE Non-Linear Video Editor.",
+      "homepage": "https://kdenlive.org/"
+    },
+    {
+      "id": "dotPDN.PaintDotNet",
+      "name": "Paint.NET",
+      "shortName": "Paint.NET",
+      "publisher": "dotPDN",
+      "description": "Растровий редактор із простим інтерфейсом.",
+      "group": "creative",
+      "icon": "paintnet",
+      "tags": [
+        "графіка",
+        "paint.net",
+        "фото",
+        "редактор"
+      ],
+      "sizeMb": 15,
+      "recommended": false,
+      "match": [
+        "Paint.NET"
+      ],
+      "descriptionEn": "Paint.NET is an image and photo editing software for PCs that run Windows. It features an intuitive and innovative user interface with support for layers, unlimited undo, special effects, and a wide variety of useful and powerful tools. An active and growing online community provides friendly…",
+      "homepage": "https://getpaint.net/"
+    },
+    {
+      "id": "Malwarebytes.Malwarebytes",
+      "name": "Malwarebytes",
+      "shortName": "Malwarebytes",
+      "publisher": "Malwarebytes",
+      "description": "Сканування та видалення шкідливих програм.",
+      "group": "security",
+      "icon": "malwarebytes",
+      "tags": [
+        "антивірус",
+        "malwarebytes",
+        "захист",
+        "сканування"
+      ],
+      "sizeMb": 300,
+      "recommended": false,
+      "match": [
+        "Malwarebytes"
+      ],
+      "descriptionEn": "Malwarebytes protects you against malware, ransomware, malicious websites, and other advanced online threats.",
+      "homepage": "https://www.malwarebytes.com/mwb-download"
+    },
+    {
+      "id": "Bitdefender.Bitdefender",
+      "name": "Bitdefender",
+      "shortName": "Bitdefender",
+      "publisher": "Bitdefender",
+      "description": "Антивірус із захистом у реальному часі.",
+      "group": "security",
+      "icon": "bitdefender",
+      "tags": [
+        "антивірус",
+        "bitdefender",
+        "захист",
+        "безпека"
+      ],
+      "sizeMb": 500,
+      "recommended": false,
+      "match": [
+        "Bitdefender"
+      ],
+      "descriptionEn": "Bitdefender Antivirus Free Edition is a free antivirus software especially designed to protect your Windows PC.",
+      "homepage": "https://www.bitdefender.com/solutions/free.html"
+    },
+    {
+      "id": "IDRIX.VeraCrypt",
+      "name": "VeraCrypt",
+      "shortName": "VeraCrypt",
+      "publisher": "IDRIX",
+      "description": "Шифрування дисків і контейнерів.",
+      "group": "security",
+      "icon": "veracrypt",
+      "tags": [
+        "шифрування",
+        "veracrypt",
+        "диск",
+        "безпека"
+      ],
+      "sizeMb": 40,
+      "recommended": false,
+      "match": [
+        "VeraCrypt"
+      ],
+      "descriptionEn": "VeraCrypt is a software for establishing and maintaining an on-the-fly-encrypted volume (data storage device). On-the-fly encryption means that data is automatically",
+      "homepage": "https://veracrypt.io/"
+    },
+    {
+      "id": "Cryptomator.Cryptomator",
+      "name": "Cryptomator",
+      "shortName": "Cryptomator",
+      "publisher": "Skymatic",
+      "description": "Шифрування файлів у хмарних сховищах.",
+      "group": "security",
+      "icon": "cryptomator",
+      "tags": [
+        "шифрування",
+        "cryptomator",
+        "хмара",
+        "безпека"
+      ],
+      "sizeMb": 60,
+      "recommended": false,
+      "match": [
+        "Cryptomator"
+      ],
+      "descriptionEn": "Cryptomator provides easy-to-use, transparent, client-side encryption for your cloud.",
+      "homepage": "https://cryptomator.org/"
+    },
+    {
+      "id": "WiresharkFoundation.Wireshark",
+      "name": "Wireshark",
+      "shortName": "Wireshark",
+      "publisher": "Wireshark Foundation",
+      "description": "Аналіз мережевого трафіку.",
+      "group": "security",
+      "icon": "wireshark",
+      "tags": [
+        "мережа",
+        "wireshark",
+        "трафік",
+        "аналіз"
+      ],
+      "sizeMb": 100,
+      "recommended": false,
+      "match": [
+        "Wireshark"
+      ],
+      "descriptionEn": "Wireshark is the world's foremost network protocol analyzer. It lets you see what's happening on your network at a microscopic level. It is the de facto (and often de jure) standard across many industries and educational institutions.",
+      "homepage": "https://www.wireshark.org/"
+    },
+    {
+      "id": "SST.OpenCodeDesktop",
+      "name": "OpenCode Desktop",
+      "shortName": "OpenCode",
+      "publisher": "SST",
+      "description": "Відкрите агентне середовище для роботи з кодом у терміналі та редакторі.",
+      "group": "ai",
+      "icon": "opencode",
+      "tags": [
+        "ші",
+        "агент",
+        "код",
+        "термінал",
+        "opencode"
+      ],
+      "sizeMb": 150,
+      "recommended": true,
+      "match": [
+        "OpenCode"
+      ],
+      "descriptionEn": "opencode is an AI coding agent. It features:",
+      "homepage": "https://opencode.ai/"
+    },
+    {
+      "id": "Google.Antigravity",
+      "name": "Google Antigravity",
+      "shortName": "Antigravity",
+      "publisher": "Google",
+      "description": "Агентне середовище розробки від Google на базі редактора.",
+      "group": "ai",
+      "icon": "antigravity",
+      "tags": [
+        "ші",
+        "агент",
+        "код",
+        "google"
+      ],
+      "sizeMb": 420,
+      "recommended": false,
+      "match": [
+        "Antigravity",
+        "Google Antigravity"
+      ],
+      "descriptionEn": "Antigravity 2.0 serves as your AI agents' central command center, providing a unified platform to launch, monitor, and orchestrate their activities. Unlike its predecessor, the Agent Manager, Antigravity 2.0 is a standalone application that functions independently of an IDE.",
+      "homepage": "https://antigravity.google/"
+    },
+    {
+      "id": "Anthropic.Claude",
+      "name": "Claude Desktop",
+      "shortName": "Claude",
+      "publisher": "Anthropic",
+      "description": "Десктопний асистент Claude для роботи з текстом і файлами.",
+      "group": "ai",
+      "icon": "claude",
+      "tags": [
+        "ші",
+        "асистент",
+        "чат",
+        "claude"
+      ],
+      "sizeMb": 260,
+      "recommended": true,
+      "match": [
+        "Claude",
+        "Claude Desktop"
+      ],
+      "descriptionEn": "Your AI partner on desktop. Fast, focused, and designed for deep work.",
+      "homepage": "https://claude.ai/download"
+    },
+    {
+      "id": "Anthropic.ClaudeCode",
+      "name": "Claude Code",
+      "shortName": "Claude Code",
+      "publisher": "Anthropic",
+      "description": "Агентний інструмент для написання коду з термінала.",
+      "group": "ai",
+      "icon": "claudecode",
+      "tags": [
+        "ші",
+        "агент",
+        "код",
+        "claude"
+      ],
+      "sizeMb": 60,
+      "recommended": false,
+      "match": [
+        "Claude Code"
+      ],
+      "descriptionEn": "Claude Code is Anthropic’s agentic coding tool that lives in your terminal and helps you turn ideas into code faster than ever before.",
+      "homepage": "https://www.anthropic.com/claude-code"
+    },
+    {
+      "id": "Anysphere.Cursor",
+      "name": "Cursor",
+      "shortName": "Cursor",
+      "publisher": "Anysphere",
+      "description": "Редактор коду з вбудованим ШІ-асистентом і агентами.",
+      "group": "ai",
+      "icon": "cursor",
+      "tags": [
+        "ші",
+        "редактор",
+        "код",
+        "cursor"
+      ],
+      "sizeMb": 350,
+      "recommended": false,
+      "match": [
+        "Cursor"
+      ],
+      "descriptionEn": "Cursor is a new, intelligent IDE, empowered by seamless integrations with AI. Built upon VSCode, Cursor is quick to learn, but can make you extraordinarily productive.",
+      "homepage": "https://www.cursor.com/"
+    },
+    {
+      "id": "Ollama.Ollama",
+      "name": "Ollama",
+      "shortName": "Ollama",
+      "publisher": "Ollama",
+      "description": "Локальний запуск великих мовних моделей однією командою.",
+      "group": "ai",
+      "icon": "ollama",
+      "tags": [
+        "ші",
+        "моделі",
+        "локально",
+        "llm"
+      ],
+      "sizeMb": 700,
+      "recommended": false,
+      "match": [
+        "Ollama"
+      ],
+      "descriptionEn": "Get up and running with large language models locally.",
+      "homepage": "https://ollama.com/"
+    },
+    {
+      "id": "ElementLabs.LMStudio",
+      "name": "LM Studio",
+      "shortName": "LM Studio",
+      "publisher": "Element Labs",
+      "description": "Чат і локальний сервер для моделей з відкритими вагами.",
+      "group": "ai",
+      "icon": "lmstudio",
+      "tags": [
+        "ші",
+        "моделі",
+        "локально",
+        "llm"
+      ],
+      "sizeMb": 620,
+      "recommended": false,
+      "match": [
+        "LM Studio",
+        "LMStudio"
+      ],
+      "descriptionEn": "LM Studio is an easy to use desktop app for experimenting with local and open-source Large Language Models (LLMs). The LM Studio cross platform desktop app allows you to download and run any ggml-compatible model from Hugging Face, and provides a simple yet powerful model configuration and…",
+      "homepage": "https://lmstudio.ai/"
+    },
+    {
+      "id": "Jan.Jan",
+      "name": "Jan",
+      "shortName": "Jan",
+      "publisher": "Menlo Research",
+      "description": "Офлайн-чат для локальних моделей без передачі даних назовні.",
+      "group": "ai",
+      "icon": "jan",
+      "tags": [
+        "ші",
+        "чат",
+        "локально",
+        "jan"
+      ],
+      "sizeMb": 260,
+      "recommended": false,
+      "match": [
+        "Jan"
+      ],
+      "descriptionEn": "Run LLMs like Mistral or Llama2 locally and offline on your computer, or connect to remote AI APIs like OpenAI’s GPT-4 or Groq.",
+      "homepage": "https://jan.ai/"
+    },
+    {
+      "id": "Google.GeminiDesktop",
+      "name": "Gemini Desktop",
+      "shortName": "Gemini",
+      "publisher": "Google",
+      "description": "Десктопний застосунок Gemini з доступом до моделей Google.",
+      "group": "ai",
+      "icon": "googlegemini",
+      "tags": [
+        "ші",
+        "асистент",
+        "gemini",
+        "google"
+      ],
+      "sizeMb": 160,
+      "recommended": false,
+      "match": [
+        "Gemini",
+        "Google Gemini"
+      ],
+      "descriptionEn": "A native AI assistant with global shortcuts and automation to help you research, write and summarise files. From drafting documents to exploring creative ideas, Gemini is always just a shortcut away, ready to help right where you are so you never break your flow.",
+      "homepage": "https://gemini.google/desktop/"
+    },
+    {
+      "id": "Perplexity.Comet",
+      "name": "Perplexity Comet",
+      "shortName": "Comet",
+      "publisher": "Perplexity",
+      "description": "Браузер Perplexity з ШІ-пошуком і помічником у вкладках.",
+      "group": "ai",
+      "icon": "perplexity",
+      "tags": [
+        "ші",
+        "браузер",
+        "пошук",
+        "perplexity"
+      ],
+      "sizeMb": 260,
+      "recommended": false,
+      "match": [
+        "Comet",
+        "Perplexity Comet"
+      ],
+      "descriptionEn": "Comet is a Chromium-based browser that integrates advanced AI capabilities powered by Perplexity. Unlike traditional browsers, Comet combines web browsing with intelligent features that enhance productivity and information access.",
+      "homepage": "https://www.perplexity.ai/"
+    },
+    {
+      "id": "kangfenmao.CherryStudio",
+      "name": "Cherry Studio",
+      "shortName": "Cherry Studio",
+      "publisher": "Cherry Studio",
+      "description": "Клієнт до багатьох ШІ-провайдерів з локальними моделями.",
+      "group": "ai",
+      "icon": "cherrystudio",
+      "tags": [
+        "ші",
+        "чат",
+        "провайдери",
+        "api"
+      ],
+      "sizeMb": 210,
+      "recommended": false,
+      "match": [
+        "Cherry Studio",
+        "CherryStudio"
+      ],
+      "descriptionEn": "A desktop client that supports for multiple LLM providers",
+      "homepage": "https://cherry-ai.com/"
+    },
+    {
+      "id": "Microsoft.Copilot",
+      "name": "Microsoft Copilot",
+      "shortName": "Copilot",
+      "publisher": "Microsoft",
+      "description": "Помічник Copilot для Windows із доступом до застосунків.",
+      "group": "ai",
+      "icon": "copilot",
+      "tags": [
+        "ші",
+        "асистент",
+        "windows",
+        "copilot"
+      ],
+      "sizeMb": 220,
+      "recommended": false,
+      "match": [
+        "Copilot",
+        "Microsoft Copilot"
+      ],
+      "descriptionEn": "Microsoft Copilot is an AI companion that helps you find information, create content,",
+      "homepage": "https://copilot.microsoft.com/"
+    },
+    {
+      "id": "OpenAI.Codex",
+      "name": "OpenAI Codex",
+      "shortName": "Codex",
+      "publisher": "OpenAI",
+      "description": "Агент OpenAI для написання й перевірки коду.",
+      "group": "ai",
+      "icon": "codex",
+      "tags": [
+        "ші",
+        "агент",
+        "код",
+        "openai"
+      ],
+      "sizeMb": 160,
+      "recommended": false,
+      "match": [
+        "Codex",
+        "OpenAI Codex"
+      ],
+      "descriptionEn": "Codex CLI is an open‐source local coding agent that runs in your terminal, letting you write, edit, and understand code without leaving the command line.",
+      "homepage": "https://github.com/openai/codex"
+    },
+    {
+      "id": "SST.opencode",
+      "name": "OpenCode CLI",
+      "shortName": "OpenCode CLI",
+      "publisher": "SST",
+      "description": "Агент для роботи з кодом із командного рядка.",
+      "group": "cli",
+      "icon": "opencode",
+      "tags": [
+        "ші",
+        "агент",
+        "код",
+        "термінал",
+        "opencode",
+        "cli"
+      ],
+      "sizeMb": 50,
+      "recommended": false,
+      "match": [
+        "opencode",
+        "OpenCode CLI"
+      ],
+      "descriptionEn": "opencode is an AI coding agent built for the terminal. It features: - A responsive, native, themeable terminal UI. - Automatically loads the right LSPs, so the LLMs make fewer mistakes. - Have multiple agents working in parallel on the same project. - Create shareable links to any session for…",
+      "homepage": "https://opencode.ai/"
+    },
+    {
+      "id": "GoLang.Go",
+      "name": "Go",
+      "shortName": "Go",
+      "publisher": "Google",
+      "description": "Мова Go і набір інструментів для складання програм.",
+      "group": "cli",
+      "icon": "go",
+      "tags": [
+        "go",
+        "golang",
+        "мова",
+        "компілятор",
+        "cli"
+      ],
+      "sizeMb": 70,
+      "recommended": false,
+      "match": [
+        "Go Programming Language",
+        "Go"
+      ],
+      "descriptionEn": "The Go programming language is an open source project to make programmers more productive. Go is expressive, concise, clean, and efficient. Its concurrency mechanisms make it easy to write programs that get the most out of multicore and networked machines, while its novel type system enables…",
+      "homepage": "https://go.dev/dl/"
+    },
+    {
+      "id": "Rustlang.Rustup",
+      "name": "Rustup",
+      "shortName": "Rustup",
+      "publisher": "Rust Project",
+      "description": "Менеджер інструментів мови Rust і компілятора rustc.",
+      "group": "cli",
+      "icon": "rust",
+      "tags": [
+        "rust",
+        "rustup",
+        "компілятор",
+        "cargo",
+        "cli"
+      ],
+      "sizeMb": 5,
+      "recommended": false,
+      "match": [
+        "Rustup"
+      ],
+      "descriptionEn": "Rustup installs The Rust Programming Language from the official release channels, enabling you to easily switch between stable, beta, and nightly compilers and keep them updated. It makes cross-compiling simpler with binary builds of the standard library for common platforms. And it runs on all…",
+      "homepage": "https://rust-lang.github.io/rustup/"
+    },
+    {
+      "id": "EclipseAdoptium.Temurin.21.JDK",
+      "name": "Eclipse Temurin JDK 21",
+      "shortName": "JDK 21",
+      "publisher": "Eclipse Adoptium",
+      "description": "Безкоштовний OpenJDK 21 для запуску та складання Java-програм.",
+      "group": "cli",
+      "icon": "openjdk",
+      "tags": [
+        "java",
+        "jdk",
+        "jvm",
+        "openjdk",
+        "cli"
+      ],
+      "sizeMb": 180,
+      "recommended": false,
+      "match": [
+        "Eclipse Temurin JDK with Hotspot 21",
+        "Eclipse Temurin JDK",
+        "Temurin 21"
+      ],
+      "descriptionEn": "Eclipse Temurin JDK is the open source Java SE build based upon OpenJDK.",
+      "homepage": "https://adoptium.net/"
+    },
+    {
+      "id": "BurntSushi.ripgrep.MSVC",
+      "name": "ripgrep",
+      "shortName": "ripgrep",
+      "publisher": "BurntSushi",
+      "description": "Швидкий рекурсивний пошук рядків у файлах.",
+      "group": "cli",
+      "icon": "ripgrep",
+      "tags": [
+        "пошук",
+        "grep",
+        "ripgrep",
+        "текст",
+        "cli"
+      ],
+      "sizeMb": 10,
+      "recommended": false,
+      "match": [
+        "RipGrep MSVC",
+        "ripgrep"
+      ],
+      "descriptionEn": "ripgrep is a line-oriented search tool that recursively searches the current directory for a regex pattern. By default, ripgrep will respect gitignore rules and automatically skip hidden files/directories and binary files. (To disable all automatic filtering by default, use rg -uuu.) ripgrep has…",
+      "homepage": "https://github.com/BurntSushi/ripgrep"
+    },
+    {
+      "id": "sharkdp.fd",
+      "name": "fd",
+      "shortName": "fd",
+      "publisher": "sharkdp",
+      "description": "Проста й швидка альтернатива команді find.",
+      "group": "cli",
+      "icon": "fd",
+      "tags": [
+        "пошук",
+        "файли",
+        "fd",
+        "cli"
+      ],
+      "sizeMb": 5,
+      "recommended": false,
+      "match": [
+        "fd"
+      ],
+      "descriptionEn": "A simple, fast and user-friendly alternative to 'find'",
+      "homepage": "https://github.com/sharkdp/fd"
+    },
+    {
+      "id": "sharkdp.bat",
+      "name": "bat",
+      "shortName": "bat",
+      "publisher": "sharkdp",
+      "description": "Перегляд файлів із підсвічуванням синтаксису.",
+      "group": "cli",
+      "icon": "bat",
+      "tags": [
+        "перегляд",
+        "синтаксис",
+        "cat",
+        "bat",
+        "cli"
+      ],
+      "sizeMb": 5,
+      "recommended": false,
+      "match": [
+        "bat"
+      ],
+      "descriptionEn": "A cat(1) clone with syntax highlighting and Git integration.",
+      "homepage": "https://github.com/sharkdp/bat"
+    },
+    {
+      "id": "junegunn.fzf",
+      "name": "fzf",
+      "shortName": "fzf",
+      "publisher": "junegunn",
+      "description": "Інтерактивний пошук і фільтрування списків у терміналі.",
+      "group": "cli",
+      "icon": "fzf",
+      "tags": [
+        "пошук",
+        "фільтр",
+        "fzf",
+        "термінал",
+        "cli"
+      ],
+      "sizeMb": 5,
+      "recommended": false,
+      "match": [
+        "fzf"
+      ],
+      "descriptionEn": "A general-purpose command-line fuzzy finder",
+      "homepage": "https://github.com/junegunn/fzf"
+    },
+    {
+      "id": "jqlang.jq",
+      "name": "jq",
+      "shortName": "jq",
+      "publisher": "jqlang",
+      "description": "Обробка й фільтрація JSON у командному рядку.",
+      "group": "cli",
+      "icon": "jq",
+      "tags": [
+        "json",
+        "jq",
+        "обробка",
+        "cli"
+      ],
+      "sizeMb": 5,
+      "recommended": false,
+      "match": [
+        "jq"
+      ],
+      "descriptionEn": "jq is a lightweight and flexible command-line JSON processor.",
+      "homepage": "https://github.com/jqlang/jq"
+    },
+    {
+      "id": "cURL.cURL",
+      "name": "curl",
+      "shortName": "curl",
+      "publisher": "curl",
+      "description": "Передавання даних за URL із командного рядка.",
+      "group": "cli",
+      "icon": "curl",
+      "tags": [
+        "http",
+        "curl",
+        "мережа",
+        "api",
+        "cli"
+      ],
+      "sizeMb": 10,
+      "recommended": false,
+      "match": [
+        "cURL",
+        "curl"
+      ],
+      "descriptionEn": "Command line tool and library for transferring data with URLs",
+      "homepage": "https://curl.se/"
+    },
+    {
+      "id": "JernejSimoncic.Wget",
+      "name": "Wget",
+      "shortName": "Wget",
+      "publisher": "Jernej Simončič",
+      "description": "Завантаження файлів із мережі в командному рядку.",
+      "group": "cli",
+      "icon": "wget",
+      "tags": [
+        "завантаження",
+        "wget",
+        "http",
+        "мережа",
+        "cli"
+      ],
+      "sizeMb": 5,
+      "recommended": false,
+      "match": [
+        "Wget"
+      ],
+      "descriptionEn": "Wget is a command line utility for retrieving files using HTTP, HTTPS, FTP and FTPS.",
+      "homepage": "https://eternallybored.org/misc/wget/"
+    },
+    {
+      "id": "Gyan.FFmpeg",
+      "name": "FFmpeg",
+      "shortName": "FFmpeg",
+      "publisher": "Gyan Doshi",
+      "description": "Конвертація, запис і обробка аудіо та відео.",
+      "group": "cli",
+      "icon": "ffmpeg",
+      "tags": [
+        "відео",
+        "аудіо",
+        "конвертація",
+        "ffmpeg",
+        "cli"
+      ],
+      "sizeMb": 100,
+      "recommended": false,
+      "match": [
+        "FFmpeg"
+      ],
+      "descriptionEn": "FFmpeg is the leading multimedia framework, able to decode, encode, transcode, mux, demux, stream, filter and play pretty much anything that humans and machines have created. It supports the most obscure ancient formats up to the cutting edge. FFmpeg 64-bit static full build from www.gyan.dev.…",
+      "homepage": "https://www.gyan.dev/ffmpeg/builds/"
+    },
+    {
+      "id": "yt-dlp.yt-dlp",
+      "name": "yt-dlp",
+      "shortName": "yt-dlp",
+      "publisher": "yt-dlp",
+      "description": "Завантаження відео та музики з різних сайтів.",
+      "group": "cli",
+      "icon": "ytdlp",
+      "tags": [
+        "відео",
+        "завантаження",
+        "yt-dlp",
+        "youtube",
+        "cli"
+      ],
+      "sizeMb": 30,
+      "recommended": false,
+      "match": [
+        "yt-dlp"
+      ],
+      "descriptionEn": "yt-dlp is a feature-rich command-line audio/video downloader with support for thousands of sites. The project is a fork of youtube-dl based on the now inactive youtube-dlc.",
+      "homepage": "https://github.com/yt-dlp/yt-dlp"
+    },
+    {
+      "id": "GitHub.cli",
+      "name": "GitHub CLI",
+      "shortName": "gh",
+      "publisher": "GitHub",
+      "description": "Керування GitHub із термінала: pull requests, issues, релізи.",
+      "group": "cli",
+      "icon": "github",
+      "tags": [
+        "github",
+        "git",
+        "cli",
+        "issues",
+        "api"
+      ],
+      "sizeMb": 30,
+      "recommended": false,
+      "match": [
+        "GitHub CLI",
+        "gh"
+      ],
+      "descriptionEn": "GitHub CLI (gh) is a command-line tool that brings pull requests, issues, GitHub Actions, and other GitHub features to your terminal, so you can do all your work in one place.",
+      "homepage": "https://cli.github.com/"
+    },
+    {
+      "id": "Amazon.AWSCLI",
+      "name": "AWS CLI",
+      "shortName": "AWS CLI",
+      "publisher": "Amazon",
+      "description": "Керування сервісами Amazon Web Services із командного рядка.",
+      "group": "cli",
+      "icon": "awscli",
+      "tags": [
+        "aws",
+        "хмара",
+        "cli",
+        "devops"
+      ],
+      "sizeMb": 70,
+      "recommended": false,
+      "match": [
+        "AWS Command Line Interface"
+      ],
+      "descriptionEn": "The AWS Command Line Interface (AWS CLI) is an open source tool that enables you to interact with AWS services using commands in your command-line shell. With minimal configuration, the AWS CLI enables you to start running commands that implement functionality equivalent to that provided by the…",
+      "homepage": "https://aws.amazon.com/cli/"
+    },
+    {
+      "id": "Microsoft.AzureCLI",
+      "name": "Azure CLI",
+      "shortName": "Azure CLI",
+      "publisher": "Microsoft",
+      "description": "Керування ресурсами Microsoft Azure із командного рядка.",
+      "group": "cli",
+      "icon": "azurecli",
+      "tags": [
+        "azure",
+        "хмара",
+        "cli",
+        "microsoft",
+        "devops"
+      ],
+      "sizeMb": 80,
+      "recommended": false,
+      "match": [
+        "Microsoft Azure CLI"
+      ],
+      "descriptionEn": "The Azure command-line interface (Azure CLI) is a set of commands used to create and manage Azure resources. The Azure CLI is available across Azure services and is designed to get you working quickly with Azure, with an emphasis on automation.",
+      "homepage": "https://docs.microsoft.com/en-us/cli/azure/"
+    },
+    {
+      "id": "Kubernetes.kubectl",
+      "name": "kubectl",
+      "shortName": "kubectl",
+      "publisher": "Kubernetes",
+      "description": "Керування кластерами Kubernetes із термінала.",
+      "group": "cli",
+      "icon": "kubernetes",
+      "tags": [
+        "kubernetes",
+        "k8s",
+        "cli",
+        "контейнери",
+        "devops"
+      ],
+      "sizeMb": 60,
+      "recommended": false,
+      "match": [
+        "Kubernetes CLI",
+        "kubectl"
+      ],
+      "descriptionEn": "A command line tool for communicating with a Kubernetes cluster's control plane, using the Kubernetes API",
+      "homepage": "https://kubernetes.io/docs/reference/kubectl/"
+    },
+    {
+      "id": "Helm.Helm",
+      "name": "Helm",
+      "shortName": "Helm",
+      "publisher": "Helm",
+      "description": "Пакети та шаблони для застосунків у Kubernetes.",
+      "group": "cli",
+      "icon": "helm",
+      "tags": [
+        "kubernetes",
+        "helm",
+        "cli",
+        "devops"
+      ],
+      "sizeMb": 30,
+      "recommended": false,
+      "match": [
+        "Helm"
+      ],
+      "descriptionEn": "The Package Manager for Kubernetes",
+      "homepage": "https://helm.sh/"
+    },
+    {
+      "id": "Hashicorp.Terraform",
+      "name": "Terraform",
+      "shortName": "Terraform",
+      "publisher": "HashiCorp",
+      "description": "Опис і розгортання інфраструктури як код.",
+      "group": "cli",
+      "icon": "terraform",
+      "tags": [
+        "terraform",
+        "інфраструктура",
+        "cli",
+        "devops"
+      ],
+      "sizeMb": 30,
+      "recommended": false,
+      "match": [
+        "HashiCorp Terraform",
+        "Terraform"
+      ],
+      "descriptionEn": "Terraform is a tool for building, changing, and versioning infrastructure safely and efficiently. Terraform can manage existing and popular service providers as well as custom in-house solutions. The key features of Terraform are: - Infrastructure as Code: Infrastructure is described using a…",
+      "homepage": "https://github.com/hashicorp/terraform"
+    },
+    {
+      "id": "Neovim.Neovim",
+      "name": "Neovim",
+      "shortName": "Neovim",
+      "publisher": "Neovim",
+      "description": "Розширюваний консольний редактор коду на основі Vim.",
+      "group": "cli",
+      "icon": "neovim",
+      "tags": [
+        "редактор",
+        "vim",
+        "neovim",
+        "термінал",
+        "код"
+      ],
+      "sizeMb": 40,
+      "recommended": false,
+      "match": [
+        "Neovim"
+      ],
+      "descriptionEn": "Vim-fork focused on extensibility and usability",
+      "homepage": "https://neovim.io/"
+    },
+    {
+      "id": "aristocratos.btop4win",
+      "name": "btop4win",
+      "shortName": "btop",
+      "publisher": "aristocratos",
+      "description": "Монітор процесорів, пам'яті та мережі в терміналі.",
+      "group": "cli",
+      "icon": "btop",
+      "tags": [
+        "моніторинг",
+        "процеси",
+        "термінал",
+        "btop",
+        "cli"
+      ],
+      "sizeMb": 10,
+      "recommended": false,
+      "match": [
+        "btop4win"
+      ],
+      "descriptionEn": "Resource monitor that shows usage and stats for processor, memory, disks, network, processes and services.",
+      "homepage": "https://github.com/aristocratos/btop4win"
+    },
+    {
+      "id": "Nushell.Nushell",
+      "name": "Nushell",
+      "shortName": "Nushell",
+      "publisher": "Nushell",
+      "description": "Командна оболонка, що працює зі структурованими даними.",
+      "group": "cli",
+      "icon": "nushell",
+      "tags": [
+        "shell",
+        "nushell",
+        "консоль",
+        "cli"
+      ],
+      "sizeMb": 40,
+      "recommended": false,
+      "match": [
+        "nu",
+        "Nushell"
+      ],
+      "descriptionEn": "Hello, and welcome to the Nushell project. The goal of this project is to take the Unix philosophy of shells, where pipes connect simple commands together, and bring it to the modern style of development. Nu takes cues from a lot of familiar territory, traditional shells like bash, object based…",
+      "homepage": "https://github.com/nushell/integrations"
+    },
+    {
+      "id": "Starship.Starship",
+      "name": "Starship",
+      "shortName": "Starship",
+      "publisher": "Starship",
+      "description": "Швидкий і налаштовуваний рядок запрошення для будь-якої оболонки.",
+      "group": "cli",
+      "icon": "starship",
+      "tags": [
+        "shell",
+        "prompt",
+        "starship",
+        "термінал",
+        "cli"
+      ],
+      "sizeMb": 10,
+      "recommended": false,
+      "match": [
+        "starship",
+        "Starship"
+      ],
+      "descriptionEn": "The minimal, blazing-fast, and infinitely customizable prompt for any shell! - Fast: it's fast – really really fast! 🚀 - Customizable: configure every aspect of your prompt. - Universal: works on any shell, on any operating system. - Intelligent: shows relevant information at a glance. -…",
+      "homepage": "https://starship.rs/"
+    },
+    {
+      "id": "Kitware.CMake",
+      "name": "CMake",
+      "shortName": "CMake",
+      "publisher": "Kitware",
+      "description": "Система збірки для C і C++ проєктів.",
+      "group": "cli",
+      "icon": "cmake",
+      "tags": [
+        "збірка",
+        "cmake",
+        "c++",
+        "cli"
+      ],
+      "sizeMb": 100,
+      "recommended": false,
+      "match": [
+        "CMake"
+      ],
+      "descriptionEn": "CMake is an open-source, cross-platform family of tools designed to build, test and package software. CMake is used to control the software compilation process using simple platform and compiler independent configuration files, and generate native makefiles and workspaces that can be used in the…",
+      "homepage": "https://cmake.org/"
+    },
+    {
+      "id": "Chocolatey.Chocolatey",
+      "name": "Chocolatey",
+      "shortName": "Chocolatey",
+      "publisher": "Chocolatey",
+      "description": "Менеджер пакетів для автоматичної інсталяції програм.",
+      "group": "cli",
+      "icon": "chocolatey",
+      "tags": [
+        "пакети",
+        "chocolatey",
+        "cli",
+        "інсталяція"
+      ],
+      "sizeMb": 30,
+      "recommended": false,
+      "match": [
+        "Chocolatey"
+      ],
+      "descriptionEn": "Chocolatey is The Package Manager for Windows. It was designed to be a decentralized framework for quickly installing applications and tools that you need. It is built on the NuGet infrastructure and uses PowerShell as its focus for delivering packages.",
+      "homepage": "https://github.com/chocolatey/choco"
+    },
+    {
+      "id": "JanDeDobbeleer.OhMyPosh",
+      "name": "Oh My Posh",
+      "shortName": "Oh My Posh",
+      "publisher": "Jan De Dobbeleer",
+      "description": "Рядок запрошення з темами для PowerShell, bash і zsh.",
+      "group": "cli",
+      "icon": "ohmypo",
+      "tags": [
+        "prompt",
+        "термінал",
+        "oh-my-posh",
+        "cli"
+      ],
+      "sizeMb": 15,
+      "recommended": false,
+      "match": [
+        "Oh My Posh"
+      ],
+      "descriptionEn": "Prompt theme engine for any shell",
+      "homepage": "https://ohmyposh.dev/"
+    },
+    {
+      "id": "JesseDuffield.lazygit",
+      "name": "lazygit",
+      "shortName": "lazygit",
+      "publisher": "Jesse Duffield",
+      "description": "Простий термінальний інтерфейс до Git.",
+      "group": "cli",
+      "icon": "lazygit",
+      "tags": [
+        "git",
+        "термінал",
+        "lazygit",
+        "cli"
+      ],
+      "sizeMb": 15,
+      "recommended": false,
+      "match": [
+        "lazygit"
+      ],
+      "descriptionEn": "Simple terminal UI for git commands.",
+      "homepage": "https://github.com/jesseduffield/lazygit"
+    },
+    {
+      "id": "dandavison.delta",
+      "name": "delta",
+      "shortName": "delta",
+      "publisher": "Dan Davison",
+      "description": "Зручний переглядач різниці змін Git.",
+      "group": "cli",
+      "icon": "delta",
+      "tags": [
+        "git",
+        "diff",
+        "delta",
+        "cli"
+      ],
+      "sizeMb": 10,
+      "recommended": false,
+      "match": [
+        "delta"
+      ],
+      "descriptionEn": "A syntax-highlighting pager for git, diff, and grep output",
+      "homepage": "https://github.com/dandavison/delta"
+    },
+    {
+      "id": "uutils.coreutils",
+      "name": "coreutils",
+      "shortName": "coreutils",
+      "publisher": "uutils",
+      "description": "Класичні утиліти GNU coreutils, переписані на Rust.",
+      "group": "cli",
+      "icon": "gnu",
+      "tags": [
+        "coreutils",
+        "gnu",
+        "утиліти",
+        "cli"
+      ],
+      "sizeMb": 15,
+      "recommended": false,
+      "match": [
+        "coreutils"
+      ],
+      "descriptionEn": "Cross-platform Rust rewrite of the GNU coreutils",
+      "homepage": "https://github.com/uutils/coreutils"
+    },
+    {
+      "id": "Rclone.Rclone",
+      "name": "Rclone",
+      "shortName": "Rclone",
+      "publisher": "Rclone",
+      "description": "Синхронізація й перенесення даних між хмарними сховищами.",
+      "group": "cli",
+      "icon": "rclone",
+      "tags": [
+        "хмара",
+        "синхронізація",
+        "rclone",
+        "cli"
+      ],
+      "sizeMb": 20,
+      "recommended": false,
+      "match": [
+        "Rclone"
+      ],
+      "descriptionEn": "Rclone (\"rsync for cloud storage\") is a command-line program to sync files and directories to and from different cloud storage providers.",
+      "homepage": "https://rclone.org/"
+    },
+    {
+      "id": "DenoLand.Deno",
+      "name": "Deno",
+      "shortName": "Deno",
+      "publisher": "Deno Land",
+      "description": "Середовище виконання JavaScript і TypeScript із безпечними дозволами.",
+      "group": "cli",
+      "icon": "deno",
+      "tags": [
+        "javascript",
+        "typescript",
+        "deno",
+        "runtime",
+        "cli"
+      ],
+      "sizeMb": 40,
+      "recommended": false,
+      "match": [
+        "Deno"
+      ],
+      "descriptionEn": "Deno is a simple, modern and secure runtime for JavaScript, TypeScript, and WebAssembly that uses V8 and is built in Rust.",
+      "homepage": "https://deno.com/"
+    },
+    {
+      "id": "Genymobile.scrcpy",
+      "name": "scrcpy",
+      "shortName": "scrcpy",
+      "publisher": "Genymobile",
+      "description": "Дзеркалення й керування екраном Android-пристрою з ПК.",
+      "group": "cli",
+      "icon": "scrcpy",
+      "tags": [
+        "android",
+        "scrcpy",
+        "дзеркалення",
+        "cli"
+      ],
+      "sizeMb": 40,
+      "recommended": false,
+      "match": [
+        "scrcpy"
+      ],
+      "descriptionEn": "This application mirrors Android devices (video and audio) connected via USB or over TCP/IP, and allows to control the device with the keyboard and the mouse of the computer. It does not require any root access.",
+      "homepage": "https://github.com/Genymobile/scrcpy"
+    },
+    {
+      "id": "wez.wezterm",
+      "name": "WezTerm",
+      "shortName": "WezTerm",
+      "publisher": "Wez Furlong",
+      "description": "Термінал із вкладками, GPU-рендерингом і мультиплексором.",
+      "group": "cli",
+      "icon": "wezterm",
+      "tags": [
+        "термінал",
+        "gpu",
+        "wezterm",
+        "cli"
+      ],
+      "sizeMb": 30,
+      "recommended": false,
+      "match": [
+        "WezTerm"
+      ],
+      "descriptionEn": "A GPU-accelerated cross-platform terminal emulator and multiplexer implemented in Rust.",
+      "homepage": "https://wezterm.org"
+    },
+    {
+      "id": "Alacritty.Alacritty",
+      "name": "Alacritty",
+      "shortName": "Alacritty",
+      "publisher": "Alacritty",
+      "description": "Швидкий термінал з апаратним прискоренням.",
+      "group": "cli",
+      "icon": "alacritty",
+      "tags": [
+        "термінал",
+        "gpu",
+        "alacritty",
+        "cli"
+      ],
+      "sizeMb": 15,
+      "recommended": false,
+      "match": [
+        "Alacritty"
+      ],
+      "descriptionEn": "Alacritty is a free and open-source GPU accelerated terminal emulator focused on performance and simplicity.",
+      "homepage": "https://github.com/alacritty/alacritty"
+    },
+    {
+      "id": "LLVM.LLVM",
+      "name": "LLVM",
+      "shortName": "LLVM",
+      "publisher": "LLVM Project",
+      "description": "Набір компіляторів Clang і інструментів LLVM.",
+      "group": "cli",
+      "icon": "llvm",
+      "tags": [
+        "llvm",
+        "clang",
+        "компілятор",
+        "c++",
+        "cli"
+      ],
+      "sizeMb": 800,
+      "recommended": false,
+      "match": [
+        "LLVM"
+      ],
+      "descriptionEn": "A collection of modular and reusable compiler and toolchain technologies.",
+      "homepage": "https://llvm.org/"
+    },
+    {
+      "id": "Ninja-build.Ninja",
+      "name": "Ninja",
+      "shortName": "Ninja",
+      "publisher": "Ninja",
+      "description": "Швидка система збірки для великих проєктів.",
+      "group": "cli",
+      "icon": "ninja",
+      "tags": [
+        "збірка",
+        "ninja",
+        "c++",
+        "cli"
+      ],
+      "sizeMb": 5,
+      "recommended": false,
+      "match": [
+        "Ninja"
+      ],
+      "descriptionEn": "Ninja is a small build system with a focus on speed. It differs from other build systems in two major respects: it is designed to have its input files generated by a higher-level build system, and it is designed to run builds as fast as possible.",
+      "homepage": "https://github.com/ninja-build/ninja"
+    },
+    {
+      "id": "MSYS2.MSYS2",
+      "name": "MSYS2",
+      "shortName": "MSYS2",
+      "publisher": "MSYS2",
+      "description": "Unix-подібне середовище та менеджер пакетів pacman для Windows.",
+      "group": "cli",
+      "icon": "msys2",
+      "tags": [
+        "msys2",
+        "unix",
+        "pacman",
+        "компілятор",
+        "cli"
+      ],
+      "sizeMb": 200,
+      "recommended": false,
+      "match": [
+        "MSYS2"
+      ],
+      "descriptionEn": "MSYS2 is a collection of tools and libraries providing you with an easy-to-use environment for building, installing and running native Windows software.",
+      "homepage": "https://github.com/msys2/msys2-installer"
+    },
+    {
+      "id": "Notepad++.Notepad++",
+      "name": "Notepad++",
+      "shortName": "Notepad++",
+      "publisher": "Don Ho",
+      "description": "Текстовий редактор із підсвічуванням синтаксису та плагінами.",
+      "group": "development",
+      "icon": "notepadplusplus",
+      "tags": [
+        "редактор",
+        "текст",
+        "notepad++",
+        "код"
+      ],
+      "sizeMb": 5,
+      "recommended": true,
+      "match": [
+        "Notepad++"
+      ],
+      "descriptionEn": "Notepad++ is a free (as in “free speech” and also as in “free beer”) source code editor and Notepad replacement that supports several languages. Running in the MS Windows environment, its use is governed by GNU General Public License.",
+      "homepage": "https://notepad-plus-plus.org/"
+    },
+    {
+      "id": "Oracle.VirtualBox",
+      "name": "Oracle VirtualBox",
+      "shortName": "VirtualBox",
+      "publisher": "Oracle",
+      "description": "Віртуальні машини для тестів і перевірки сумісності.",
+      "group": "development",
+      "icon": "virtualbox",
+      "tags": [
+        "віртуалізація",
+        "vm",
+        "virtualbox",
+        "oracle"
+      ],
+      "sizeMb": 120,
+      "recommended": false,
+      "match": [
+        "Oracle VirtualBox",
+        "Oracle VM VirtualBox"
+      ],
+      "descriptionEn": "VirtualBox is a general-purpose full virtualization software for x86_64 hardware (with version 7.1 additionally for macOS/Arm), targeted at laptop, desktop, server and embedded use. It features a very user friendly graphical user interface and is available for many popular operating systems…",
+      "homepage": "https://www.virtualbox.org/"
+    },
+    {
+      "id": "JetBrains.PyCharm.Community",
+      "name": "PyCharm Community",
+      "shortName": "PyCharm",
+      "publisher": "JetBrains",
+      "description": "IDE для Python і роботи з віртуальними середовищами.",
+      "group": "development",
+      "icon": "pycharm",
+      "tags": [
+        "python",
+        "ide",
+        "jetbrains",
+        "pycharm"
+      ],
+      "sizeMb": 600,
+      "recommended": false,
+      "match": [
+        "PyCharm Community Edition",
+        "PyCharm"
+      ],
+      "descriptionEn": "The Python & Django IDE with intelligent code completion, on-the-fly error checking, quick-fixes, and much more...",
+      "homepage": "https://www.jetbrains.com/pycharm/"
+    },
+    {
+      "id": "Bruno.Bruno",
+      "name": "Bruno",
+      "shortName": "Bruno",
+      "publisher": "Bruno",
+      "description": "Офлайн-клієнт для тестування HTTP API з файлами колекцій.",
+      "group": "development",
+      "icon": "bruno",
+      "tags": [
+        "api",
+        "http",
+        "bruno",
+        "тестування"
+      ],
+      "sizeMb": 120,
+      "recommended": false,
+      "match": [
+        "Bruno"
+      ],
+      "descriptionEn": "Bruno is a fast, Git-friendly, and open-source API client, aimed at revolutionizing the status quo represented by Postman, Insomnia and similar tools out there. Bruno stores your collections directly in a folder on your filesystem. We use a plain text markup language, Bru, to save information…",
+      "homepage": "https://www.usebruno.com/"
+    },
+    {
+      "id": "MongoDB.Compass.Full",
+      "name": "MongoDB Compass",
+      "shortName": "Compass",
+      "publisher": "MongoDB",
+      "description": "Графічний клієнт для роботи з базами MongoDB.",
+      "group": "development",
+      "icon": "mongodb",
+      "tags": [
+        "mongodb",
+        "бази даних",
+        "compass",
+        "nosql"
+      ],
+      "sizeMb": 200,
+      "recommended": false,
+      "match": [
+        "MongoDB Compass"
+      ],
+      "descriptionEn": "The GUI for MongoDB. Visually explore your data. Run ad hoc queries in seconds. Interact with your data with full CRUD functionality. View and optimize your query performance. Available on Linux, Mac, or Windows. Compass empowers you to make smarter decisions about indexing, document validation,…",
+      "homepage": "https://www.mongodb.com/products/compass"
+    },
+    {
+      "id": "ZedIndustries.Zed",
+      "name": "Zed",
+      "shortName": "Zed",
+      "publisher": "Zed Industries",
+      "description": "Швидкий редактор коду зі спільною роботою та ШІ.",
+      "group": "development",
+      "icon": "zed",
+      "tags": [
+        "редактор",
+        "код",
+        "zed",
+        "ші"
+      ],
+      "sizeMb": 200,
+      "recommended": false,
+      "match": [
+        "Zed"
+      ],
+      "descriptionEn": "Zed is a next-generation code editor designed for high-performance collaboration with humans and AI. - Written from scratch in Rust to efficiently leverage multiple CPU cores and your GPU. - Integrate upcoming LLMs into your workflow to generate, transform, and analyze code. - Chat with…",
+      "homepage": "https://zed.dev/windows"
+    },
+    {
+      "id": "WinMerge.WinMerge",
+      "name": "WinMerge",
+      "shortName": "WinMerge",
+      "publisher": "WinMerge",
+      "description": "Порівняння та злиття файлів і каталогів.",
+      "group": "development",
+      "icon": "winmerge",
+      "tags": [
+        "diff",
+        "порівняння",
+        "merge",
+        "winmerge"
+      ],
+      "sizeMb": 15,
+      "recommended": false,
+      "match": [
+        "WinMerge"
+      ],
+      "descriptionEn": "WinMerge is an open source differencing and merging tool for Windows. WinMerge can compare files and folders, presenting differences in a visual format that is easy to understand and manipulate.",
+      "homepage": "https://winmerge.org/"
+    },
+    {
+      "id": "JetBrains.Toolbox",
+      "name": "JetBrains Toolbox",
+      "shortName": "Toolbox",
+      "publisher": "JetBrains",
+      "description": "Керування встановленням і оновленням IDE JetBrains.",
+      "group": "development",
+      "icon": "jetbrains",
+      "tags": [
+        "jetbrains",
+        "ide",
+        "toolbox",
+        "оновлення"
+      ],
+      "sizeMb": 100,
+      "recommended": false,
+      "match": [
+        "JetBrains Toolbox"
+      ],
+      "descriptionEn": "Open any of your projects in any of the IDEs with one click.",
+      "homepage": "https://www.jetbrains.com/toolbox-app/"
+    },
+    {
+      "id": "Insomnia.Insomnia",
+      "name": "Insomnia",
+      "shortName": "Insomnia",
+      "publisher": "Insomnia",
+      "description": "Клієнт для запитів до REST і GraphQL API.",
+      "group": "development",
+      "icon": "insomnia",
+      "tags": [
+        "api",
+        "rest",
+        "graphql",
+        "insomnia",
+        "тестування"
+      ],
+      "sizeMb": 200,
+      "recommended": false,
+      "match": [
+        "Insomnia"
+      ],
+      "descriptionEn": "The Desktop API client for REST and GraphQL. Make requests, inspect responses.",
+      "homepage": "https://insomnia.rest/"
+    },
+    {
+      "id": "LibreWolf.LibreWolf",
+      "name": "LibreWolf",
+      "shortName": "LibreWolf",
+      "publisher": "LibreWolf",
+      "description": "Приватний браузер на базі Firefox без телеметрії.",
+      "group": "browsers",
+      "icon": "librewolf",
+      "tags": [
+        "браузер",
+        "browser",
+        "приватність",
+        "firefox",
+        "librewolf"
+      ],
+      "sizeMb": 80,
+      "recommended": false,
+      "match": [
+        "LibreWolf"
+      ],
+      "descriptionEn": "This project is a custom and independent version of Firefox, with the primary goals of privacy, security and user freedom. LibreWolf is designed to increase protection against tracking and fingerprinting techniques, while also including a few security improvements. This is achieved through our…",
+      "homepage": "https://librewolf.net/"
+    },
+    {
+      "id": "TheBrowserCompany.Arc",
+      "name": "Arc",
+      "shortName": "Arc",
+      "publisher": "The Browser Company",
+      "description": "Браузер із бічною панеллю та просторами для вкладок.",
+      "group": "browsers",
+      "icon": "arc",
+      "tags": [
+        "браузер",
+        "browser",
+        "arc",
+        "вкладки"
+      ],
+      "sizeMb": 150,
+      "recommended": false,
+      "match": [
+        "Arc"
+      ],
+      "descriptionEn": "Arc is a new browser that shapes itself to how you use the internet. It offers Spaces, Profiles, Split View, Themes, and more to organize and customize your online experience.",
+      "homepage": "https://arc.net/"
+    },
+    {
+      "id": "Yandex.Browser",
+      "name": "Yandex Browser",
+      "shortName": "Yandex",
+      "publisher": "Yandex",
+      "description": "Браузер із вбудованим перекладачем і сервісами Яндекса.",
+      "group": "browsers",
+      "icon": "yandex",
+      "tags": [
+        "браузер",
+        "browser",
+        "yandex",
+        "переклад"
+      ],
+      "sizeMb": 120,
+      "recommended": false,
+      "match": [
+        "Yandex Browser",
+        "Yandex"
+      ],
+      "descriptionEn": "Yandex Browser delivers fast and secure browsing with built-in Alice and the ability to sync passwords, bookmarks, and bank cards across devices.",
+      "homepage": "https://browser.yandex.com/"
+    },
+    {
+      "id": "Opera.OperaGX",
+      "name": "Opera GX",
+      "shortName": "Opera GX",
+      "publisher": "Opera Norway",
+      "description": "Ігрова версія Opera з обмеженням споживання ресурсів.",
+      "group": "browsers",
+      "icon": "operagx",
+      "tags": [
+        "браузер",
+        "browser",
+        "opera",
+        "ігри",
+        "gx"
+      ],
+      "sizeMb": 100,
+      "recommended": false,
+      "match": [
+        "Opera GX Stable",
+        "Opera GX"
+      ],
+      "descriptionEn": "Opera GX is a special version of the Opera browser which, on top of Opera’s great features for privacy, security and efficiency, includes special features designed to complement gaming.",
+      "homepage": "https://www.opera.com/gx"
+    },
+    {
+      "id": "Mozilla.Thunderbird",
+      "name": "Mozilla Thunderbird",
+      "shortName": "Thunderbird",
+      "publisher": "Mozilla",
+      "description": "Поштовий клієнт із календарем і стрічкою новин.",
+      "group": "communication",
+      "icon": "thunderbird",
+      "tags": [
+        "пошта",
+        "email",
+        "календар",
+        "thunderbird"
+      ],
+      "sizeMb": 60,
+      "recommended": false,
+      "match": [
+        "Mozilla Thunderbird",
+        "Thunderbird"
+      ],
+      "descriptionEn": "Thunderbird is a free and open source email, newsfeed, chat, and calendaring client, that’s easy to set up and customize. One of the core principles of Thunderbird is the use and promotion of open standards - this focus is a rejection of our world of closed platforms and services that can’t…",
+      "homepage": "https://www.thunderbird.net/"
+    },
+    {
+      "id": "Mattermost.MattermostDesktop",
+      "name": "Mattermost",
+      "shortName": "Mattermost",
+      "publisher": "Mattermost",
+      "description": "Командний чат для власного сервера.",
+      "group": "communication",
+      "icon": "mattermost",
+      "tags": [
+        "чат",
+        "mattermost",
+        "команда",
+        "self-hosted"
+      ],
+      "sizeMb": 150,
+      "recommended": false,
+      "match": [
+        "Mattermost"
+      ],
+      "descriptionEn": "Access your Mattermost instance with your credentials using the desktop app",
+      "homepage": "https://mattermost.com/apps/"
+    },
+    {
+      "id": "PeterPawlowski.foobar2000",
+      "name": "foobar2000",
+      "shortName": "foobar2000",
+      "publisher": "Peter Pawlowski",
+      "description": "Швидкий аудіоплеєр із підтримкою тегів і конвертації.",
+      "group": "media",
+      "icon": "foobar2000",
+      "tags": [
+        "музика",
+        "плеєр",
+        "foobar2000",
+        "аудіо"
+      ],
+      "sizeMb": 10,
+      "recommended": false,
+      "match": [
+        "foobar2000"
+      ],
+      "descriptionEn": "foobar2000 is an advanced freeware audio player for the Windows platform.",
+      "homepage": "https://www.foobar2000.org/"
+    },
+    {
+      "id": "Jellyfin.JellyfinMediaPlayer",
+      "name": "Jellyfin Media Player",
+      "shortName": "Jellyfin",
+      "publisher": "Jellyfin",
+      "description": "Плеєр для власного медіасервера Jellyfin.",
+      "group": "media",
+      "icon": "jellyfin",
+      "tags": [
+        "медіа",
+        "jellyfin",
+        "плеєр",
+        "сервер"
+      ],
+      "sizeMb": 60,
+      "recommended": false,
+      "match": [
+        "Jellyfin Media Player"
+      ],
+      "descriptionEn": "Jellyfin Desktop Client based on Plex Media Player",
+      "homepage": "https://github.com/jellyfin/jellyfin-media-player"
+    },
+    {
+      "id": "Daum.PotPlayer",
+      "name": "PotPlayer",
+      "shortName": "PotPlayer",
+      "publisher": "Kakao",
+      "description": "Плеєр із гнучкими налаштуваннями та підтримкою субтитрів.",
+      "group": "media",
+      "icon": "potplayer",
+      "tags": [
+        "плеєр",
+        "відео",
+        "potplayer",
+        "субтитри"
+      ],
+      "sizeMb": 30,
+      "recommended": false,
+      "match": [
+        "PotPlayer"
+      ],
+      "descriptionEn": "Powerful multimedia player that supports a variety of different video codecs and formats.",
+      "homepage": "https://potplayer.tv/"
+    },
+    {
+      "id": "MoritzBunkus.MKVToolNix",
+      "name": "MKVToolNix",
+      "shortName": "MKVToolNix",
+      "publisher": "Moritz Bunkus",
+      "description": "Робота з контейнерами та доріжками файлів MKV.",
+      "group": "media",
+      "icon": "mkvtoolnix",
+      "tags": [
+        "mkv",
+        "відео",
+        "доріжки",
+        "субтитри"
+      ],
+      "sizeMb": 40,
+      "recommended": false,
+      "match": [
+        "MKVToolNix"
+      ],
+      "descriptionEn": "MKVToolNix is a set of tools to create, alter and inspect Matroska files under Linux, other Unices and Windows.",
+      "homepage": "https://mkvtoolnix.download/"
+    },
+    {
+      "id": "mpv.net",
+      "name": "mpv.net",
+      "shortName": "mpv.net",
+      "publisher": "mpv.net",
+      "description": "Мінімальний відеоплеєр на базі mpv із звичним меню.",
+      "group": "media",
+      "icon": "mpv",
+      "tags": [
+        "плеєр",
+        "відео",
+        "mpv",
+        "медіа"
+      ],
+      "sizeMb": 40,
+      "recommended": false,
+      "match": [
+        "mpv.net"
+      ],
+      "descriptionEn": "mpv.net is a media player for Windows with a modern GUI.",
+      "homepage": "https://github.com/mpvnet-player/mpv.net"
+    },
+    {
+      "id": "RockstarGames.Launcher",
+      "name": "Rockstar Games Launcher",
+      "shortName": "Rockstar",
+      "publisher": "Rockstar Games",
+      "description": "Лаунчер ігор Rockstar: GTA і Red Dead.",
+      "group": "gaming",
+      "icon": "rockstar",
+      "tags": [
+        "ігри",
+        "rockstar",
+        "лаунчер",
+        "gta"
+      ],
+      "sizeMb": 20,
+      "recommended": false,
+      "match": [
+        "Rockstar Games Launcher"
+      ],
+      "descriptionEn": "Launcher hub for certain Rockstar Games PC games, including the Grand Theft Auto and Red Dead Redemption franchises.",
+      "homepage": "https://socialclub.rockstargames.com/rockstar-games-launcher"
+    },
+    {
+      "id": "Amazon.Games",
+      "name": "Amazon Games",
+      "shortName": "Amazon Games",
+      "publisher": "Amazon",
+      "description": "Магазин і бібліотека ігор Amazon, зокрема Prime Gaming.",
+      "group": "gaming",
+      "icon": "amazongames",
+      "tags": [
+        "ігри",
+        "amazon",
+        "магазин",
+        "лаунчер"
+      ],
+      "sizeMb": 100,
+      "recommended": false,
+      "match": [
+        "Amazon Games"
+      ],
+      "descriptionEn": "Amazon Games app is a Windows PC game launcher that allows you to claim, download, and play new and classic Windows PC games every month from Prime Gaming.",
+      "homepage": "https://gaming.amazon.com/home"
+    },
+    {
+      "id": "Mojang.MinecraftLauncher",
+      "name": "Minecraft Launcher",
+      "shortName": "Minecraft",
+      "publisher": "Mojang",
+      "description": "Офіційний лаунчер Minecraft із вибором версій.",
+      "group": "gaming",
+      "icon": "minecraft",
+      "tags": [
+        "minecraft",
+        "ігри",
+        "лаунчер",
+        "mojang"
+      ],
+      "sizeMb": 30,
+      "recommended": false,
+      "match": [
+        "Minecraft Launcher",
+        "Minecraft"
+      ],
+      "descriptionEn": "Explore your own unique world, survive the night, and create anything you can imagine!",
+      "homepage": "https://www.minecraft.net/en-us/download"
+    },
+    {
+      "id": "ItchIo.Itch",
+      "name": "itch",
+      "shortName": "itch",
+      "publisher": "itch.io",
+      "description": "Магазин інді-ігор із засобом їх оновлення.",
+      "group": "gaming",
+      "icon": "itch",
+      "tags": [
+        "ігри",
+        "itch",
+        "інді",
+        "магазин"
+      ],
+      "sizeMb": 150,
+      "recommended": false,
+      "match": [
+        "itch"
+      ],
+      "descriptionEn": "The itch.io app, itch, lets you effortlessly download and run games and software from itch.io. All of your downloads are kept in a single place and are automatically updated. Access your collections and purchases, or browse for new games via the in-app browser.",
+      "homepage": "https://itch.io/app"
+    },
+    {
+      "id": "Balena.Etcher",
+      "name": "balenaEtcher",
+      "shortName": "Etcher",
+      "publisher": "Balena",
+      "description": "Запис образів ОС на SD-карти та USB-носії.",
+      "group": "utilities",
+      "icon": "etcher",
+      "tags": [
+        "образ",
+        "usb",
+        "sd",
+        "etcher"
+      ],
+      "sizeMb": 120,
+      "recommended": false,
+      "match": [
+        "balenaEtcher",
+        "Etcher"
+      ],
+      "descriptionEn": "Etcher is a powerful OS image flasher built with web technologies to ensure flashing an SDCard or USB drive is a pleasant and safe experience. It protects you from accidentally writing to your hard-drives, ensures every byte of data was written correctly, and much more. It can also directly…",
+      "homepage": "https://etcher.balena.io/"
+    },
+    {
+      "id": "CPUID.CPU-Z",
+      "name": "CPU-Z",
+      "shortName": "CPU-Z",
+      "publisher": "CPUID",
+      "description": "Детальна інформація про процесор, пам'ять і плату.",
+      "group": "utilities",
+      "icon": "cpuz",
+      "tags": [
+        "процесор",
+        "cpu",
+        "залізо",
+        "cpu-z"
+      ],
+      "sizeMb": 5,
+      "recommended": false,
+      "match": [
+        "CPUID CPU-Z",
+        "CPU-Z"
+      ],
+      "descriptionEn": "CPU-Z is a freeware that gathers information on some of the main devices of your system - Processor name and number, codename, process, package, cache levels. - Mainboard and chipset. - Memory type, size, timings, and module specifications (SPD). - Real time measurement of each cores internal…",
+      "homepage": "https://www.cpuid.com/softwares/cpu-z.html"
+    },
+    {
+      "id": "TechPowerUp.GPU-Z",
+      "name": "GPU-Z",
+      "shortName": "GPU-Z",
+      "publisher": "TechPowerUp",
+      "description": "Детальна інформація про відеокарту та її сенсори.",
+      "group": "utilities",
+      "icon": "gpuz",
+      "tags": [
+        "відеокарта",
+        "gpu",
+        "залізо",
+        "gpu-z"
+      ],
+      "sizeMb": 10,
+      "recommended": false,
+      "match": [
+        "TechPowerUp GPU-Z",
+        "GPU-Z"
+      ],
+      "descriptionEn": "GPU-Z is a lightweight system utility designed to provide vital information about your video card and graphics processor. Main Features - Supports NVIDIA, AMD, ATI and Intel graphics devices - Displays adapter, GPU and display information - Displays overclock, default clocks and 3D/boost clocks…",
+      "homepage": "https://www.techpowerup.com/gpuz/"
+    },
+    {
+      "id": "Guru3D.Afterburner",
+      "name": "MSI Afterburner",
+      "shortName": "Afterburner",
+      "publisher": "MSI",
+      "description": "Розгін і моніторинг температури відеокарти.",
+      "group": "utilities",
+      "icon": "afterburner",
+      "tags": [
+        "розгін",
+        "відеокарта",
+        "gpu",
+        "afterburner"
+      ],
+      "sizeMb": 40,
+      "recommended": false,
+      "match": [
+        "MSI Afterburner"
+      ],
+      "descriptionEn": "MSI Afterburner monitoring and GPU overclocking tool.",
+      "homepage": "https://www.msi.com/Landing/afterburner/graphics-cards"
+    },
+    {
+      "id": "Rainmeter.Rainmeter",
+      "name": "Rainmeter",
+      "shortName": "Rainmeter",
+      "publisher": "Rainmeter",
+      "description": "Налаштовувані віджети та панелі для робочого столу.",
+      "group": "utilities",
+      "icon": "rainmeter",
+      "tags": [
+        "робочий стіл",
+        "віджети",
+        "rainmeter",
+        "тема"
+      ],
+      "sizeMb": 5,
+      "recommended": false,
+      "match": [
+        "Rainmeter"
+      ],
+      "descriptionEn": "Rainmeter allows you to display customizable skins on your desktop, from hardware usage meters to fully functional audio visualizers. You are only limited by your imagination and creativity.",
+      "homepage": "https://www.rainmeter.net/"
+    },
+    {
+      "id": "AutoHotkey.AutoHotkey",
+      "name": "AutoHotkey",
+      "shortName": "AutoHotkey",
+      "publisher": "AutoHotkey",
+      "description": "Автоматизація дій і гарячих клавіш за допомогою скриптів.",
+      "group": "utilities",
+      "icon": "autohotkey",
+      "tags": [
+        "скрипти",
+        "автоматизація",
+        "клавіші",
+        "autohotkey"
+      ],
+      "sizeMb": 10,
+      "recommended": false,
+      "match": [
+        "AutoHotkey"
+      ],
+      "descriptionEn": "AutoHotkey is a free, open source macro-creation and automation software utility that allows users to automate repetitive tasks. It is driven by a custom scripting language that has special provision for defining keyboard shortcuts, otherwise known as hotkeys.",
+      "homepage": "https://www.autohotkey.com/"
+    },
+    {
+      "id": "Flow-Launcher.Flow-Launcher",
+      "name": "Flow Launcher",
+      "shortName": "Flow",
+      "publisher": "Flow Launcher",
+      "description": "Швидкий запуск програм і пошук по системі.",
+      "group": "utilities",
+      "icon": "flowlauncher",
+      "tags": [
+        "запуск",
+        "пошук",
+        "flow",
+        "launcher"
+      ],
+      "sizeMb": 40,
+      "recommended": false,
+      "match": [
+        "Flow Launcher"
+      ],
+      "descriptionEn": "Keystroke launcher for Windows to search, manage and launch files, folders bookmarks, websites and more.",
+      "homepage": "https://github.com/Flow-Launcher/Flow.Launcher"
+    },
+    {
+      "id": "FilesCommunity.Files",
+      "name": "Files",
+      "shortName": "Files",
+      "publisher": "Files Community",
+      "description": "Сучасний файловий менеджер із вкладками.",
+      "group": "utilities",
+      "icon": "files",
+      "tags": [
+        "файли",
+        "менеджер",
+        "провідник",
+        "files"
+      ],
+      "sizeMb": 60,
+      "recommended": false,
+      "match": [
+        "Files - Stable",
+        "Files"
+      ],
+      "descriptionEn": "A modern file manager that helps users organize their files and folders.",
+      "homepage": "https://github.com/files-community/Files"
+    },
+    {
+      "id": "Syncthing.Syncthing",
+      "name": "Syncthing",
+      "shortName": "Syncthing",
+      "publisher": "Syncthing",
+      "description": "Синхронізація файлів між пристроями без хмари.",
+      "group": "utilities",
+      "icon": "syncthing",
+      "tags": [
+        "синхронізація",
+        "файли",
+        "syncthing",
+        "p2p"
+      ],
+      "sizeMb": 20,
+      "recommended": false,
+      "match": [
+        "Syncthing"
+      ],
+      "descriptionEn": "Syncthing is a continuous file synchronization program. It synchronizes files between two or more computers in real time, safely protected from prying eyes. Your data is your data alone and you deserve to choose where it is stored, whether it is shared with some third party, and how it's…",
+      "homepage": "https://github.com/syncthing/syncthing"
+    },
+    {
+      "id": "RevoUninstaller.RevoUninstaller",
+      "name": "Revo Uninstaller",
+      "shortName": "Revo",
+      "publisher": "Revo Uninstaller",
+      "description": "Повне видалення програм разом із залишками.",
+      "group": "utilities",
+      "icon": "revo",
+      "tags": [
+        "видалення",
+        "uninstall",
+        "revo",
+        "чищення"
+      ],
+      "sizeMb": 10,
+      "recommended": false,
+      "match": [
+        "Revo Uninstaller"
+      ],
+      "descriptionEn": "Revo Uninstaller Free helps you to uninstall software and remove unwanted programs easily. It first runs the program's built-in uninstaller and then scans for leftover data that may still remain in files, folders, and Windows registry entries. It also cleans history and traces, manages startup…",
+      "homepage": "https://www.revouninstaller.com/products/revo-uninstaller-free/"
+    },
+    {
+      "id": "WireGuard.WireGuard",
+      "name": "WireGuard",
+      "shortName": "WireGuard",
+      "publisher": "WireGuard",
+      "description": "Простий і швидкий VPN-тунель.",
+      "group": "utilities",
+      "icon": "wireguard",
+      "tags": [
+        "vpn",
+        "wireguard",
+        "мережа",
+        "безпека"
+      ],
+      "sizeMb": 10,
+      "recommended": false,
+      "match": [
+        "WireGuard"
+      ],
+      "descriptionEn": "WireGuard® is an extremely simple yet fast and modern VPN that utilizes state-of-the-art cryptography. It aims to be faster, simpler, leaner, and more useful than IPsec, while avoiding the massive headache. It intends to be considerably more performant than OpenVPN. WireGuard is designed as a…",
+      "homepage": "https://www.wireguard.com/install/"
+    },
+    {
+      "id": "TeamViewer.TeamViewer",
+      "name": "TeamViewer",
+      "shortName": "TeamViewer",
+      "publisher": "TeamViewer",
+      "description": "Віддалене керування комп'ютером і підтримка користувачів.",
+      "group": "utilities",
+      "icon": "teamviewer",
+      "tags": [
+        "віддалений доступ",
+        "teamviewer",
+        "підтримка",
+        "remote"
+      ],
+      "sizeMb": 60,
+      "recommended": false,
+      "match": [
+        "TeamViewer"
+      ],
+      "descriptionEn": "TeamViewer is a comprehensive, remote access, remote control and remote support solution that works with almost every desktop and mobile platform, including Windows. It lets you remote in to computers or mobile devices located anywhere in the world and use them as though you were there.",
+      "homepage": "https://www.teamviewer.com/en/download/windows/"
+    },
+    {
+      "id": "Microsoft.OneDrive",
+      "name": "Microsoft OneDrive",
+      "shortName": "OneDrive",
+      "publisher": "Microsoft",
+      "description": "Синхронізація файлів із хмарою Microsoft.",
+      "group": "utilities",
+      "icon": "onedrive",
+      "tags": [
+        "хмара",
+        "синхронізація",
+        "onedrive",
+        "microsoft"
+      ],
+      "sizeMb": 100,
+      "recommended": false,
+      "match": [
+        "Microsoft OneDrive"
+      ],
+      "descriptionEn": "Keep your files and memories protected, up to date, and easily accessible across all your devices.",
+      "homepage": "https://www.microsoft.com/microsoft-365/onedrive/download"
+    },
+    {
+      "id": "Google.GoogleDrive",
+      "name": "Google Drive",
+      "shortName": "Google Drive",
+      "publisher": "Google",
+      "description": "Синхронізація файлів із Google Диском.",
+      "group": "utilities",
+      "icon": "googledrive",
+      "tags": [
+        "хмара",
+        "синхронізація",
+        "google drive",
+        "файли"
+      ],
+      "sizeMb": 120,
+      "recommended": false,
+      "match": [
+        "Google Drive"
+      ],
+      "descriptionEn": "Choose folders on your computer to sync with Google Drive or backup to Google Photos, and access all of your content directly from your PC or Mac.",
+      "homepage": "https://workspace.google.com/products/drive/"
+    },
+    {
+      "id": "Dropbox.Dropbox",
+      "name": "Dropbox",
+      "shortName": "Dropbox",
+      "publisher": "Dropbox",
+      "description": "Синхронізація файлів між пристроями та командою.",
+      "group": "utilities",
+      "icon": "dropbox",
+      "tags": [
+        "хмара",
+        "синхронізація",
+        "dropbox",
+        "файли"
+      ],
+      "sizeMb": 130,
+      "recommended": false,
+      "match": [
+        "Dropbox"
+      ],
+      "descriptionEn": "Organize all your team's content, tune out distractions, and get everyone coordinated with the world's first smart workspace.",
+      "homepage": "https://www.dropbox.com/"
+    },
+    {
+      "id": "BleachBit.BleachBit",
+      "name": "BleachBit",
+      "shortName": "BleachBit",
+      "publisher": "BleachBit",
+      "description": "Очищення диска від тимчасових файлів і кешів.",
+      "group": "utilities",
+      "icon": "bleachbit",
+      "tags": [
+        "очищення",
+        "диск",
+        "bleachbit",
+        "приватність"
+      ],
+      "sizeMb": 20,
+      "recommended": false,
+      "match": [
+        "BleachBit"
+      ],
+      "descriptionEn": "When your computer is getting full, BleachBit quickly frees disk space. When your information is only your business, BleachBit guards your privacy. With BleachBit you can free cache, delete cookies, clear Internet history, shred temporary files, delete logs, and discard junk you didn't know was…",
+      "homepage": "https://www.bleachbit.org/"
+    },
+    {
+      "id": "Anki.Anki",
+      "name": "Anki",
+      "shortName": "Anki",
+      "publisher": "Anki",
+      "description": "Флеш-картки з інтервальними повтореннями для навчання.",
+      "group": "office",
+      "icon": "anki",
+      "tags": [
+        "картки",
+        "навчання",
+        "anki",
+        "пам'ять"
+      ],
+      "sizeMb": 120,
+      "recommended": false,
+      "match": [
+        "Anki"
+      ],
+      "descriptionEn": "Anki is a program which makes remembering things easy. Because it's a lot more efficient than traditional study methods, you can either greatly decrease your time spent studying, or greatly increase the amount you learn. Anyone who needs to remember things in their daily life can benefit from…",
+      "homepage": "https://apps.ankiweb.net/"
+    },
+    {
+      "id": "geeksoftwareGmbH.PDF24Creator",
+      "name": "PDF24 Creator",
+      "shortName": "PDF24",
+      "publisher": "geeksoftware",
+      "description": "Створення, об'єднання та стиснення PDF-документів.",
+      "group": "office",
+      "icon": "pdf",
+      "tags": [
+        "pdf",
+        "конвертація",
+        "друк",
+        "pdf24"
+      ],
+      "sizeMb": 300,
+      "recommended": false,
+      "match": [
+        "PDF24 Creator"
+      ],
+      "descriptionEn": "A free and easy to use PDF solution with many features",
+      "homepage": "https://www.pdf24.org/en/"
+    },
+    {
+      "id": "Foxit.FoxitReader",
+      "name": "Foxit PDF Reader",
+      "shortName": "Foxit",
+      "publisher": "Foxit",
+      "description": "Швидкий переглядач і коментування PDF-файлів.",
+      "group": "office",
+      "icon": "foxit",
+      "tags": [
+        "pdf",
+        "reader",
+        "foxit",
+        "документи"
+      ],
+      "sizeMb": 200,
+      "recommended": false,
+      "match": [
+        "Foxit PDF Reader",
+        "Foxit Reader"
+      ],
+      "descriptionEn": "View, annotate, form fill, and sign PDF across desktop, mobile, and web – no matter if you’re at the office, home, or on the go.",
+      "homepage": "https://www.foxitsoftware.com/pdf-reader/"
+    },
+    {
+      "id": "Evernote.Evernote",
+      "name": "Evernote",
+      "shortName": "Evernote",
+      "publisher": "Evernote",
+      "description": "Нотатки, знімки екрана та веб-кліпер в одному сервісі.",
+      "group": "office",
+      "icon": "evernote",
+      "tags": [
+        "нотатки",
+        "evernote",
+        "кліпер",
+        "синхронізація"
+      ],
+      "sizeMb": 250,
+      "recommended": false,
+      "match": [
+        "Evernote"
+      ],
+      "descriptionEn": "Evernote helps you focus on what matters most and have access to your information when you need it. Input typed notes or scan handwritten notes. Add to-do’s, photos, images, web pages, or audio ... and it’s all instantly searchable. Organize notes any way you want and share with anyone. And…",
+      "homepage": "https://evernote.com/download"
+    },
+    {
+      "id": "Cockos.REAPER",
+      "name": "REAPER",
+      "shortName": "REAPER",
+      "publisher": "Cockos",
+      "description": "Цифрова звукова станція для запису та мікшування.",
+      "group": "creative",
+      "icon": "reaper",
+      "tags": [
+        "звук",
+        "daw",
+        "reaper",
+        "запис"
+      ],
+      "sizeMb": 20,
+      "recommended": false,
+      "match": [
+        "REAPER"
+      ],
+      "descriptionEn": "REAPER is a digital audio production application, offering full multitrack audio and MIDI recording, processing, editing, mixing and mastering toolset.",
+      "homepage": "https://www.reaper.fm/"
+    },
+    {
+      "id": "LMMS.LMMS",
+      "name": "LMMS",
+      "shortName": "LMMS",
+      "publisher": "LMMS",
+      "description": "Створення музики: секвенсор, синтезатори та семпли.",
+      "group": "creative",
+      "icon": "lmms",
+      "tags": [
+        "музика",
+        "daw",
+        "lmms",
+        "синтезатор"
+      ],
+      "sizeMb": 200,
+      "recommended": false,
+      "match": [
+        "LMMS"
+      ],
+      "descriptionEn": "LMMS is a free cross-platform alternative to commercial programs like FL Studio®, which allow you to produce music with your computer. This includes the creation of melodies and beats, the synthesis and mixing of sounds, and arranging of samples. You can have fun with your MIDI-keyboard and much…",
+      "homepage": "https://lmms.io/download"
+    },
+    {
+      "id": "Musescore.Musescore",
+      "name": "MuseScore",
+      "shortName": "MuseScore",
+      "publisher": "MuseScore",
+      "description": "Нотний редактор із відтворенням партитур.",
+      "group": "creative",
+      "icon": "musescore",
+      "tags": [
+        "ноти",
+        "музика",
+        "musescore",
+        "партитура"
+      ],
+      "sizeMb": 250,
+      "recommended": false,
+      "match": [
+        "MuseScore"
+      ],
+      "descriptionEn": "Create, play back and print beautiful sheet music with free and easy to use music notation software MuseScore.",
+      "homepage": "https://musescore.org/en"
+    },
+    {
+      "id": "FreeCAD.FreeCAD",
+      "name": "FreeCAD",
+      "shortName": "FreeCAD",
+      "publisher": "FreeCAD",
+      "description": "Параметричне 3D-моделювання для інженерії.",
+      "group": "creative",
+      "icon": "freecad",
+      "tags": [
+        "3d",
+        "cad",
+        "freecad",
+        "моделювання"
+      ],
+      "sizeMb": 700,
+      "recommended": false,
+      "match": [
+        "FreeCAD"
+      ],
+      "descriptionEn": "FreeCAD is a general purpose open source parametric 3D CAD modeler licensed under the LGPL License. FreeCAD is aimed directly at mechanical engineering and product design but, being very generic, also fits in a wider range of uses around engineering, such as architecture, finite element…",
+      "homepage": "https://www.freecad.org/downloads.php"
+    },
+    {
+      "id": "darktable.darktable",
+      "name": "darktable",
+      "shortName": "darktable",
+      "publisher": "darktable",
+      "description": "Обробка RAW-фотографій і каталогізація знімків.",
+      "group": "creative",
+      "icon": "darktable",
+      "tags": [
+        "фото",
+        "raw",
+        "darktable",
+        "обробка"
+      ],
+      "sizeMb": 150,
+      "recommended": false,
+      "match": [
+        "darktable"
+      ],
+      "descriptionEn": "darktable is an open source photography workflow application and raw developer. A virtual lighttable and darkroom for photographers. It manages your digital negatives in a database, lets you view them through a zoomable lighttable and enables you to develop raw images and enhance them.",
+      "homepage": "https://www.darktable.org/"
+    },
+    {
+      "id": "Canva.Canva",
+      "name": "Canva",
+      "shortName": "Canva",
+      "publisher": "Canva",
+      "description": "Шаблони та графіка для соцмереж, макетів і презентацій.",
+      "group": "creative",
+      "icon": "canva",
+      "tags": [
+        "дизайн",
+        "шаблони",
+        "canva",
+        "графіка"
+      ],
+      "sizeMb": 150,
+      "recommended": false,
+      "match": [
+        "Canva"
+      ],
+      "descriptionEn": "Canva is a graphic design platform, used to create social media graphics, presentations, posters, documents and other visual content.",
+      "homepage": "https://www.canva.com/download/windows/"
+    },
+    {
+      "id": "KeePassXCTeam.KeePassXC",
+      "name": "KeePassXC",
+      "shortName": "KeePassXC",
+      "publisher": "KeePassXC Team",
+      "description": "Офлайн-менеджер паролів у локальному зашифрованому файлі.",
+      "group": "security",
+      "icon": "keepassxc",
+      "tags": [
+        "паролі",
+        "keepassxc",
+        "безпека",
+        "офлайн"
+      ],
+      "sizeMb": 40,
+      "recommended": false,
+      "match": [
+        "KeePassXC"
+      ],
+      "descriptionEn": "KeePassXC is a modern, secure, and open-source password manager that stores and manages your most sensitive information. You can run KeePassXC on Windows, macOS, and Linux systems. KeePassXC is for people with extremely high demands of secure personal data management. It saves many different…",
+      "homepage": "https://keepassxc.org/"
+    },
+    {
+      "id": "Proton.ProtonVPN",
+      "name": "Proton VPN",
+      "shortName": "Proton VPN",
+      "publisher": "Proton",
+      "description": "VPN із шифруванням і заявленою відсутністю логів.",
+      "group": "security",
+      "icon": "protonvpn",
+      "tags": [
+        "vpn",
+        "protonvpn",
+        "приватність",
+        "безпека"
+      ],
+      "sizeMb": 100,
+      "recommended": false,
+      "match": [
+        "Proton VPN"
+      ],
+      "descriptionEn": "We built ProtonVPN with extra security features to make it better at protecting your privacy than an ordinary VPN. When you use ProtonVPN to browse the web, your Internet connection is encrypted. By routing your connection through encrypted tunnels, ProtonVPNs advanced security features ensure…",
+      "homepage": "https://protonvpn.com/"
+    },
+    {
+      "id": "MullvadVPN.MullvadVPN",
+      "name": "Mullvad VPN",
+      "shortName": "Mullvad",
+      "publisher": "Mullvad VPN",
+      "description": "VPN без реєстрації та з анонімною оплатою.",
+      "group": "security",
+      "icon": "mullvad",
+      "tags": [
+        "vpn",
+        "mullvad",
+        "приватність",
+        "безпека"
+      ],
+      "sizeMb": 40,
+      "recommended": false,
+      "match": [
+        "Mullvad VPN"
+      ],
+      "descriptionEn": "Mullvad is an open-source commercial virtual private network service based in Sweden.",
+      "homepage": "https://mullvad.net/"
+    },
+    {
+      "id": "Malwarebytes.AdwCleaner",
+      "name": "AdwCleaner",
+      "shortName": "AdwCleaner",
+      "publisher": "Malwarebytes",
+      "description": "Видалення adware, панелей браузера та небажаних програм.",
+      "group": "security",
+      "icon": "adwcleaner",
+      "tags": [
+        "adware",
+        "очищення",
+        "adwcleaner",
+        "безпека"
+      ],
+      "sizeMb": 10,
+      "recommended": false,
+      "match": [
+        "AdwCleaner"
+      ],
+      "descriptionEn": "Popular adware cleaner that finds and removes unwanted programs and junkware so your online experience stays optimal and hassle-free",
+      "homepage": "https://www.malwarebytes.com/adwcleaner"
+    },
+    {
+      "id": "Insecure.Nmap",
+      "name": "Nmap",
+      "shortName": "Nmap",
+      "publisher": "Nmap Project",
+      "description": "Сканування мережі, портів і служб.",
+      "group": "security",
+      "icon": "nmap",
+      "tags": [
+        "мережа",
+        "сканування",
+        "nmap",
+        "порти"
+      ],
+      "sizeMb": 30,
+      "recommended": false,
+      "match": [
+        "Nmap"
+      ],
+      "descriptionEn": "Nmap (\"Network Mapper\") is a free and open source utility for network discovery and security auditing.",
+      "homepage": "https://nmap.org"
+    },
+    {
+      "id": "Microsoft.Sysinternals.Suite",
+      "name": "Sysinternals Suite",
+      "shortName": "Sysinternals",
+      "publisher": "Microsoft",
+      "description": "Набір утиліт Microsoft для діагностики Windows.",
+      "group": "security",
+      "icon": "windows",
+      "tags": [
+        "sysinternals",
+        "діагностика",
+        "windows",
+        "утиліти"
+      ],
+      "sizeMb": 60,
+      "recommended": false,
+      "match": [
+        "Sysinternals Suite"
+      ],
+      "descriptionEn": "Sysinternals Suite is a bundle of the Sysinternals utilities including Process Explorer, Process Monitor, Sysmon, Autoruns, ProcDump, all of the PsTools, and many more. The Sysinternals website was created in 1996 by Mark Russinovich to host his advanced system utilities and technical…",
+      "homepage": "https://learn.microsoft.com/en-us/sysinternals/downloads/sysinternals-suite"
+    },
+    {
+      "id": "Codeium.Windsurf",
+      "name": "Windsurf",
+      "shortName": "Windsurf",
+      "publisher": "Codeium",
+      "description": "Редактор коду з агентом Cascade для великих проєктів.",
+      "group": "ai",
+      "icon": "windsurf",
+      "tags": [
+        "ші",
+        "агент",
+        "редактор",
+        "windsurf",
+        "код"
+      ],
+      "sizeMb": 400,
+      "recommended": false,
+      "match": [
+        "Windsurf"
+      ],
+      "descriptionEn": "The first agentic IDE, and then some. The Windsurf Editor is where the work of developers and AI truly flow together, allowing for a coding experience that feels like literal magic.",
+      "homepage": "https://codeium.com/windsurf"
+    },
+    {
+      "id": "Nvidia.PhysX",
+      "name": "NVIDIA PhysX",
+      "shortName": "PhysX",
+      "publisher": "NVIDIA",
+      "description": "Фізичний рушій для старіших ігор, що його потребують.",
+      "group": "system",
+      "icon": "nvidia",
+      "tags": [
+        "nvidia",
+        "physx",
+        "фізика",
+        "ігри",
+        "сумісність"
+      ],
+      "sizeMb": 90,
+      "recommended": false,
+      "match": [
+        "NVIDIA PhysX System Software",
+        "NVIDIA PhysX"
+      ],
+      "descriptionEn": "Provides updates that are necessary for some games to run PhysX content properly.",
+      "homepage": "https://www.nvidia.com/en-us/drivers/physx/physx-9-26-0703-driver/"
+    },
+    {
+      "id": "CreativeTechnology.OpenAL",
+      "name": "OpenAL",
+      "shortName": "OpenAL",
+      "publisher": "Creative Technology",
+      "description": "Аудіобібліотека для старіших ігор і програм.",
+      "group": "system",
+      "icon": "openal",
+      "tags": [
+        "openal",
+        "аудіо",
+        "бібліотеки",
+        "сумісність"
+      ],
+      "sizeMb": 2,
+      "recommended": false,
+      "match": [
+        "OpenAL"
+      ],
+      "descriptionEn": "OpenAL is a cross-platform 3D audio API appropriate for use with gaming applications and many other types of audio applications.",
+      "homepage": "https://openal.org/"
+    },
+    {
+      "id": "Microsoft.XNARedist",
+      "name": "Microsoft XNA Framework",
+      "shortName": "XNA",
+      "publisher": "Microsoft",
+      "description": "Бібліотеки XNA для ігор, що їх потребують.",
+      "group": "system",
+      "icon": "xna",
+      "tags": [
+        "xna",
+        "runtime",
+        "бібліотеки",
+        "ігри",
+        "сумісність"
+      ],
+      "sizeMb": 6,
+      "recommended": false,
+      "match": [
+        "Microsoft XNA Framework Redistributable Refresh",
+        "Microsoft XNA Framework"
+      ],
+      "descriptionEn": "The XNA Framework Redistributable download provides game developers with the XNA Framework run-time libraries they can include with their product for redistribution on the Windows platform.",
+      "homepage": "https://www.microsoft.com/en-gb/download/details.aspx?id=20914"
+    }
+  ]
+}

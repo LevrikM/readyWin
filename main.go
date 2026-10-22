@@ -12,6 +12,10 @@ import (
 var assets embed.FS
 
 func main() {
+	if !acquireSingleInstance() {
+		showAlreadyRunning()
+		return
+	}
 	app := NewApp()
 
 	err := wails.Run(&options.App{
@@ -25,7 +29,8 @@ func main() {
 		AssetServer: &assetserver.Options{
 			Assets: assets,
 		},
-		OnStartup: app.startup,
+		OnStartup:     app.startup,
+		OnBeforeClose: app.beforeClose,
 		Bind: []interface{}{
 			app,
 		},

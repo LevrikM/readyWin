@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"errors"
 	"os/exec"
 	"strings"
@@ -77,7 +78,7 @@ func (a *App) checkUpdates() UpdateReport {
 	installed := a.detectInstalled(cat)
 	report.InstalledCount = len(installed)
 
-	out, err := runWinget("upgrade", "--include-unknown", "--accept-source-agreements", "--disable-interactivity")
+	out, err := runWingetTimeout(90*time.Second, "upgrade", "--include-unknown", "--accept-source-agreements", "--disable-interactivity")
 	report.DurationMs = int(time.Since(started).Milliseconds())
 	if err != nil {
 		report.Error = err.Error()
@@ -120,6 +121,10 @@ func (a *App) checkUpdates() UpdateReport {
 // runWinget executes winget through cmd.exe with a UTF-8 console so accented
 // and Cyrillic product names survive the trip back.
 func runWinget(args ...string) (string, error) {
+	return runWingetTimeout(3*time.Minute, args...)
+}
+
+func runWingetTimeout(timeout time.Duration, args ...string) (string, error) {
 	path, err := exec.LookPath("winget")
 	if err != nil {
 		return "", errors.New("winget не знайдено в PATH")
@@ -128,10 +133,15 @@ func runWinget(args ...string) (string, error) {
 	for _, arg := range args {
 		parts = append(parts, cmdQuote(arg))
 	}
-	cmd := exec.Command("cmd.exe", "/c", strings.Join(parts, " "))
+	ctx, cancel := context.WithTimeout(context.Background(), timeout)
+	defer cancel()
+	cmd := exec.CommandContext(ctx, "cmd.exe", "/c", strings.Join(parts, " "))
 	cmd.SysProcAttr = hiddenProcess()
 
 	out, err := cmd.Output()
+	if ctx.Err() == context.DeadlineExceeded {
+		return "", errors.New("winget не відповів за " + timeout.String())
+	}
 	text := string(out)
 	if err != nil && text == "" {
 		return "", err
