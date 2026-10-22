@@ -4,7 +4,7 @@ import {formatSize} from '../format'
 import {useI18n} from '../i18n'
 import {groupName} from '../catalogText'
 import {bridge} from '../bridge'
-import {IconCheck, IconCopy, IconExternal, IconInfo, IconPlus, IconX} from '../uiIcons'
+import {IconCopy, IconExternal, IconInfo, IconPlus, IconRefresh, IconTrash, IconX} from '../uiIcons'
 import {IconTile} from './Primitives'
 
 export function ItemDialog({
@@ -15,6 +15,8 @@ export function ItemDialog({
   onClose,
   onAdd,
   onRemove,
+  onUninstall,
+  onRepair,
   onToast,
 }: {
   item: Item | null
@@ -24,6 +26,8 @@ export function ItemDialog({
   onClose: () => void
   onAdd: (id: string) => void
   onRemove: (id: string) => void
+  onUninstall: (id: string) => void
+  onRepair: (id: string) => void
   onToast: (message: string) => void
 }) {
   const {lang, t} = useI18n()
@@ -145,10 +149,16 @@ export function ItemDialog({
           <div className="dialog-actions">
             <button className="btn btn-ghost" type="button" onClick={onClose}>{t('action.close')}</button>
             {installed ? (
-              <button className="btn btn-secondary" type="button" onClick={onClose}>
-                <IconCheck size={16}/>
-                {t('status.already')}
-              </button>
+              <>
+                <button className="btn btn-secondary" type="button" onClick={() => onRepair(item.id)}>
+                  <IconRefresh size={16}/>
+                  {t('dlg.repair')}
+                </button>
+                <button className="btn btn-danger" type="button" onClick={() => onUninstall(item.id)}>
+                  <IconTrash size={16}/>
+                  {t('dlg.uninstall')}
+                </button>
+              </>
             ) : queued ? (
               <button className="btn btn-secondary" type="button" onClick={() => onRemove(item.id)}>
                 <IconX size={16}/>

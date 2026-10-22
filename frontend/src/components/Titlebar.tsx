@@ -12,6 +12,7 @@ import {
 const pageLabels: Record<Page, TranslationKey> = {
   overview: 'nav.overview',
   catalog: 'nav.catalog',
+  health: 'nav.health',
   system: 'nav.system',
   history: 'nav.history',
 }

@@ -90,14 +90,27 @@ export type ScanResult = {
   checks: SystemCheck[]
 }
 
+export type InstallMode = 'install' | 'upgrade' | 'uninstall' | 'repair'
+
+export type InstallNote =
+  | 'installed'
+  | 'already'
+  | 'upgraded'
+  | 'uptodate'
+  | 'removed'
+  | 'repaired'
+  | 'notinstalled'
+  | 'restart'
+  | 'skipped'
+  | 'failed'
+
 export type InstallItem = {
   id: string
   name: string
   status: 'pending' | 'running' | 'ok' | 'failed' | 'skipped'
   exitCode?: number
   message?: string
-  /** 'installed' | 'already' | 'upgraded' | 'uptodate' | 'restart' | 'skipped' | 'failed' */
-  note?: 'installed' | 'already' | 'upgraded' | 'uptodate' | 'restart' | 'skipped' | 'failed'
+  note?: InstallNote
 }
 
 export type UpdateInfo = {
@@ -114,6 +127,19 @@ export type UpdateReport = {
   updates: UpdateInfo[]
   installedCount: number
   upToDate: number
+  error?: string
+}
+
+export type AppUpdateInfo = {
+  currentVersion: string
+  latestVersion?: string
+  available: boolean
+  releaseName?: string
+  releaseUrl?: string
+  downloadUrl?: string
+  notes?: string
+  publishedAt?: string
+  checkedAt: string
   error?: string
 }
 
@@ -134,10 +160,9 @@ export type InstallState = {
   success: boolean
   cancelled: boolean
   message?: string
-  /** 'done' | 'withErrors' | 'noResult' | 'noLog' | 'uacCancelled' | 'cancelled' */
+  /** 'done' | 'withErrors' | 'noResult' | 'noLog' | 'uacCancelled' | 'launcherFailed' | 'cancelled' */
   code?: string
-  /** 'install' | 'upgrade' */
-  mode?: 'install' | 'upgrade'
+  mode?: InstallMode
   okCount: number
   failCount: number
   skippedCount: number
@@ -168,10 +193,89 @@ export type HistoryEntry = {
   status: 'success' | 'failed' | 'cancelled'
   message: string
   code?: string
+  mode?: InstallMode
   items: HistoryItem[]
   before: number
   after: number
   newApps: string[]
 }
 
-export type Page = 'overview' | 'catalog' | 'system' | 'history'
+export type HealthStatus = 'ok' | 'warn' | 'bad' | 'unknown' | 'info' | 'na'
+
+export type HealthItem = {
+  id: string
+  status: HealthStatus
+  value?: string
+  detail?: string
+}
+
+export type DiskHealth = {
+  name: string
+  media?: string
+  health?: string
+  operational?: string
+  sizeGb: number
+  wear?: number
+  temperature?: number
+}
+
+export type HealthReport = {
+  checkedAt: string
+  durationMs: number
+  items: HealthItem[]
+  disks: DiskHealth[]
+  error?: string
+}
+
+export type StartupEntry = {
+  id: string
+  name: string
+  command: string
+  location: string
+  /** 'registry' | 'folder' | 'task' */
+  source: string
+  /** 'user' | 'system' */
+  scope: string
+  enabled: boolean
+  canToggle: boolean
+  state?: string
+}
+
+export type StartupReport = {
+  checkedAt: string
+  entries: StartupEntry[]
+  error?: string
+}
+
+export type CatalogStatus = {
+  source: string
+  version: string
+  updated: string
+  itemCount: number
+  embeddedVersion: string
+  embeddedUpdated: string
+  checkedAt?: string
+  error?: string
+}
+
+export type CatalogRefreshResult = {
+  updated: boolean
+  catalog: Catalog
+  status: CatalogStatus
+}
+
+export type TransferResult = {
+  cancelled: boolean
+  path?: string
+  count: number
+}
+
+export type ImportResult = {
+  cancelled: boolean
+  path?: string
+  apps: string[]
+  unknown: string[]
+  settings?: Record<string, string>
+}
+
+export type Page = 'overview' | 'catalog' | 'health' | 'system' | 'history'

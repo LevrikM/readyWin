@@ -8,6 +8,7 @@ import {
   IconMoon,
   IconOverview,
   IconQueue,
+  IconShield,
   IconSun,
   IconSystem,
   LogoMark,
@@ -16,6 +17,7 @@ import {
 const navItems: Array<{page: Page; label: TranslationKey; icon: typeof IconOverview}> = [
   {page: 'overview', label: 'nav.overview', icon: IconOverview},
   {page: 'catalog', label: 'nav.catalog', icon: IconCatalog},
+  {page: 'health', label: 'nav.health', icon: IconShield},
   {page: 'system', label: 'nav.system', icon: IconSystem},
   {page: 'history', label: 'nav.history', icon: IconHistory},
 ]

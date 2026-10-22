@@ -1,5 +1,5 @@
 import {useEffect} from 'react'
-import type {Catalog, InstallState} from '../types'
+import type {Catalog, InstallMode, InstallState} from '../types'
 import {formatSize} from '../format'
 import {useI18n} from '../i18n'
 import type {TranslationKey} from '../i18n'
@@ -30,6 +30,9 @@ const noteKeys: Record<string, TranslationKey> = {
   already: 'note.already',
   upgraded: 'note.upgraded',
   uptodate: 'note.uptodate',
+  removed: 'note.removed',
+  repaired: 'note.repaired',
+  notinstalled: 'note.notinstalled',
   restart: 'note.restart',
   skipped: 'note.skipped',
   failed: 'note.failed',
@@ -47,6 +50,7 @@ export function QueueDrawer({
   onClear,
   onInstall,
   onUpgrade,
+  onRetry,
   onCancel,
   onBrowse,
 }: {
@@ -61,12 +65,17 @@ export function QueueDrawer({
   onClear: () => void
   onInstall: () => void
   onUpgrade: (ids: string[]) => void
+  onRetry: (mode: InstallMode, ids: string[]) => void
   onCancel: () => void
   onBrowse: () => void
 }) {
   const {t} = useI18n()
   const inProgress = Boolean(installState?.active)
-  const isUpgrade = installState?.mode === 'upgrade'
+  const mode: InstallMode = installState?.mode ?? 'install'
+  const isUpgrade = mode === 'upgrade'
+  const isUninstall = mode === 'uninstall'
+  const isRepair = mode === 'repair'
+  const isInstall = mode === 'install'
   const resultMode = Boolean(installState && (inProgress || (installState.finished && showResult)))
   const itemsById = new Map(catalog.items.map((item) => [item.id, item]))
   const queueItems = queue.map((id) => itemsById.get(id)).filter((item) => item !== undefined)
@@ -91,8 +100,8 @@ export function QueueDrawer({
         ok: installState.okCount ?? okCount,
         total: stateItems.length,
         skipped: installState.skippedCount,
-        added: isUpgrade ? 0 : added.length,
-        removed: isUpgrade ? 0 : removed.length,
+        added: isInstall || isUninstall ? added.length : 0,
+        removed: isInstall || isUninstall ? removed.length : 0,
       })
     : ''
 
@@ -119,13 +128,17 @@ export function QueueDrawer({
         <header className="drawer-head">
           <div>
             <span className="eyebrow">
-              {resultMode ? (inProgress ? (isUpgrade ? t('q.mode.upgrade') : t('q.eyebrowInstall')) : t('q.eyebrowResult')) : t('queue.title')}
+              {resultMode
+                ? (inProgress
+                    ? (isUpgrade ? t('q.mode.upgrade') : isUninstall ? t('q.mode.uninstall') : isRepair ? t('q.mode.repair') : t('q.eyebrowInstall'))
+                    : t('q.eyebrowResult'))
+                : t('queue.title')}
             </span>
             <h2 id="queue-title">
               {resultMode
                 ? inProgress
-                  ? (isUpgrade ? t('q.mode.running') : t('q.titleRunning'))
-                  : (isUpgrade ? t('q.mode.done') : t('status.done'))
+                  ? (isUpgrade ? t('q.mode.running') : isUninstall ? t('q.mode.uninstallRunning') : isRepair ? t('q.mode.repairRunning') : t('q.titleRunning'))
+                  : (isUpgrade ? t('q.mode.done') : isUninstall ? t('q.mode.uninstallDone') : isRepair ? t('q.mode.repairDone') : t('status.done'))
                 : t('q.titleToInstall')}
             </h2>
           </div>
@@ -218,7 +231,7 @@ export function QueueDrawer({
                     </div>
                   )}
 
-                  {!isUpgrade && (added.length > 0 || removed.length > 0) && (
+                  {!isUpgrade && (isInstall || isUninstall) && (added.length > 0 || removed.length > 0) && (
                     <div className="install-diff">
                       <div className="install-diff-head">
                         <span className="install-diff-title">{t('q.diffTitle')}</span>
@@ -255,7 +268,11 @@ export function QueueDrawer({
                       <button
                         className="btn btn-primary"
                         type="button"
-                        onClick={() => (isUpgrade ? onUpgrade(failedItems.map((item) => item.id)) : onInstall())}
+                        onClick={() => {
+                          const ids = failedItems.map((item) => item.id)
+                          if (isUpgrade) onUpgrade(ids)
+                          else onRetry(mode, ids)
+                        }}
                       >
                         <IconDownload size={15}/>
                         {t('q.retry')}

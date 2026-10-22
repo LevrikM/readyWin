@@ -1,32 +1,52 @@
 import catalogJson from '../../shared/catalog.json'
 import type {
+  AppUpdateInfo,
   Catalog,
+  CatalogRefreshResult,
+  CatalogStatus,
+  HealthReport,
   HistoryEntry,
+  ImportResult,
   InstallEvent,
+  InstallMode,
   InstallState,
   ScanResult,
+  StartupEntry,
+  StartupReport,
   SystemCheck,
+  TransferResult,
   UpdateReport,
 } from './types'
 
 const catalog = catalogJson as Catalog
 
-type InstallMode = 'install' | 'upgrade'
-
 type WailsApp = {
   GetCatalog: () => Promise<Catalog>
+  GetCatalogStatus: () => Promise<CatalogStatus>
+  RefreshCatalog: (force: boolean) => Promise<CatalogRefreshResult>
   Scan: () => Promise<ScanResult>
   StartInstall: (ids: string[]) => Promise<InstallState>
   StartUpgrade: (ids: string[]) => Promise<InstallState>
+  StartUninstall: (ids: string[]) => Promise<InstallState>
+  StartRepair: (ids: string[]) => Promise<InstallState>
   CancelInstall: () => Promise<InstallState>
   GetInstallState: () => Promise<InstallState>
   GetUpdates: (force: boolean) => Promise<UpdateReport>
   RefreshUpdates: () => Promise<UpdateReport>
   GetHistory: () => Promise<HistoryEntry[]>
   ClearHistory: () => Promise<void>
+  GetHealth: (force: boolean) => Promise<HealthReport>
+  GetStartup: () => Promise<StartupReport>
+  SetStartupEnabled: (id: string, enabled: boolean) => Promise<void>
+  ExportProfile: (ids: string[], settings: Record<string, string>) => Promise<TransferResult>
+  ImportProfile: () => Promise<ImportResult>
+  ExportWinget: () => Promise<TransferResult>
+  ImportWingetFile: () => Promise<ImportResult>
   OpenExternal: (url: string) => Promise<void>
   OpenDataFolder: () => Promise<void>
   GetVersion: () => Promise<string>
+  GetAppUpdate: (force: boolean) => Promise<AppUpdateInfo>
+  SetLanguage: (lang: string) => void
   Minimise: () => void
   ToggleMaximise: () => void
   Hide: () => void
@@ -269,22 +289,23 @@ function advanceMockInstall() {
   }
   mockState.items = mockState.items.map((item, i) => (i === index ? {...item, status: 'running'} : item))
   mockState.current = mockState.items[index].id
-  mockState.message = mockState.mode === 'upgrade' ? 'winget: upgrade in progress' : 'winget: install in progress'
+  mockState.message = `winget: ${mockState.mode ?? 'install'} in progress`
   emit({type: 'state', state: {...mockState, items: [...mockState.items]}})
   emit({type: 'log', line: `winget resolve ${mockState.items[index].name}`, state: mockState})
   mockTimer = window.setTimeout(() => {
+    const mode = mockState.mode ?? 'install'
     mockState.items = mockState.items.map((item, i) => {
       if (i !== index) return item
-      if (mockState.mode === 'upgrade') {
-        return {...item, status: 'ok' as const, note: 'upgraded' as const, message: 'Оновлено'}
-      }
-      return {...item, status: 'ok' as const, note: 'installed' as const, message: 'Встановлено'}
+      const note = mode === 'upgrade' ? 'upgraded' : mode === 'uninstall' ? 'removed' : mode === 'repair' ? 'repaired' : 'installed'
+      const label = mode === 'upgrade' ? 'Оновлено' : mode === 'uninstall' ? 'Видалено' : mode === 'repair' ? 'Відновлено' : 'Встановлено'
+      return {...item, status: 'ok' as const, note: note as InstallState['items'][number]['note'], message: label}
     })
+    if (mode === 'uninstall') delete installedSeed[mockState.items[index].id]
     mockState.current = undefined
     emit({type: 'state', state: {...mockState, items: [...mockState.items]}})
     emit({
       type: 'log',
-      line: `winget ${mockState.mode === 'upgrade' ? 'upgrade' : 'install'} ${mockState.items[index].name}: exit 0`,
+      line: `winget ${mode} ${mockState.items[index].name}: exit 0`,
       state: mockState,
     })
     mockTimer = window.setTimeout(() => advanceMockInstall(), 550)
@@ -299,18 +320,24 @@ function finishMockInstall(cancelled: boolean) {
   const ok = finishedItems.filter((item) => item.status === 'ok').length
   const failed = finishedItems.filter((item) => item.status === 'failed').length
   const skipped = finishedItems.filter((item) => item.status === 'skipped').length
-  const upgraded = mockState.mode === 'upgrade'
-  if (upgraded) {
+  const mode = mockState.mode ?? 'install'
+  if (mode === 'upgrade') {
     for (const item of finishedItems) {
       if (item.status === 'ok') mockUpgradedIds.add(item.id)
     }
   }
-  const added = upgraded
-    ? []
-    : finishedItems
-        .filter((item) => item.status === 'ok')
-        .map((item) => ({id: item.id, name: item.name}))
-  const removed = mockState.removed ?? []
+  const added =
+    mode === 'install'
+      ? finishedItems
+          .filter((item) => item.status === 'ok')
+          .map((item) => ({id: item.id, name: item.name}))
+      : []
+  const removed =
+    mode === 'uninstall'
+      ? finishedItems
+          .filter((item) => item.status === 'ok')
+          .map((item) => ({id: item.id, name: item.name}))
+      : (mockState.removed ?? [])
   const baselineCount = mockState.baselineCount ?? 0
   const code = cancelled ? 'cancelled' : failed > 0 ? 'withErrors' : ok > 0 ? 'done' : 'noResult'
   mockState = {
@@ -322,7 +349,7 @@ function finishMockInstall(cancelled: boolean) {
     cancelled,
     success: !cancelled && ok > 0 && failed === 0,
     current: undefined,
-    message: `winget${upgraded ? ' upgrade' : ''}: ok=${ok} failed=${failed} skipped=${skipped}`,
+    message: `winget${mode !== 'install' ? ` ${mode}` : ''}: ok=${ok} failed=${failed} skipped=${skipped}`,
     code,
     okCount: ok,
     failCount: failed,
@@ -340,6 +367,7 @@ function finishMockInstall(cancelled: boolean) {
     status: cancelled ? 'cancelled' : failed > 0 ? 'failed' : 'success',
     message: mockState.message ?? '',
     code,
+    mode,
     items: finishedItems.map((item) => ({id: item.id, name: item.name, status: item.status})),
     before: baselineCount,
     after: baselineCount + added.length - removed.length,
@@ -383,10 +411,101 @@ function mockHistory(): HistoryEntry[] {
   ]
 }
 
+function mockCatalogStatus(): CatalogStatus {
+  return {
+    source: 'embedded',
+    version: catalog.version,
+    updated: catalog.updated,
+    itemCount: catalog.items.length,
+    embeddedVersion: catalog.version,
+    embeddedUpdated: catalog.updated,
+    checkedAt: new Date().toISOString(),
+  }
+}
+
+function mockHealth(): HealthReport {
+  return {
+    checkedAt: new Date().toISOString(),
+    durationMs: 480,
+    items: [
+      {id: 'pendingReboot', status: 'ok'},
+      {id: 'defender', status: 'ok', value: '1.439.88.0', detail: '2'},
+      {id: 'firewall', status: 'ok', value: '3/3'},
+      {id: 'bitlocker', status: 'warn', value: 'off'},
+      {id: 'secureBoot', status: 'ok', value: 'on'},
+      {id: 'activation', status: 'ok', value: 'licensed', detail: 'Windows 11 Pro'},
+      {id: 'windowsUpdate', status: 'ok', value: 'KB5066835', detail: '2026-10-14T00:00:00Z'},
+      {id: 'restorePoint', status: 'ok', value: '2026-10-18T09:12:00Z', detail: 'ReadyWin'},
+      {id: 'battery', status: 'na'},
+      {id: 'uptime', status: 'info', value: '3d 4h'},
+      {id: 'memory', status: 'ok', value: '18.4 GB', detail: '32 GB'},
+      {id: 'disk', status: 'ok', value: '412.7 GB', detail: '931 GB'},
+    ],
+    disks: [
+      {name: 'Samsung SSD 990 PRO 1TB', media: 'SSD', health: 'Healthy', operational: 'OK', sizeGb: 931.5, wear: 3, temperature: 41},
+      {name: 'WDC WD20EZBX-00AYRA0', media: 'HDD', health: 'Healthy', operational: 'OK', sizeGb: 1863, wear: 0, temperature: 34},
+    ],
+  }
+}
+
+let mockStartup: StartupEntry[] = [
+  {
+    id: 'reg|bW9jazE=',
+    name: 'Steam',
+    command: '"C:\\Program Files (x86)\\Steam\\steam.exe" -silent',
+    location: 'HKCU\\Software\\Microsoft\\Windows\\CurrentVersion\\Run',
+    source: 'registry',
+    scope: 'user',
+    enabled: true,
+    canToggle: true,
+  },
+  {
+    id: 'reg|bW9jazI=',
+    name: 'OneDrive',
+    command: '"C:\\Program Files\\Microsoft OneDrive\\OneDrive.exe" /background',
+    location: 'HKLM\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run',
+    source: 'registry',
+    scope: 'system',
+    enabled: true,
+    canToggle: true,
+  },
+  {
+    id: 'folder|bW9jazM=',
+    name: 'Bitwarden.lnk',
+    command: 'C:\\Users\\misha\\AppData\\Roaming\\Microsoft\\Windows\\Start Menu\\Programs\\Startup\\Bitwarden.lnk',
+    location: 'Startup folder',
+    source: 'folder',
+    scope: 'user',
+    enabled: false,
+    canToggle: true,
+  },
+  {
+    id: 'task|bW9jazQ=',
+    name: 'Update Steam',
+    command: 'C:\\Program Files (x86)\\Steam\\steam.exe -silent',
+    location: '\\Steam\\Update Steam',
+    source: 'task',
+    scope: 'system',
+    enabled: true,
+    canToggle: true,
+    state: 'Ready',
+  },
+]
+
 export const bridge = {
   getCatalog: async (): Promise<Catalog> => {
     const app = wailsApp()
     return app ? app.GetCatalog() : catalog
+  },
+  getCatalogStatus: async (): Promise<CatalogStatus> => {
+    const app = wailsApp()
+    return app ? app.GetCatalogStatus() : mockCatalogStatus()
+  },
+  refreshCatalog: async (force: boolean): Promise<CatalogRefreshResult> => {
+    const app = wailsApp()
+    if (app) return app.RefreshCatalog(force)
+    await new Promise((resolve) => window.setTimeout(resolve, 420))
+    return {updated: false, catalog, status: mockCatalogStatus()}
   },
   scan: async (): Promise<ScanResult> => {
     const app = wailsApp()
@@ -403,6 +522,56 @@ export const bridge = {
     const app = wailsApp()
     if (app) return app.StartUpgrade(ids)
     return startMockInstall(ids, 'upgrade')
+  },
+  startUninstall: async (ids: string[]): Promise<InstallState> => {
+    const app = wailsApp()
+    if (app) return app.StartUninstall(ids)
+    return startMockInstall(ids, 'uninstall')
+  },
+  startRepair: async (ids: string[]): Promise<InstallState> => {
+    const app = wailsApp()
+    if (app) return app.StartRepair(ids)
+    return startMockInstall(ids, 'repair')
+  },
+  getHealth: async (force: boolean): Promise<HealthReport> => {
+    const app = wailsApp()
+    if (app) return app.GetHealth(force)
+    await new Promise((resolve) => window.setTimeout(resolve, force ? 620 : 180))
+    return mockHealth()
+  },
+  getStartup: async (): Promise<StartupReport> => {
+    const app = wailsApp()
+    if (app) return app.GetStartup()
+    await new Promise((resolve) => window.setTimeout(resolve, 260))
+    return {checkedAt: new Date().toISOString(), entries: mockStartup.map((entry) => ({...entry}))}
+  },
+  setStartupEnabled: async (id: string, enabled: boolean): Promise<void> => {
+    const app = wailsApp()
+    if (app) {
+      await app.SetStartupEnabled(id, enabled)
+      return
+    }
+    mockStartup = mockStartup.map((entry) => (entry.id === id ? {...entry, enabled, state: enabled ? 'Ready' : 'Disabled'} : entry))
+  },
+  exportProfile: async (ids: string[], settings: Record<string, string>): Promise<TransferResult> => {
+    const app = wailsApp()
+    if (!app) throw new Error('desktop only')
+    return app.ExportProfile(ids, settings)
+  },
+  importProfile: async (): Promise<ImportResult> => {
+    const app = wailsApp()
+    if (!app) throw new Error('desktop only')
+    return app.ImportProfile()
+  },
+  exportWinget: async (): Promise<TransferResult> => {
+    const app = wailsApp()
+    if (!app) throw new Error('desktop only')
+    return app.ExportWinget()
+  },
+  importWingetFile: async (): Promise<ImportResult> => {
+    const app = wailsApp()
+    if (!app) throw new Error('desktop only')
+    return app.ImportWingetFile()
   },
   getUpdates: async (force: boolean): Promise<UpdateReport> => {
     const app = wailsApp()
@@ -456,7 +625,20 @@ export const bridge = {
   },
   getVersion: async (): Promise<string> => {
     const app = wailsApp()
-    return app ? app.GetVersion() : '1.0.0'
+    return app ? app.GetVersion() : '1.1.0'
+  },
+  getAppUpdate: async (force: boolean): Promise<AppUpdateInfo> => {
+    const app = wailsApp()
+    if (app) return app.GetAppUpdate(force)
+    return {
+      currentVersion: '1.1.0',
+      latestVersion: '1.1.0',
+      available: false,
+      checkedAt: new Date().toISOString(),
+    }
+  },
+  setLanguage: (lang: string) => {
+    wailsApp()?.SetLanguage?.(lang)
   },
   onInstallEvent: (callback: (event: InstallEvent) => void): (() => void) => {
     if (window.runtime) {

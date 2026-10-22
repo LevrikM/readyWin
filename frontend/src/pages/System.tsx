@@ -1,10 +1,11 @@
-import type {Catalog, ScanResult} from '../types'
+import type {AppUpdateInfo, Catalog, CatalogStatus, ScanResult} from '../types'
 import {formatDateTime, formatRam} from '../format'
 import {useI18n} from '../i18n'
 import {checkDetail, checkLabel} from '../checks'
 import {
   IconCheck,
   IconCopy,
+  IconDownload,
   IconExternal,
   IconRefresh,
   IconShield,
@@ -18,19 +19,41 @@ export function SystemPage({
   scan,
   scanning,
   queue,
+  catalogStatus,
+  catalogRefreshing,
+  appUpdate,
+  appUpdateLoading,
+  onCheckAppUpdate,
+  onOpenAppUpdate,
   onScan,
   onAdd,
   onToast,
   onOpenDataFolder,
+  onRefreshCatalog,
+  onExportProfile,
+  onImportProfile,
+  onExportWinget,
+  onImportWinget,
 }: {
   catalog: Catalog
   scan: ScanResult | null
   scanning: boolean
   queue: string[]
+  catalogStatus: CatalogStatus | null
+  catalogRefreshing: boolean
+  appUpdate: AppUpdateInfo | null
+  appUpdateLoading: boolean
+  onCheckAppUpdate: () => void
+  onOpenAppUpdate: () => void
   onScan: () => void
   onAdd: (id: string) => void
   onToast: (message: string) => void
   onOpenDataFolder: () => void
+  onRefreshCatalog: (force: boolean) => void
+  onExportProfile: (kind: 'selected' | 'installed') => void
+  onImportProfile: () => void
+  onExportWinget: () => void
+  onImportWinget: () => void
 }) {
   const {locale, t, tc} = useI18n()
   const system = scan?.system
@@ -41,6 +64,12 @@ export function SystemPage({
   const queueSet = new Set(queue)
   const runtimeOk = runtimeChecks.filter((check) => check.status === 'ok').length
   const checksOk = checks.filter((check) => check.status === 'ok').length
+  const catalogSourceKey =
+    catalogStatus?.source === 'remote'
+      ? 'sys.catalog.source.remote'
+      : catalogStatus?.source === 'cache'
+        ? 'sys.catalog.source.cache'
+        : 'sys.catalog.source.embedded'
 
   const copyText = async (text: string) => {
     try {
@@ -180,6 +209,27 @@ export function SystemPage({
               {!runtimeChecks.length && <div className="empty-inline">{t('empty.scanPending')}</div>}
             </div>
           </section>
+
+          <section className="panel transfer-panel">
+            <SectionHeader index="04" title={t('sys.transfer.title')}/>
+            <p className="panel-copy">{t('sys.transfer.text')}</p>
+            <div className="transfer-actions">
+              <button className="btn btn-secondary" type="button" onClick={() => onExportProfile('selected')}>
+                {t('sys.exportSelection')}
+              </button>
+              <button className="btn btn-secondary" type="button" onClick={() => onExportProfile('installed')}>
+                {t('sys.exportInstalled')}
+              </button>
+              <button className="btn btn-primary" type="button" onClick={onImportProfile}>
+                {t('sys.importProfile')}
+              </button>
+            </div>
+            <div className="transfer-actions is-quiet">
+              <button className="text-button" type="button" onClick={onExportWinget}>{t('sys.wingetExport')}</button>
+              <button className="text-button" type="button" onClick={onImportWinget}>{t('sys.wingetImport')}</button>
+            </div>
+            <p className="transfer-note">{t('sys.transfer.note')}</p>
+          </section>
         </div>
 
         <aside className="system-side">
@@ -218,6 +268,76 @@ export function SystemPage({
                 </div>
               ))}
             </div>
+          </section>
+
+          <section className="panel side-panel catalog-panel">
+            <SectionHeader title={t('sys.catalog.title')} meta={t(catalogSourceKey)}/>
+            <div className="catalog-status">
+              <span className="mono">
+                {t('sys.catalog.version', {
+                  version: catalogStatus?.version ?? catalog.version,
+                  count: catalogStatus?.itemCount ?? catalog.items.length,
+                })}
+              </span>
+              <span>{t('sys.catalog.updated', {date: catalogStatus?.updated ?? catalog.updated})}</span>
+              {catalogStatus?.checkedAt && (
+                <span>{t('sys.catalog.checked', {date: formatDateTime(catalogStatus.checkedAt)})}</span>
+              )}
+            </div>
+            {catalogStatus?.error && (
+              <div className="health-inline-error">
+                {t('sys.catalog.error')} <span className="mono">{catalogStatus.error}</span>
+              </div>
+            )}
+            <button
+              className="btn btn-secondary btn-block"
+              type="button"
+              onClick={() => onRefreshCatalog(true)}
+              disabled={catalogRefreshing}
+            >
+              {catalogRefreshing ? <Spinner size={15}/> : <IconRefresh size={15}/>}
+              {catalogRefreshing ? t('sys.catalog.checking') : t('sys.catalog.check')}
+            </button>
+            <p className="catalog-note">{t('sys.catalog.note')}</p>
+          </section>
+
+          <section className="panel side-panel app-update-panel">
+            <SectionHeader
+              title={t('update.app.title')}
+              meta={appUpdate?.available && appUpdate.latestVersion ? t('update.app.latest', {version: appUpdate.latestVersion}) : undefined}
+            />
+            <div className="catalog-status">
+              <span className="mono">
+                {t('update.app.currentVersion', {version: appUpdate?.currentVersion ?? '—'})}
+              </span>
+              {appUpdate?.checkedAt && (
+                <span>{t('update.app.checked', {date: formatDateTime(appUpdate.checkedAt)})}</span>
+              )}
+            </div>
+            {appUpdate?.error && (
+              <div className="health-inline-error">
+                {t('update.app.error')} <span className="mono">{appUpdate.error}</span>
+              </div>
+            )}
+            {appUpdate && !appUpdate.available && !appUpdate.error && (
+              <p className="catalog-note">{t('update.app.current')}</p>
+            )}
+            {appUpdate?.available && (appUpdate.downloadUrl || appUpdate.releaseUrl) && (
+              <button className="btn btn-primary btn-block" type="button" onClick={onOpenAppUpdate}>
+                <IconDownload size={15}/>
+                {t('update.app.download')}
+              </button>
+            )}
+            <button
+              className="btn btn-secondary btn-block"
+              type="button"
+              onClick={onCheckAppUpdate}
+              disabled={appUpdateLoading}
+            >
+              {appUpdateLoading ? <Spinner size={15}/> : <IconRefresh size={15}/>}
+              {appUpdateLoading ? t('update.app.checking') : t('update.app.check')}
+            </button>
+            <p className="catalog-note">{t('update.app.note')}</p>
           </section>
 
           <div className="local-note side-note">

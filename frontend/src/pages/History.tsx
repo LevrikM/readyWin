@@ -1,5 +1,5 @@
 import {useState} from 'react'
-import type {HistoryEntry} from '../types'
+import type {HistoryEntry, InstallMode} from '../types'
 import {formatClock, formatDay, formatDuration, formatMonth, relativeScan} from '../format'
 import {useI18n} from '../i18n'
 import type {TranslationKey} from '../i18n'
@@ -10,6 +10,13 @@ const statusLabels: Record<HistoryEntry['status'], TranslationKey> = {
   success: 'hist.status.success',
   failed: 'hist.status.failed',
   cancelled: 'hist.status.cancelled',
+}
+
+const modeLabels: Record<InstallMode, TranslationKey> = {
+  install: 'hist.mode.install',
+  upgrade: 'hist.mode.upgrade',
+  uninstall: 'hist.mode.uninstall',
+  repair: 'hist.mode.repair',
 }
 
 export function HistoryPage({
@@ -128,7 +135,7 @@ function JournalEntry({entry}: {entry: HistoryEntry}) {
   const skipped = entry.items.filter((item) => item.status === 'skipped').length
   const newApps = entry.newApps ?? []
   const resultText = entry.code
-    ? installResultText(t, {code: entry.code, ok, total: entry.items.length})
+    ? installResultText(t, {code: entry.code, mode: entry.mode, ok, total: entry.items.length})
     : entry.message
   const showDiff = typeof entry.before === 'number' && typeof entry.after === 'number' && entry.after !== entry.before
   return (
@@ -148,6 +155,7 @@ function JournalEntry({entry}: {entry: HistoryEntry}) {
               <span className="status-dot"/>
               {t(statusLabels[entry.status])}
             </span>
+            {entry.mode && <span className="journal-mode">{t(modeLabels[entry.mode])}</span>}
           </div>
           <span className="journal-duration mono">{formatDuration(entry.durationSec)}</span>
         </div>
