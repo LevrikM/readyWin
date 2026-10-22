@@ -1,14 +1,24 @@
 package main
 
 import (
+	"context"
+	"crypto/sha256"
+	"encoding/hex"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io"
 	"net/http"
+	"net/url"
+	"os"
+	"os/exec"
+	"path/filepath"
 	"strconv"
 	"strings"
 	"sync"
 	"time"
+
+	wruntime "github.com/wailsapp/wails/v2/pkg/runtime"
 )
 
 const (
@@ -16,11 +26,25 @@ const (
 	appUpdateErrorTTL   = 15 * time.Minute
 	appUpdateBodyLimit  = 1 << 20
 	appUpdateNotesLimit = 4000
+	appUpdateHashLimit  = 4096
 )
 
 var appReleaseURL = "https://api.github.com/repos/LevrikM/readyWin/releases/latest"
 
 var appUpdateHTTPClient = &http.Client{Timeout: 8 * time.Second}
+
+var appDownloadClient = &http.Client{
+	Timeout: 15 * time.Minute,
+	CheckRedirect: func(request *http.Request, via []*http.Request) error {
+		if err := validateUpdateURL(request.URL.String()); err != nil {
+			return err
+		}
+		if len(via) >= 10 {
+			return errors.New("забагато перенаправлень")
+		}
+		return nil
+	},
+}
 
 type AppUpdateInfo struct {
 	CurrentVersion string `json:"currentVersion"`
@@ -29,22 +53,42 @@ type AppUpdateInfo struct {
 	ReleaseName    string `json:"releaseName,omitempty"`
 	ReleaseURL     string `json:"releaseUrl,omitempty"`
 	DownloadURL    string `json:"downloadUrl,omitempty"`
+	DownloadSize   int64  `json:"downloadSize,omitempty"`
+	Checksum       string `json:"checksum,omitempty"`
 	Notes          string `json:"notes,omitempty"`
 	PublishedAt    string `json:"publishedAt,omitempty"`
 	CheckedAt      string `json:"checkedAt"`
 	Error          string `json:"error,omitempty"`
 }
 
+type AppUpdateDownload struct {
+	Path   string `json:"path"`
+	SHA256 string `json:"sha256"`
+	Size   int64  `json:"size"`
+}
+
+type AppUpdateProgress struct {
+	Downloaded int64  `json:"downloaded"`
+	Total      int64  `json:"total"`
+	Percent    int    `json:"percent"`
+	Done       bool   `json:"done"`
+	Error      string `json:"error,omitempty"`
+}
+
+type githubAsset struct {
+	Name               string `json:"name"`
+	BrowserDownloadURL string `json:"browser_download_url"`
+	Size               int64  `json:"size"`
+	Digest             string `json:"digest"`
+}
+
 type githubRelease struct {
-	TagName     string `json:"tag_name"`
-	Name        string `json:"name"`
-	Body        string `json:"body"`
-	HTMLURL     string `json:"html_url"`
-	PublishedAt string `json:"published_at"`
-	Assets      []struct {
-		Name               string `json:"name"`
-		BrowserDownloadURL string `json:"browser_download_url"`
-	} `json:"assets"`
+	TagName     string        `json:"tag_name"`
+	Name        string        `json:"name"`
+	Body        string        `json:"body"`
+	HTMLURL     string        `json:"html_url"`
+	PublishedAt string        `json:"published_at"`
+	Assets      []githubAsset `json:"assets"`
 }
 
 var (
@@ -120,30 +164,292 @@ func fetchAppUpdate(url, current string) AppUpdateInfo {
 	info.ReleaseURL = release.HTMLURL
 	info.PublishedAt = release.PublishedAt
 	info.Notes = truncateText(strings.TrimSpace(release.Body), appUpdateNotesLimit)
-	info.DownloadURL = releaseDownloadURL(release)
+	asset := releaseDownloadAsset(release)
+	info.DownloadURL = asset.BrowserDownloadURL
+	info.DownloadSize = asset.Size
+	info.Checksum = releaseChecksum(release, asset)
 	info.Available = compareAppVersions(latestVersion, currentVersion) > 0
 	return info
 }
 
-func releaseDownloadURL(release githubRelease) string {
+func releaseDownloadAsset(release githubRelease) githubAsset {
 	for _, asset := range release.Assets {
 		if strings.EqualFold(asset.Name, "ReadyWin.exe") {
-			return asset.BrowserDownloadURL
+			return asset
 		}
 	}
 	for _, asset := range release.Assets {
 		name := strings.ToLower(asset.Name)
 		if strings.HasPrefix(name, "readywin-") && strings.HasSuffix(name, ".zip") {
-			return asset.BrowserDownloadURL
+			return asset
 		}
 	}
 	for _, asset := range release.Assets {
 		name := strings.ToLower(asset.Name)
 		if strings.HasSuffix(name, ".exe") || strings.HasSuffix(name, ".zip") {
-			return asset.BrowserDownloadURL
+			return asset
+		}
+	}
+	return githubAsset{}
+}
+
+func releaseDownloadURL(release githubRelease) string {
+	return releaseDownloadAsset(release).BrowserDownloadURL
+}
+
+func releaseChecksum(release githubRelease, download githubAsset) string {
+	if sum := normalizeSHA256(strings.TrimPrefix(download.Digest, "sha256:")); sum != "" {
+		return sum
+	}
+	for _, asset := range release.Assets {
+		name := strings.ToLower(asset.Name)
+		if name != "readywin.exe.sha256" && name != "sha256sums.txt" && name != "checksums.txt" {
+			continue
+		}
+		if sum := fetchChecksum(asset.BrowserDownloadURL); sum != "" {
+			return sum
 		}
 	}
 	return ""
+}
+
+func fetchChecksum(rawURL string) string {
+	if err := validateUpdateURL(rawURL); err != nil {
+		return ""
+	}
+	request, err := http.NewRequest(http.MethodGet, rawURL, nil)
+	if err != nil {
+		return ""
+	}
+	request.Header.Set("User-Agent", "ReadyWin/"+appVersion)
+	response, err := appUpdateHTTPClient.Do(request)
+	if err != nil {
+		return ""
+	}
+	defer response.Body.Close()
+	if response.StatusCode != http.StatusOK {
+		return ""
+	}
+	body, err := io.ReadAll(io.LimitReader(response.Body, appUpdateHashLimit))
+	if err != nil {
+		return ""
+	}
+	for _, field := range strings.Fields(string(body)) {
+		if sum := normalizeSHA256(strings.TrimPrefix(field, "sha256:")); sum != "" {
+			return sum
+		}
+	}
+	return ""
+}
+
+func normalizeSHA256(value string) string {
+	value = strings.ToLower(strings.TrimSpace(value))
+	if len(value) != sha256.Size*2 {
+		return ""
+	}
+	if _, err := hex.DecodeString(value); err != nil {
+		return ""
+	}
+	return value
+}
+
+func validateUpdateURL(rawURL string) error {
+	parsed, err := url.Parse(rawURL)
+	if err != nil || parsed.Scheme != "https" || parsed.Host == "" {
+		return errors.New("некоректне посилання на оновлення")
+	}
+	host := strings.ToLower(parsed.Hostname())
+	if host == "github.com" || strings.HasSuffix(host, ".githubusercontent.com") {
+		return nil
+	}
+	return errors.New("недозволене джерело оновлення")
+}
+
+func (a *App) DownloadAppUpdate() (AppUpdateDownload, error) {
+	var result AppUpdateDownload
+	info := a.GetAppUpdate(false)
+	if !info.Available || info.DownloadURL == "" {
+		return result, errors.New("оновлення недоступне")
+	}
+	if info.Checksum == "" {
+		return result, errors.New("у релізі немає SHA256")
+	}
+	if err := validateUpdateURL(info.DownloadURL); err != nil {
+		return result, err
+	}
+
+	baseDir, err := dataDir()
+	if err != nil {
+		return result, err
+	}
+	updatesDir := filepath.Join(baseDir, "updates")
+	if err := os.MkdirAll(updatesDir, 0o755); err != nil {
+		return result, err
+	}
+	name := safeUpdateName(info.DownloadURL, info.LatestVersion)
+	target := filepath.Join(updatesDir, name)
+	partial := target + ".part"
+	_ = os.Remove(partial)
+
+	request, err := http.NewRequest(http.MethodGet, info.DownloadURL, nil)
+	if err != nil {
+		return result, err
+	}
+	request.Header.Set("User-Agent", "ReadyWin/"+appVersion)
+	response, err := appDownloadClient.Do(request)
+	if err != nil {
+		return result, err
+	}
+	defer response.Body.Close()
+	if response.StatusCode != http.StatusOK {
+		return result, fmt.Errorf("завантаження: %s", response.Status)
+	}
+
+	file, err := os.Create(partial)
+	if err != nil {
+		return result, err
+	}
+	hasher := sha256.New()
+	progress := &updateProgressWriter{
+		total: response.ContentLength,
+		emit: func(downloaded int64) {
+			emitAppUpdateProgress(a.ctx, downloaded, response.ContentLength, false, "")
+		},
+	}
+	written, copyErr := io.Copy(io.MultiWriter(file, hasher, progress), response.Body)
+	closeErr := file.Close()
+	if copyErr != nil {
+		_ = os.Remove(partial)
+		emitAppUpdateProgress(a.ctx, written, response.ContentLength, true, copyErr.Error())
+		return result, copyErr
+	}
+	if closeErr != nil {
+		_ = os.Remove(partial)
+		emitAppUpdateProgress(a.ctx, written, response.ContentLength, true, closeErr.Error())
+		return result, closeErr
+	}
+
+	sum := hex.EncodeToString(hasher.Sum(nil))
+	if !strings.EqualFold(sum, info.Checksum) {
+		_ = os.Remove(partial)
+		err := errors.New("SHA256 не збігається")
+		emitAppUpdateProgress(a.ctx, written, response.ContentLength, true, err.Error())
+		return result, err
+	}
+	if err := os.Remove(target); err != nil && !errors.Is(err, os.ErrNotExist) {
+		_ = os.Remove(partial)
+		emitAppUpdateProgress(a.ctx, written, response.ContentLength, true, err.Error())
+		return result, err
+	}
+	if err := os.Rename(partial, target); err != nil {
+		_ = os.Remove(partial)
+		emitAppUpdateProgress(a.ctx, written, response.ContentLength, true, err.Error())
+		return result, err
+	}
+	emitAppUpdateProgress(a.ctx, written, response.ContentLength, true, "")
+	return AppUpdateDownload{Path: target, SHA256: sum, Size: written}, nil
+}
+
+func (a *App) LaunchAppUpdate(path string) error {
+	abs, err := filepath.Abs(path)
+	if err != nil {
+		return err
+	}
+	baseDir, err := dataDir()
+	if err != nil {
+		return err
+	}
+	updatesDir, err := filepath.Abs(filepath.Join(baseDir, "updates"))
+	if err != nil {
+		return err
+	}
+	relative, err := filepath.Rel(updatesDir, abs)
+	if err != nil || relative == ".." || strings.HasPrefix(relative, ".."+string(os.PathSeparator)) {
+		return errors.New("некоректний шлях до оновлення")
+	}
+	if !strings.EqualFold(filepath.Ext(abs), ".exe") {
+		return errors.New("оновлення має бути EXE")
+	}
+	if info, err := os.Stat(abs); err != nil || !info.Mode().IsRegular() {
+		return errors.New("файл оновлення не знайдено")
+	}
+
+	command := fmt.Sprintf("Start-Sleep -Seconds 2; Start-Process -FilePath %s", psQuote(abs))
+	cmd := exec.Command("powershell.exe", "-NoProfile", "-NonInteractive", "-WindowStyle", "Hidden", "-Command", command)
+	cmd.SysProcAttr = hiddenProcess()
+	if err := cmd.Start(); err != nil {
+		return err
+	}
+	if a.ctx != nil {
+		wruntime.Quit(a.ctx)
+	}
+	return nil
+}
+
+func (a *App) OpenUpdatesFolder() error {
+	baseDir, err := dataDir()
+	if err != nil {
+		return err
+	}
+	path := filepath.Join(baseDir, "updates")
+	if err := os.MkdirAll(path, 0o755); err != nil {
+		return err
+	}
+	return exec.Command("explorer.exe", path).Start()
+}
+
+func safeUpdateName(rawURL, version string) string {
+	name := ""
+	if parsed, err := url.Parse(rawURL); err == nil && !strings.HasSuffix(parsed.Path, "/") {
+		name = filepath.Base(parsed.Path)
+	}
+	if name == "" || name == "." || name == ".." || name == string(os.PathSeparator) {
+		name = "ReadyWin-" + version + ".exe"
+	}
+	name = strings.Map(func(r rune) rune {
+		if strings.ContainsRune(`<>:"/\|?*`, r) {
+			return '-'
+		}
+		return r
+	}, name)
+	return name
+}
+
+type updateProgressWriter struct {
+	total    int64
+	written  int64
+	lastEmit time.Time
+	emit     func(int64)
+}
+
+func (w *updateProgressWriter) Write(data []byte) (int, error) {
+	w.written += int64(len(data))
+	now := time.Now()
+	if now.Sub(w.lastEmit) >= 150*time.Millisecond || (w.total > 0 && w.written >= w.total) {
+		w.lastEmit = now
+		w.emit(w.written)
+	}
+	return len(data), nil
+}
+
+func emitAppUpdateProgress(ctx context.Context, downloaded, total int64, done bool, errText string) {
+	if ctx == nil {
+		return
+	}
+	percent := 0
+	if total > 0 {
+		percent = int(downloaded * 100 / total)
+		if percent > 100 {
+			percent = 100
+		}
+	}
+	wruntime.EventsEmit(ctx, "appupdate:progress", AppUpdateProgress{
+		Downloaded: downloaded,
+		Total:      total,
+		Percent:    percent,
+		Done:       done,
+		Error:      errText,
+	})
 }
 
 func parseAppVersion(raw string) ([3]int, bool) {

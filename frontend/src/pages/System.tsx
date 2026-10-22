@@ -1,4 +1,11 @@
-import type {AppUpdateInfo, Catalog, CatalogStatus, ScanResult} from '../types'
+import type {
+  AppUpdateDownload,
+  AppUpdateInfo,
+  AppUpdateProgress,
+  Catalog,
+  CatalogStatus,
+  ScanResult,
+} from '../types'
 import {formatDateTime, formatRam} from '../format'
 import {useI18n} from '../i18n'
 import {checkDetail, checkLabel} from '../checks'
@@ -23,8 +30,17 @@ export function SystemPage({
   catalogRefreshing,
   appUpdate,
   appUpdateLoading,
+  appUpdateDownload,
+  appUpdateProgress,
+  appUpdateDownloading,
+  updateSkipped,
   onCheckAppUpdate,
   onOpenAppUpdate,
+  onDownloadAppUpdate,
+  onLaunchAppUpdate,
+  onOpenUpdatesFolder,
+  onSkipAppUpdate,
+  onUnskipAppUpdate,
   onScan,
   onAdd,
   onToast,
@@ -43,8 +59,17 @@ export function SystemPage({
   catalogRefreshing: boolean
   appUpdate: AppUpdateInfo | null
   appUpdateLoading: boolean
+  appUpdateDownload: AppUpdateDownload | null
+  appUpdateProgress: AppUpdateProgress | null
+  appUpdateDownloading: boolean
+  updateSkipped: boolean
   onCheckAppUpdate: () => void
   onOpenAppUpdate: () => void
+  onDownloadAppUpdate: () => void
+  onLaunchAppUpdate: () => void
+  onOpenUpdatesFolder: () => void
+  onSkipAppUpdate: () => void
+  onUnskipAppUpdate: () => void
   onScan: () => void
   onAdd: (id: string) => void
   onToast: (message: string) => void
@@ -322,11 +347,76 @@ export function SystemPage({
             {appUpdate && !appUpdate.available && !appUpdate.error && (
               <p className="catalog-note">{t('update.app.current')}</p>
             )}
-            {appUpdate?.available && (appUpdate.downloadUrl || appUpdate.releaseUrl) && (
-              <button className="btn btn-primary btn-block" type="button" onClick={onOpenAppUpdate}>
-                <IconDownload size={15}/>
-                {t('update.app.download')}
-              </button>
+            {appUpdate?.available && appUpdate.notes && (
+              <details className="app-update-notes">
+                <summary>{t('update.app.notes')}</summary>
+                <div>{appUpdate.notes}</div>
+              </details>
+            )}
+            {appUpdate?.available && appUpdate.checksum && (
+              <div className="app-update-checksum">
+                <span>{t('update.app.checksum')}</span>
+                <code title={appUpdate.checksum}>{appUpdate.checksum.slice(0, 16)}…</code>
+              </div>
+            )}
+            {appUpdateDownloading && appUpdateProgress && (
+              <div className="app-update-download">
+                <div className="app-update-progress" aria-hidden="true">
+                  <span style={{width: `${appUpdateProgress.percent}%`}}/>
+                </div>
+                <span className="mono">
+                  {t('update.app.downloading', {percent: appUpdateProgress.percent})}
+                </span>
+              </div>
+            )}
+            {appUpdateDownload && (
+              <div className="app-update-verified">
+                <IconCheck size={14}/>
+                <span>{t('update.app.verified')}</span>
+                <code title={appUpdateDownload.sha256}>{appUpdateDownload.sha256.slice(0, 12)}…</code>
+              </div>
+            )}
+            {appUpdate?.available && (
+              <>
+                {appUpdateDownload ? (
+                  <button className="btn btn-primary btn-block" type="button" onClick={onLaunchAppUpdate}>
+                    <IconCheck size={15}/>
+                    {t('update.app.install')}
+                  </button>
+                ) : (
+                  <button
+                    className="btn btn-primary btn-block"
+                    type="button"
+                    onClick={onDownloadAppUpdate}
+                    disabled={appUpdateDownloading}
+                  >
+                    <IconDownload size={15}/>
+                    {appUpdateDownloading
+                      ? t('update.app.downloading', {percent: appUpdateProgress?.percent ?? 0})
+                      : t('update.app.download')}
+                  </button>
+                )}
+                {appUpdateDownload ? (
+                  <button className="btn btn-secondary btn-block" type="button" onClick={onOpenUpdatesFolder}>
+                    <IconDownload size={15}/>
+                    {t('update.app.openFolder')}
+                  </button>
+                ) : (
+                  <button className="btn btn-secondary btn-block" type="button" onClick={onOpenAppUpdate}>
+                    <IconExternal size={15}/>
+                    {t('update.app.releasePage')}
+                  </button>
+                )}
+                {updateSkipped ? (
+                  <button className="text-button app-update-skip" type="button" onClick={onUnskipAppUpdate}>
+                    {t('update.app.unskip')}
+                  </button>
+                ) : (
+                  <button className="text-button app-update-skip" type="button" onClick={onSkipAppUpdate}>
+                    {t('update.app.skip')}
+                  </button>
+                )}
+              </>
             )}
             <button
               className="btn btn-secondary btn-block"

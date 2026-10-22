@@ -137,9 +137,25 @@ export type AppUpdateInfo = {
   releaseName?: string
   releaseUrl?: string
   downloadUrl?: string
+  downloadSize?: number
+  checksum?: string
   notes?: string
   publishedAt?: string
   checkedAt: string
+  error?: string
+}
+
+export type AppUpdateDownload = {
+  path: string
+  sha256: string
+  size: number
+}
+
+export type AppUpdateProgress = {
+  downloaded: number
+  total: number
+  percent: number
+  done: boolean
   error?: string
 }
 
@@ -224,6 +240,8 @@ export type HealthReport = {
   durationMs: number
   items: HealthItem[]
   disks: DiskHealth[]
+  elevated?: boolean
+  elevatedError?: string
   error?: string
 }
 

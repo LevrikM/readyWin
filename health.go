@@ -1,8 +1,10 @@
 package main
 
 import (
+	"errors"
 	"fmt"
 	"os"
+	"path/filepath"
 	"strconv"
 	"strings"
 	"sync"
@@ -32,11 +34,13 @@ type DiskHealth struct {
 }
 
 type HealthReport struct {
-	CheckedAt  string       `json:"checkedAt"`
-	DurationMs int          `json:"durationMs"`
-	Items      []HealthItem `json:"items"`
-	Disks      []DiskHealth `json:"disks"`
-	Error      string       `json:"error,omitempty"`
+	CheckedAt     string       `json:"checkedAt"`
+	DurationMs    int          `json:"durationMs"`
+	Items         []HealthItem `json:"items"`
+	Disks         []DiskHealth `json:"disks"`
+	Elevated      bool         `json:"elevated,omitempty"`
+	ElevatedError string       `json:"elevatedError,omitempty"`
+	Error         string       `json:"error,omitempty"`
 }
 
 const healthCacheTTL = 30 * time.Second
@@ -57,6 +61,140 @@ func (a *App) GetHealth(force bool) HealthReport {
 	healthCache = report
 	healthAt = time.Now()
 	return report
+}
+
+func (a *App) GetHealthElevated() HealthReport {
+	base := a.GetHealth(false)
+	started := time.Now()
+	elevated, err := collectElevatedHealth()
+	if err != nil {
+		base.ElevatedError = err.Error()
+		return base
+	}
+	merged := mergeElevatedHealth(base, elevated)
+	merged.DurationMs = base.DurationMs + int(time.Since(started).Milliseconds())
+	healthMu.Lock()
+	healthCache = merged
+	healthAt = time.Now()
+	healthMu.Unlock()
+	return merged
+}
+
+type psElevatedHealth struct {
+	Disks     []psDisk    `json:"disks"`
+	BitLocker psBitLocker `json:"bitlocker"`
+}
+
+func collectElevatedHealth() (psElevatedHealth, error) {
+	var result psElevatedHealth
+	baseDir, err := dataDir()
+	if err != nil {
+		return result, err
+	}
+	dir := filepath.Join(baseDir, "elevated")
+	if err := os.MkdirAll(dir, 0o755); err != nil {
+		return result, err
+	}
+	file, err := os.CreateTemp(dir, "health-*.json")
+	if err != nil {
+		return result, err
+	}
+	path := file.Name()
+	_ = file.Close()
+	_ = os.Remove(path)
+	defer os.Remove(path)
+
+	script := fmt.Sprintf(`$path = %s
+$rows = @()
+try {
+  foreach ($d in (Get-PhysicalDisk -ErrorAction Stop)) {
+    $wear = $null; $temp = $null
+    try { $c = $d | Get-StorageReliabilityCounter -ErrorAction Stop; $wear = $c.Wear; $temp = $c.Temperature } catch {}
+    $rows += [pscustomobject]@{name=[string]$d.FriendlyName; media=[string]$d.MediaType; health=[string]$d.HealthStatus; operational=[string]($d.OperationalStatus -join ','); size=[double]$d.Size; wear=$wear; temperature=$temp}
+  }
+} catch {}
+$bl = $null
+try {
+  $v = Get-BitLockerVolume -MountPoint $env:SystemDrive -ErrorAction Stop
+  $bl = [pscustomobject]@{status=[string]$v.ProtectionStatus; pct=[int]$v.EncryptionPercentage; method=[string]$v.EncryptionMethod}
+} catch {}
+[pscustomobject]@{disks=$rows; bitlocker=$bl} | ConvertTo-Json -Compress -Depth 4 | Set-Content -LiteralPath $path -Encoding UTF8`, psQuote(path))
+	if err := runElevatedPowerShell("health", script, 45*time.Second); err != nil {
+		return result, err
+	}
+	out, err := os.ReadFile(path)
+	if err != nil {
+		return result, errors.New("розширена діагностика не повернула результат")
+	}
+	if err := decodeJSONObject(out, &result); err != nil {
+		return result, err
+	}
+	return result, nil
+}
+
+func mergeElevatedHealth(base HealthReport, elevated psElevatedHealth) HealthReport {
+	base.Elevated = true
+	base.ElevatedError = ""
+	base.CheckedAt = time.Now().Format(time.RFC3339)
+	if len(elevated.Disks) > 0 {
+		base.Error = ""
+		for _, disk := range elevated.Disks {
+			health := diskHealth(disk)
+			replaced := false
+			for index := range base.Disks {
+				if strings.EqualFold(base.Disks[index].Name, health.Name) {
+					base.Disks[index] = health
+					replaced = true
+					break
+				}
+			}
+			if !replaced {
+				base.Disks = append(base.Disks, health)
+			}
+		}
+	}
+	if elevated.BitLocker.Status != "" {
+		item := bitlockerHealthItem(elevated.BitLocker)
+		replaced := false
+		for index := range base.Items {
+			if base.Items[index].ID == "bitlocker" {
+				base.Items[index] = item
+				replaced = true
+				break
+			}
+		}
+		if !replaced {
+			base.Items = append(base.Items, item)
+		}
+	}
+	return base
+}
+
+func diskHealth(disk psDisk) DiskHealth {
+	return DiskHealth{
+		Name:        disk.Name,
+		Media:       strings.ToLower(disk.Media),
+		Health:      strings.ToLower(disk.Health),
+		Operational: disk.Operational,
+		SizeGB:      float64(disk.Size) / (1 << 30),
+		Wear:        disk.Wear,
+		Temperature: disk.Temperature,
+	}
+}
+
+func bitlockerHealthItem(bitlocker psBitLocker) HealthItem {
+	status := "unknown"
+	value := "unknown"
+	if bitlocker.Status != "" {
+		value = strings.ToLower(bitlocker.Status)
+		switch value {
+		case "on":
+			status = "ok"
+		case "off":
+			status = "warn"
+		}
+	}
+	return HealthItem{ID: "bitlocker", Status: status, Value: value, Detail: strings.TrimSpace(bitlocker.Method)}
 }
 
 type psDisk struct {
@@ -260,18 +398,10 @@ ConvertTo-Json -InputObject $rows -Compress -Depth 3`, 9*time.Second)
 	report.Items = append(report.Items, HealthItem{ID: "secureBoot", Status: sbStatus, Value: sb})
 
 	// BitLocker.
-	blStatus := "unknown"
-	blValue := "unknown"
-	if bitErr == nil && bitlocker.Status != "" {
-		blValue = strings.ToLower(bitlocker.Status)
-		switch blValue {
-		case "on":
-			blStatus = "ok"
-		case "off":
-			blStatus = "warn"
-		}
+	if bitErr != nil {
+		bitlocker = psBitLocker{}
 	}
-	report.Items = append(report.Items, HealthItem{ID: "bitlocker", Status: blStatus, Value: blValue, Detail: strings.TrimSpace(bitlocker.Method)})
+	report.Items = append(report.Items, bitlockerHealthItem(bitlocker))
 
 	// Activation.
 	actStatus := "unknown"
@@ -368,16 +498,7 @@ ConvertTo-Json -InputObject $rows -Compress -Depth 3`, 9*time.Second)
 		if strings.TrimSpace(d.Name) == "" {
 			continue
 		}
-		dh := DiskHealth{
-			Name:        d.Name,
-			Media:       strings.ToLower(d.Media),
-			Health:      strings.ToLower(d.Health),
-			Operational: d.Operational,
-			SizeGB:      float64(d.Size) / (1 << 30),
-			Wear:        d.Wear,
-			Temperature: d.Temperature,
-		}
-		report.Disks = append(report.Disks, dh)
+		report.Disks = append(report.Disks, diskHealth(d))
 	}
 	report.DurationMs = int(time.Since(started).Milliseconds())
 	return report

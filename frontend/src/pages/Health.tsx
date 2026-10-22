@@ -9,6 +9,7 @@ import {
   IconCircleCheck,
   IconCircleX,
   IconRefresh,
+  IconShield,
   Spinner,
 } from '../uiIcons'
 import {SectionHeader} from '../components/Primitives'
@@ -85,6 +86,7 @@ export function HealthPage({scan, onToast}: {scan: ScanResult | null; onToast: (
   const [startupLoading, setStartupLoading] = useState(false)
   const [toggling, setToggling] = useState<string | null>(null)
   const [startupFilter, setStartupFilter] = useState<StartupFilter>('all')
+  const [elevatedLoading, setElevatedLoading] = useState(false)
 
   const load = useCallback(async (force: boolean) => {
     setLoading(true)
@@ -119,6 +121,19 @@ export function HealthPage({scan, onToast}: {scan: ScanResult | null; onToast: (
   useEffect(() => {
     void load(false)
   }, [load])
+
+  const loadElevated = async () => {
+    setElevatedLoading(true)
+    try {
+      const report = await bridge.getHealthElevated()
+      setHealth(report)
+      onToast(report.elevatedError ? t('toast.healthElevatedFail') : t('toast.healthElevated'))
+    } catch {
+      onToast(t('toast.healthElevatedFail'))
+    } finally {
+      setElevatedLoading(false)
+    }
+  }
 
   const toggleStartup = async (entry: StartupEntry) => {
     setToggling(entry.id)
@@ -235,6 +250,16 @@ export function HealthPage({scan, onToast}: {scan: ScanResult | null; onToast: (
             <span className="mono">{health ? t('health.score', {ok: okCount, total}) : t('health.refreshing')}</span>
             <span>{health ? t('health.checked', {date: formatDateTime(health.checkedAt)}) : t('empty.scanPending')}</span>
           </div>
+          <button
+            className="btn btn-secondary"
+            type="button"
+            onClick={() => void loadElevated()}
+            disabled={elevatedLoading}
+            title={t('health.elevatedHint')}
+          >
+            {elevatedLoading ? <Spinner size={16}/> : <IconShield size={16}/>}
+            {elevatedLoading ? t('health.elevatedLoading') : t('health.elevated')}
+          </button>
           <button className="btn btn-secondary" type="button" onClick={() => void load(true)} disabled={loading}>
             {loading ? <Spinner size={16}/> : <IconRefresh size={16}/>}
             {loading ? t('health.refreshing') : t('health.refresh')}
@@ -249,6 +274,12 @@ export function HealthPage({scan, onToast}: {scan: ScanResult | null; onToast: (
         <div className="health-hero-copy">
           <strong>{health ? t('health.score', {ok: okCount, total}) : t('health.empty')}</strong>
           <span>{health?.error ? t('health.error') : t('sys.note')}</span>
+          {health?.elevated && (
+            <span className="health-elevated-badge">
+              <IconShield size={12}/>
+              {t('health.elevatedActive')}
+            </span>
+          )}
         </div>
         <div className="health-counts">
           <span className="is-ok"><i/>{counts.ok}</span>
@@ -260,6 +291,11 @@ export function HealthPage({scan, onToast}: {scan: ScanResult | null; onToast: (
 
       {!health && loading && <div className="empty-inline">{t('health.refreshing')}…</div>}
       {health?.error && <div className="upd-error"><span className="upd-error-title">{t('health.error')}</span><span className="mono">{health.error}</span></div>}
+      {health?.elevatedError && (
+        <div className="health-inline-error">
+          {t('health.elevatedError')} <span className="mono">{health.elevatedError}</span>
+        </div>
+      )}
 
       {health && GROUPS.map((group) => {
         const groupItems = group.items.map((id) => itemMap.get(id)).filter((item): item is HealthItem => Boolean(item))

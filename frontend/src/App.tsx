@@ -2,7 +2,9 @@ import {useCallback, useEffect, useRef, useState} from 'react'
 import './App.css'
 import {bridge, embeddedCatalog, isDesktop} from './bridge'
 import type {
+  AppUpdateDownload,
   AppUpdateInfo,
+  AppUpdateProgress,
   Catalog,
   CatalogStatus,
   HistoryEntry,
@@ -28,6 +30,8 @@ import {HealthPage} from './pages/Health'
 import {HistoryPage} from './pages/History'
 
 type StatusFilter = 'all' | 'missing' | 'installed' | 'updates'
+
+const SKIP_UPDATE_KEY = 'readywin.skipUpdateVersion'
 
 function initialTheme(): 'light' | 'dark' {
   const saved =
@@ -65,6 +69,10 @@ function App() {
   const [appUpdate, setAppUpdate] = useState<AppUpdateInfo | null>(null)
   const [appUpdateLoading, setAppUpdateLoading] = useState(false)
   const [appUpdateDismissed, setAppUpdateDismissed] = useState(false)
+  const [appUpdateDownload, setAppUpdateDownload] = useState<AppUpdateDownload | null>(null)
+  const [appUpdateProgress, setAppUpdateProgress] = useState<AppUpdateProgress | null>(null)
+  const [appUpdateDownloading, setAppUpdateDownloading] = useState(false)
+  const [skippedVersion, setSkippedVersion] = useState(() => localStorage.getItem(SKIP_UPDATE_KEY) ?? '')
 
   const searchRef = useRef<HTMLInputElement>(null)
   const mainRef = useRef<HTMLElement>(null)
@@ -139,7 +147,11 @@ function App() {
     try {
       const result = await bridge.getAppUpdate(force)
       setAppUpdate(result)
-      if (result.available) setAppUpdateDismissed(false)
+      if (result.latestVersion !== appUpdate?.latestVersion) {
+        setAppUpdateDownload(null)
+        setAppUpdateProgress(null)
+      }
+      if (result.available && result.latestVersion !== skippedVersion) setAppUpdateDismissed(false)
       if (force) {
         showToast(
           result.available
@@ -154,10 +166,10 @@ function App() {
     } finally {
       setAppUpdateLoading(false)
     }
-  }, [showToast, t])
+  }, [appUpdate, skippedVersion, showToast, t])
 
   const openAppUpdate = async () => {
-    const target = appUpdate?.downloadUrl || appUpdate?.releaseUrl
+    const target = appUpdate?.releaseUrl
     if (!target) return
     try {
       await bridge.openExternal(target)
@@ -165,6 +177,59 @@ function App() {
       showToast(t('toast.openFail'))
     }
   }
+
+  const downloadAppUpdate = async () => {
+    if (!appUpdate?.available) return
+    setAppUpdateDownloading(true)
+    setAppUpdateDownload(null)
+    setAppUpdateProgress({
+      downloaded: 0,
+      total: appUpdate.downloadSize ?? 0,
+      percent: 0,
+      done: false,
+    })
+    try {
+      const result = await bridge.downloadAppUpdate()
+      setAppUpdateDownload(result)
+      setAppUpdateProgress({
+        downloaded: result.size,
+        total: result.size,
+        percent: 100,
+        done: true,
+      })
+      showToast(t('toast.updateDownloaded'))
+    } catch {
+      showToast(t('toast.updateDownloadFail'))
+    } finally {
+      setAppUpdateDownloading(false)
+    }
+  }
+
+  const launchAppUpdate = async () => {
+    if (!appUpdateDownload) return
+    try {
+      await bridge.launchAppUpdate(appUpdateDownload.path)
+    } catch {
+      showToast(t('toast.updateInstallFail'))
+    }
+  }
+
+  const skipAppUpdate = () => {
+    const version = appUpdate?.latestVersion
+    if (!version) return
+    localStorage.setItem(SKIP_UPDATE_KEY, version)
+    setSkippedVersion(version)
+    setAppUpdateDismissed(true)
+    showToast(t('toast.updateSkipped', {version}))
+  }
+
+  const unskipAppUpdate = () => {
+    localStorage.removeItem(SKIP_UPDATE_KEY)
+    setSkippedVersion('')
+    setAppUpdateDismissed(false)
+  }
+
+  useEffect(() => bridge.onAppUpdateProgress((progress) => setAppUpdateProgress(progress)), [])
 
   useEffect(() => {
     document.documentElement.dataset.theme = theme
@@ -515,12 +580,33 @@ function App() {
         onClose={() => bridge.close()}
       />
 
-      {appUpdate?.available && !appUpdateDismissed && (
+      {appUpdate?.available && !appUpdateDismissed && appUpdate.latestVersion !== skippedVersion && (
         <div className="app-update-banner" role="status">
           <IconDownload size={16}/>
-          <span>{t('update.app.available', {version: appUpdate.latestVersion ?? ''})}</span>
-          <button className="btn btn-small btn-primary" type="button" onClick={() => void openAppUpdate()}>
-            {t('update.app.download')}
+          <span>
+            {t('update.app.available', {version: appUpdate.latestVersion ?? ''})}
+            {appUpdateDownload && <small className="app-update-banner-note">{t('update.app.ready')}</small>}
+          </span>
+          {appUpdateDownload ? (
+            <button className="btn btn-small btn-primary" type="button" onClick={() => void launchAppUpdate()}>
+              <IconCheck size={14}/>
+              {t('update.app.install')}
+            </button>
+          ) : (
+            <button
+              className="btn btn-small btn-primary"
+              type="button"
+              onClick={() => void downloadAppUpdate()}
+              disabled={appUpdateDownloading}
+            >
+              <IconDownload size={14}/>
+              {appUpdateDownloading
+                ? t('update.app.downloading', {percent: appUpdateProgress?.percent ?? 0})
+                : t('update.app.download')}
+            </button>
+          )}
+          <button className="btn btn-small btn-secondary" type="button" onClick={() => void openAppUpdate()}>
+            {t('update.app.notes')}
           </button>
           <button
             className="app-update-dismiss"
@@ -530,6 +616,11 @@ function App() {
           >
             <IconX size={14}/>
           </button>
+          {appUpdateDownloading && appUpdateProgress && (
+            <div className="app-update-progress" aria-hidden="true">
+              <span style={{width: `${appUpdateProgress.percent}%`}}/>
+            </div>
+          )}
         </div>
       )}
 
@@ -601,8 +692,17 @@ function App() {
               catalogRefreshing={catalogRefreshing}
               appUpdate={appUpdate}
               appUpdateLoading={appUpdateLoading}
+              appUpdateDownload={appUpdateDownload}
+              appUpdateProgress={appUpdateProgress}
+              appUpdateDownloading={appUpdateDownloading}
+              updateSkipped={Boolean(appUpdate?.latestVersion && appUpdate.latestVersion === skippedVersion)}
               onCheckAppUpdate={() => void checkAppUpdate(true)}
               onOpenAppUpdate={() => void openAppUpdate()}
+              onDownloadAppUpdate={() => void downloadAppUpdate()}
+              onLaunchAppUpdate={() => void launchAppUpdate()}
+              onOpenUpdatesFolder={() => void bridge.openUpdatesFolder()}
+              onSkipAppUpdate={skipAppUpdate}
+              onUnskipAppUpdate={unskipAppUpdate}
               onScan={refreshScan}
               onAdd={addToQueue}
               onToast={showToast}

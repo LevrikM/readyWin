@@ -1,8 +1,11 @@
 package main
 
 import (
+	"crypto/sha256"
 	"encoding/base64"
 	"encoding/json"
+	"fmt"
+	"io"
 	"net/http"
 	"net/http/httptest"
 	"os"
@@ -406,5 +409,216 @@ func TestFetchAppUpdate(t *testing.T) {
 	current := fetchAppUpdate(server.URL, "1.1.0")
 	if current.Available || current.Error != "" {
 		t.Fatalf("same version reported as update: %#v", current)
+	}
+}
+
+func TestUpdateHelpers(t *testing.T) {
+	valid := strings.Repeat("a", 64)
+	if got := normalizeSHA256("  " + strings.ToUpper(valid) + " "); got != valid {
+		t.Fatalf("normalizeSHA256 = %q", got)
+	}
+	if got := normalizeSHA256(strings.Repeat("g", 64)); got != "" {
+		t.Fatalf("invalid hex accepted: %q", got)
+	}
+	if got := normalizeSHA256(valid[:63]); got != "" {
+		t.Fatalf("short hash accepted: %q", got)
+	}
+
+	allowed := []string{
+		"https://github.com/LevrikM/readyWin/releases/download/v1.2.0/ReadyWin.exe",
+		"https://objects.githubusercontent.com/some/asset",
+	}
+	for _, raw := range allowed {
+		if err := validateUpdateURL(raw); err != nil {
+			t.Fatalf("validateUpdateURL(%q): %v", raw, err)
+		}
+	}
+	rejected := []string{
+		"http://github.com/ReadyWin.exe",
+		"https://example.com/ReadyWin.exe",
+		"https://evilgithub.com/ReadyWin.exe",
+		"https://github.com.evil.test/ReadyWin.exe",
+		"",
+	}
+	for _, raw := range rejected {
+		if err := validateUpdateURL(raw); err == nil {
+			t.Fatalf("validateUpdateURL accepted %q", raw)
+		}
+	}
+
+	cases := map[string]string{
+		"https://github.com/LevrikM/readyWin/releases/download/v1.2.0/ReadyWin.exe": "ReadyWin.exe",
+		"https://github.com/LevrikM/readyWin/releases/download/v1.2.0/..":           "ReadyWin-1.2.0.exe",
+		"https://github.com/LevrikM/readyWin/releases/download/v1.2.0/":             "ReadyWin-1.2.0.exe",
+		"https://github.com/LevrikM/readyWin/releases/download/v1.2.0/a:b%3F.exe":   "a-b-.exe",
+	}
+	for raw, want := range cases {
+		if got := safeUpdateName(raw, "1.2.0"); got != want {
+			t.Fatalf("safeUpdateName(%q) = %q, want %q", raw, got, want)
+		}
+	}
+}
+
+func TestMergeElevatedHealth(t *testing.T) {
+	wear := 7
+	temp := 41
+	base := HealthReport{
+		Disks: []DiskHealth{{Name: "Disk A", Media: "ssd", Health: "healthy", SizeGB: 100}},
+		Items: []HealthItem{
+			{ID: "bitlocker", Status: "unknown", Value: "unknown"},
+			{ID: "defender", Status: "ok"},
+		},
+		Error: "base disk error",
+	}
+	elevated := psElevatedHealth{
+		Disks: []psDisk{
+			{Name: "disk a", Media: "SSD", Health: "Healthy", Operational: "OK", Size: 100 << 30, Wear: &wear, Temperature: &temp},
+			{Name: "Disk B", Media: "HDD", Health: "Warning", Size: 2 << 30},
+		},
+		BitLocker: psBitLocker{Status: "On", Method: "XtsAes256"},
+	}
+
+	merged := mergeElevatedHealth(base, elevated)
+	if !merged.Elevated || merged.ElevatedError != "" || merged.Error != "" {
+		t.Fatalf("merged flags = %#v", merged)
+	}
+	if len(merged.Disks) != 2 {
+		t.Fatalf("disks = %#v", merged.Disks)
+	}
+	if merged.Disks[0].Name != "disk a" || merged.Disks[0].Wear == nil || *merged.Disks[0].Wear != wear || merged.Disks[0].Temperature == nil || *merged.Disks[0].Temperature != temp {
+		t.Fatalf("merged disk = %#v", merged.Disks[0])
+	}
+	if merged.Disks[1].Media != "hdd" || merged.Disks[1].SizeGB != 2 {
+		t.Fatalf("appended disk = %#v", merged.Disks[1])
+	}
+	if len(merged.Items) != 2 || merged.Items[0].ID != "bitlocker" || merged.Items[0].Status != "ok" || merged.Items[0].Value != "on" || merged.Items[0].Detail != "XtsAes256" {
+		t.Fatalf("bitlocker item = %#v", merged.Items)
+	}
+	if merged.Items[1].ID != "defender" {
+		t.Fatalf("unrelated item changed: %#v", merged.Items)
+	}
+}
+
+func TestBitlockerHealthItem(t *testing.T) {
+	cases := []struct {
+		status string
+		want   string
+	}{
+		{"on", "ok"},
+		{"off", "warn"},
+		{"", "unknown"},
+	}
+	for _, tc := range cases {
+		item := bitlockerHealthItem(psBitLocker{Status: tc.status, Method: " method "})
+		if item.ID != "bitlocker" || item.Status != tc.want || item.Detail != "method" {
+			t.Fatalf("bitlockerHealthItem(%q) = %#v", tc.status, item)
+		}
+	}
+}
+
+type updateRoundTripper struct {
+	api     string
+	asset   string
+	payload []byte
+	digest  string
+}
+
+func (rt *updateRoundTripper) RoundTrip(request *http.Request) (*http.Response, error) {
+	response := func(status int, body string) *http.Response {
+		return &http.Response{
+			StatusCode: status,
+			Status:     fmt.Sprintf("%d %s", status, http.StatusText(status)),
+			Header:     make(http.Header),
+			Body:       io.NopCloser(strings.NewReader(body)),
+			Request:    request,
+		}
+	}
+	switch request.URL.String() {
+	case rt.api:
+		body := fmt.Sprintf(`{"tag_name":"v9.9.9","name":"ReadyWin 9.9.9","body":"Notes","html_url":"https://github.com/LevrikM/readyWin/releases/tag/v9.9.9","published_at":"2026-10-22T10:00:00Z","assets":[{"name":"ReadyWin.exe","browser_download_url":%q,"size":%d,"digest":"sha256:%s"}]}`, rt.asset, len(rt.payload), rt.digest)
+		return response(http.StatusOK, body), nil
+	case rt.asset:
+		res := response(http.StatusOK, string(rt.payload))
+		res.ContentLength = int64(len(rt.payload))
+		return res, nil
+	default:
+		return response(http.StatusNotFound, ""), nil
+	}
+}
+
+func TestDownloadAppUpdate(t *testing.T) {
+	t.Setenv("LOCALAPPDATA", t.TempDir())
+
+	payload := []byte("first readywin build")
+	sum := sha256.Sum256(payload)
+	rt := &updateRoundTripper{
+		api:     "https://api.github.com/repos/LevrikM/readyWin/releases/latest",
+		asset:   "https://github.com/LevrikM/readyWin/releases/download/v9.9.9/ReadyWin.exe",
+		payload: payload,
+		digest:  fmt.Sprintf("%x", sum),
+	}
+	client := &http.Client{Transport: rt}
+
+	oldAPI, oldUpdateClient, oldDownloadClient := appReleaseURL, appUpdateHTTPClient, appDownloadClient
+	oldCache, oldCacheAt := appUpdateCache, appUpdateCacheAt
+	defer func() {
+		appReleaseURL, appUpdateHTTPClient, appDownloadClient = oldAPI, oldUpdateClient, oldDownloadClient
+		appUpdateCache, appUpdateCacheAt = oldCache, oldCacheAt
+	}()
+	resetUpdate := func() {
+		appReleaseURL = rt.api
+		appUpdateHTTPClient = client
+		appDownloadClient = client
+		appUpdateCache = nil
+		appUpdateCacheAt = time.Time{}
+	}
+
+	resetUpdate()
+	app := &App{}
+	first, err := app.DownloadAppUpdate()
+	if err != nil {
+		t.Fatal(err)
+	}
+	if first.SHA256 != rt.digest || first.Size != int64(len(payload)) {
+		t.Fatalf("download result = %#v", first)
+	}
+	stored, err := os.ReadFile(first.Path)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if string(stored) != string(payload) {
+		t.Fatalf("stored payload = %q", stored)
+	}
+
+	secondPayload := []byte("second readywin build, longer")
+	secondSum := sha256.Sum256(secondPayload)
+	rt.payload = secondPayload
+	rt.digest = fmt.Sprintf("%x", secondSum)
+	resetUpdate()
+	second, err := app.DownloadAppUpdate()
+	if err != nil {
+		t.Fatal(err)
+	}
+	if second.Path != first.Path {
+		t.Fatalf("path changed: %q != %q", second.Path, first.Path)
+	}
+	stored, err = os.ReadFile(second.Path)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if string(stored) != string(secondPayload) {
+		t.Fatalf("overwritten payload = %q", stored)
+	}
+
+	rt.digest = strings.Repeat("0", 64)
+	resetUpdate()
+	if _, err := app.DownloadAppUpdate(); err == nil || !strings.Contains(err.Error(), "SHA256") {
+		t.Fatalf("hash mismatch error = %v", err)
+	}
+	if _, err := os.Stat(second.Path + ".part"); !os.IsNotExist(err) {
+		t.Fatalf("partial file left behind: %v", err)
+	}
+	if stored, err := os.ReadFile(second.Path); err != nil || string(stored) != string(secondPayload) {
+		t.Fatalf("verified file was damaged: %q, %v", stored, err)
 	}
 }

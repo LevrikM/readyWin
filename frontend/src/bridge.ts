@@ -1,6 +1,8 @@
 import catalogJson from '../../shared/catalog.json'
 import type {
+  AppUpdateDownload,
   AppUpdateInfo,
+  AppUpdateProgress,
   Catalog,
   CatalogRefreshResult,
   CatalogStatus,
@@ -36,6 +38,7 @@ type WailsApp = {
   GetHistory: () => Promise<HistoryEntry[]>
   ClearHistory: () => Promise<void>
   GetHealth: (force: boolean) => Promise<HealthReport>
+  GetHealthElevated: () => Promise<HealthReport>
   GetStartup: () => Promise<StartupReport>
   SetStartupEnabled: (id: string, enabled: boolean) => Promise<void>
   ExportProfile: (ids: string[], settings: Record<string, string>) => Promise<TransferResult>
@@ -46,6 +49,9 @@ type WailsApp = {
   OpenDataFolder: () => Promise<void>
   GetVersion: () => Promise<string>
   GetAppUpdate: (force: boolean) => Promise<AppUpdateInfo>
+  DownloadAppUpdate: () => Promise<AppUpdateDownload>
+  LaunchAppUpdate: (path: string) => Promise<void>
+  OpenUpdatesFolder: () => Promise<void>
   SetLanguage: (lang: string) => void
   Minimise: () => void
   ToggleMaximise: () => void
@@ -54,7 +60,7 @@ type WailsApp = {
 }
 
 type WailsRuntime = {
-  EventsOn: (name: string, callback: (event: InstallEvent) => void) => () => void
+  EventsOn: <T>(name: string, callback: (event: T) => void) => () => void
   EventsOff: (name: string) => void
   WindowMinimise: () => void
   WindowToggleMaximise: () => void
@@ -539,6 +545,12 @@ export const bridge = {
     await new Promise((resolve) => window.setTimeout(resolve, force ? 620 : 180))
     return mockHealth()
   },
+  getHealthElevated: async (): Promise<HealthReport> => {
+    const app = wailsApp()
+    if (app) return app.GetHealthElevated()
+    await new Promise((resolve) => window.setTimeout(resolve, 650))
+    return {...mockHealth(), elevated: true}
+  },
   getStartup: async (): Promise<StartupReport> => {
     const app = wailsApp()
     if (app) return app.GetStartup()
@@ -625,17 +637,34 @@ export const bridge = {
   },
   getVersion: async (): Promise<string> => {
     const app = wailsApp()
-    return app ? app.GetVersion() : '1.1.0'
+    return app ? app.GetVersion() : '1.2.0'
   },
   getAppUpdate: async (force: boolean): Promise<AppUpdateInfo> => {
     const app = wailsApp()
     if (app) return app.GetAppUpdate(force)
     return {
-      currentVersion: '1.1.0',
-      latestVersion: '1.1.0',
+      currentVersion: '1.2.0',
+      latestVersion: '1.2.0',
       available: false,
       checkedAt: new Date().toISOString(),
     }
+  },
+  downloadAppUpdate: async (): Promise<AppUpdateDownload> => {
+    const app = wailsApp()
+    if (app) return app.DownloadAppUpdate()
+    throw new Error('demo')
+  },
+  launchAppUpdate: async (path: string): Promise<void> => {
+    const app = wailsApp()
+    if (app) await app.LaunchAppUpdate(path)
+  },
+  openUpdatesFolder: async (): Promise<void> => {
+    const app = wailsApp()
+    if (app) await app.OpenUpdatesFolder()
+  },
+  onAppUpdateProgress: (callback: (progress: AppUpdateProgress) => void): (() => void) => {
+    if (window.runtime) return window.runtime.EventsOn('appupdate:progress', callback)
+    return () => undefined
   },
   setLanguage: (lang: string) => {
     wailsApp()?.SetLanguage?.(lang)
