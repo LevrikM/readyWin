@@ -5,9 +5,13 @@ import type {
   AppUpdateProgress,
   AppUpdateResult,
   AppUpdateSettings,
+  BatteryHealth,
   Catalog,
   CatalogRefreshResult,
   CatalogStatus,
+  DiskCleanResult,
+  DiskUsageReport,
+  EventLogReport,
   HealthReport,
   HistoryEntry,
   ImportResult,
@@ -20,6 +24,8 @@ import type {
   SystemCheck,
   TransferResult,
   UpdateReport,
+  WindowsUpdateState,
+  WingetSearchResult,
 } from './types'
 
 const catalog = catalogJson as Catalog
@@ -41,6 +47,15 @@ type WailsApp = {
   ClearHistory: () => Promise<void>
   GetHealth: (force: boolean) => Promise<HealthReport>
   GetHealthElevated: () => Promise<HealthReport>
+  GetBatteryHealth: (force: boolean) => Promise<BatteryHealth>
+  GetEventLog: (force: boolean) => Promise<EventLogReport>
+  GetDiskUsage: (force: boolean) => Promise<DiskUsageReport>
+  CleanDisk: (ids: string[]) => Promise<DiskCleanResult>
+  GetWindowsUpdate: (force: boolean) => Promise<WindowsUpdateState>
+  PauseWindowsUpdates: (days: number) => Promise<WindowsUpdateState>
+  ResumeWindowsUpdates: () => Promise<WindowsUpdateState>
+  SearchWinget: (query: string) => Promise<WingetSearchResult>
+  InstallWingetPackage: (id: string, name: string) => Promise<InstallState>
   GetStartup: () => Promise<StartupReport>
   SetStartupEnabled: (id: string, enabled: boolean) => Promise<void>
   ExportProfile: (ids: string[], settings: Record<string, string>) => Promise<TransferResult>
@@ -447,7 +462,7 @@ function mockHealth(): HealthReport {
       {id: 'activation', status: 'ok', value: 'licensed', detail: 'Windows 11 Pro'},
       {id: 'windowsUpdate', status: 'ok', value: 'KB5066835', detail: '2026-10-14T00:00:00Z'},
       {id: 'restorePoint', status: 'ok', value: '2026-10-18T09:12:00Z', detail: 'ReadyWin'},
-      {id: 'battery', status: 'na'},
+      {id: 'battery', status: 'ok', value: '84', detail: '214'},
       {id: 'uptime', status: 'info', value: '3d 4h'},
       {id: 'memory', status: 'ok', value: '18.4 GB', detail: '32 GB'},
       {id: 'disk', status: 'ok', value: '412.7 GB', detail: '931 GB'},
@@ -503,7 +518,106 @@ let mockStartup: StartupEntry[] = [
   },
 ]
 
+function mockBattery(): BatteryHealth {
+  return {
+    present: true,
+    charge: 76,
+    status: 'charging',
+    designMah: 57000,
+    fullMah: 48200,
+    healthPct: 84,
+    cycles: 214,
+    chemistry: 'Li-I',
+    manufacturer: 'Example Cells',
+  }
+}
+
+function mockEventLog(): EventLogReport {
+  return {
+    checkedAt: new Date().toISOString(),
+    days: 7,
+    total: 62,
+    groups: [
+      {
+        source: 'Microsoft-Windows-WindowsUpdateClient',
+        id: 20,
+        level: 2,
+        count: 6,
+        last: '2026-10-23T18:48:13Z',
+        message: 'Installation failed with error 0x80073D02.',
+      },
+      {
+        source: 'Service Control Manager',
+        id: 7009,
+        level: 2,
+        count: 4,
+        last: '2026-10-22T12:29:15Z',
+        message: 'Timeout (30000 ms) waiting for the Steam Client Service to connect.',
+      },
+      {
+        source: 'BTHUSB',
+        id: 5,
+        level: 2,
+        count: 3,
+        last: '2026-10-24T13:21:57Z',
+        message: 'The Bluetooth driver expected an HCI event of a certain size but did not receive it.',
+      },
+    ],
+  }
+}
+
+const mockDiskSeed = [
+  {id: 'userTemp', label: 'Temporary files', path: 'C:\\Users\\misha\\AppData\\Local\\Temp', safe: true, bytes: 1288490188, files: 4120},
+  {id: 'windowsTemp', label: 'Windows temp', path: 'C:\\Windows\\Temp', safe: true, bytes: 402653184, files: 830},
+  {id: 'windowsUpdate', label: 'Windows Update cache', path: 'C:\\Windows\\SoftwareDistribution\\Download', safe: true, bytes: 1717986918, files: 212},
+  {id: 'deliveryOptimization', label: 'Delivery Optimization cache', path: 'C:\\Windows\\ServiceProfiles\\NetworkService\\AppData\\Local\\Microsoft\\Windows\\DeliveryOptimization\\Cache', safe: true, bytes: 734003200, files: 96},
+  {id: 'crashDumps', label: 'Crash dumps', path: 'C:\\Users\\misha\\AppData\\Local\\CrashDumps', safe: true, bytes: 88080384, files: 3},
+  {id: 'thumbnails', label: 'Thumbnail cache', path: 'C:\\Users\\misha\\AppData\\Local\\Microsoft\\Windows\\Explorer', safe: true, bytes: 24117248, files: 14},
+  {id: 'downloads', label: 'Downloads', path: 'C:\\Users\\misha\\Downloads', safe: false, bytes: 12884901888, files: 1180},
+  {id: 'desktop', label: 'Desktop', path: 'C:\\Users\\misha\\Desktop', safe: false, bytes: 3221225472, files: 240},
+  {id: 'documents', label: 'Documents', path: 'C:\\Users\\misha\\Documents', safe: false, bytes: 5368709120, files: 860},
+]
+let mockDisk = mockDiskSeed.map((entry) => ({...entry, exists: true, children: []}))
+
+function mockDiskUsage(): DiskUsageReport {
+  return {
+    checkedAt: new Date().toISOString(),
+    diskTotalGb: 931,
+    diskFreeGb: 412,
+    scanMs: 1800,
+    entries: mockDisk.map((entry) => ({...entry, children: []})),
+  }
+}
+
+function mockWindowsUpdate(): WindowsUpdateState {
+  return {
+    checkedAt: new Date().toISOString(),
+    edition: 'Windows 11 Pro',
+    displayVersion: '24H2',
+    build: '26100.2033',
+    activation: 'licensed',
+    licenseName: 'Windows(R), Professional edition',
+    licenseKind: 'Retail',
+    latestHotfix: 'KB5066835',
+    hotfixDate: '2026-10-14T00:00:00Z',
+    paused: false,
+  }
+}
+
+const mockWingetCatalog = [
+  {id: 'VideoLAN.VLC', name: 'VLC media player', version: '3.0.24'},
+  {id: '7zip.7zip', name: '7-Zip', version: '24.09'},
+  {id: 'Notepad++.Notepad++', name: 'Notepad++', version: '8.7.1'},
+  {id: 'Git.Git', name: 'Git', version: '2.47.0'},
+  {id: 'Python.Python.3.13', name: 'Python 3.13', version: '3.13.0'},
+  {id: 'OBSProject.OBSStudio', name: 'OBS Studio', version: '31.0.0'},
+  {id: 'Discord.Discord', name: 'Discord', version: '1.0.9170'},
+  {id: 'Valve.Steam', name: 'Steam', version: '2.10.91.91'},
+  {id: 'Bitwarden.Bitwarden', name: 'Bitwarden', version: '2024.11.2'},
+]
+
 export const bridge = {
+
   getCatalog: async (): Promise<Catalog> => {
     const app = wailsApp()
     return app ? app.GetCatalog() : catalog
@@ -555,6 +669,64 @@ export const bridge = {
     if (app) return app.GetHealthElevated()
     await new Promise((resolve) => window.setTimeout(resolve, 650))
     return {...mockHealth(), elevated: true}
+  },
+  getBatteryHealth: async (force: boolean): Promise<BatteryHealth> => {
+    const app = wailsApp()
+    if (app) return app.GetBatteryHealth(force)
+    await new Promise((resolve) => window.setTimeout(resolve, force ? 400 : 120))
+    return mockBattery()
+  },
+  getEventLog: async (force: boolean): Promise<EventLogReport> => {
+    const app = wailsApp()
+    if (app) return app.GetEventLog(force)
+    await new Promise((resolve) => window.setTimeout(resolve, force ? 700 : 180))
+    return mockEventLog()
+  },
+  getDiskUsage: async (force: boolean): Promise<DiskUsageReport> => {
+    const app = wailsApp()
+    if (app) return app.GetDiskUsage(force)
+    await new Promise((resolve) => window.setTimeout(resolve, force ? 900 : 200))
+    return mockDiskUsage()
+  },
+  cleanDisk: async (ids: string[]): Promise<DiskCleanResult> => {
+    const app = wailsApp()
+    if (app) return app.CleanDisk(ids)
+    const selected = mockDisk.filter((entry) => entry.safe && ids.includes(entry.id))
+    const freedBytes = selected.reduce((sum, entry) => sum + entry.bytes, 0)
+    mockDisk = mockDisk.map((entry) => (ids.includes(entry.id) ? {...entry, bytes: 0, files: 0} : entry))
+    return {freedBytes, removed: selected.length, failed: 0, needsAdmin: false}
+  },
+  getWindowsUpdate: async (force: boolean): Promise<WindowsUpdateState> => {
+    const app = wailsApp()
+    if (app) return app.GetWindowsUpdate(force)
+    await new Promise((resolve) => window.setTimeout(resolve, force ? 500 : 150))
+    return mockWindowsUpdate()
+  },
+  pauseWindowsUpdates: async (days: number): Promise<WindowsUpdateState> => {
+    const app = wailsApp()
+    if (app) return app.PauseWindowsUpdates(days)
+    const until = new Date(Date.now() + days * 86400000).toISOString()
+    return {...mockWindowsUpdate(), paused: true, pausedUntil: until, pauseDays: days}
+  },
+  resumeWindowsUpdates: async (): Promise<WindowsUpdateState> => {
+    const app = wailsApp()
+    if (app) return app.ResumeWindowsUpdates()
+    return mockWindowsUpdate()
+  },
+  searchWinget: async (query: string): Promise<WingetSearchResult> => {
+    const app = wailsApp()
+    if (app) return app.SearchWinget(query)
+    await new Promise((resolve) => window.setTimeout(resolve, 380))
+    const needle = query.trim().toLowerCase()
+    const results = needle.length < 2
+      ? []
+      : mockWingetCatalog.filter((item) => item.name.toLowerCase().includes(needle) || item.id.toLowerCase().includes(needle))
+    return {query, checkedAt: new Date().toISOString(), results}
+  },
+  installWingetPackage: async (id: string, name: string): Promise<InstallState> => {
+    const app = wailsApp()
+    if (app) return app.InstallWingetPackage(id, name)
+    return startMockInstall([id], 'install')
   },
   getStartup: async (): Promise<StartupReport> => {
     const app = wailsApp()

@@ -1,11 +1,12 @@
-import {useDeferredValue} from 'react'
+import {useDeferredValue, useState} from 'react'
 import type {RefObject} from 'react'
-import type {Catalog as CatalogType, Item, ScanResult, UpdateReport} from '../types'
+import type {Catalog as CatalogType, Item, ScanResult, UpdateReport, WingetSearchResult} from '../types'
+import {bridge} from '../bridge'
 import {formatSize} from '../format'
 import {useI18n} from '../i18n'
 import {groupName} from '../catalogText'
-import {IconCheck, IconPlus, IconSearch, IconX} from '../uiIcons'
-import {IconTile, Kbd} from '../components/Primitives'
+import {IconCheck, IconPlus, IconSearch, IconX, Spinner} from '../uiIcons'
+import {IconTile, Kbd, SectionHeader} from '../components/Primitives'
 
 type StatusFilter = 'all' | 'missing' | 'installed' | 'updates'
 
@@ -26,6 +27,7 @@ export function Catalog({
   onOpenItem,
   searchRef,
   scanning,
+  onToast,
 }: {
   catalog: CatalogType
   scan: ScanResult | null
@@ -43,8 +45,14 @@ export function Catalog({
   onOpenItem: (item: Item) => void
   searchRef: RefObject<HTMLInputElement | null>
   scanning: boolean
+  onToast: (message: string) => void
 }) {
   const {lang, locale, t, tc} = useI18n()
+  const [wingetQuery, setWingetQuery] = useState('')
+  const [wingetSearch, setWingetSearch] = useState<WingetSearchResult | null>(null)
+  const [wingetLoading, setWingetLoading] = useState(false)
+  const [wingetConfirm, setWingetConfirm] = useState<string | null>(null)
+  const [wingetInstalling, setWingetInstalling] = useState<string | null>(null)
   const deferredQuery = useDeferredValue(query)
   const installed = scan?.installed ?? {}
   const installedSet = new Set(Object.keys(installed))
@@ -88,6 +96,42 @@ export function Catalog({
     setActiveGroup('all')
     setStatusFilter('all')
     searchRef.current?.focus()
+  }
+
+  const runWingetSearch = async () => {
+    const value = wingetQuery.trim()
+    if (value.length < 2) return
+    setWingetLoading(true)
+    setWingetConfirm(null)
+    try {
+      setWingetSearch(await bridge.searchWinget(value))
+    } catch (error) {
+      setWingetSearch({
+        query: value,
+        checkedAt: new Date().toISOString(),
+        results: [],
+        error: error instanceof Error ? error.message : String(error),
+      })
+    } finally {
+      setWingetLoading(false)
+    }
+  }
+
+  const installWinget = async (id: string, name: string) => {
+    if (wingetConfirm !== id) {
+      setWingetConfirm(id)
+      return
+    }
+    setWingetInstalling(id)
+    try {
+      await bridge.installWingetPackage(id, name)
+      onToast(t('toast.wingetStarted', {name}))
+      setWingetConfirm(null)
+    } catch {
+      onToast(t('toast.wingetFail'))
+    } finally {
+      setWingetInstalling(null)
+    }
   }
 
   return (
@@ -284,6 +328,65 @@ export function Catalog({
           </button>
         </div>
       )}
+
+      <section className="section winget-section">
+        <SectionHeader title={t('cat.winget.title')} meta={t('cat.winget.meta')}/>
+        <form
+          className="winget-search"
+          onSubmit={(event) => {
+            event.preventDefault()
+            void runWingetSearch()
+          }}
+        >
+          <IconSearch size={17}/>
+          <input
+            value={wingetQuery}
+            onChange={(event) => setWingetQuery(event.target.value)}
+            placeholder={t('cat.winget.placeholder')}
+            aria-label={t('cat.winget.placeholder')}
+            autoComplete="off"
+          />
+          <button
+            className="btn btn-secondary btn-small"
+            type="submit"
+            disabled={wingetLoading || wingetQuery.trim().length < 2}
+          >
+            {wingetLoading ? <Spinner size={14}/> : null}
+            {t('cat.winget.search')}
+          </button>
+        </form>
+        <p className="catalog-note">{t('cat.winget.note')}</p>
+        {wingetSearch?.error && (
+          <div className="health-inline-error">
+            <span className="mono">{wingetSearch.error}</span>
+          </div>
+        )}
+        {wingetSearch && wingetSearch.results.length > 0 && (
+          <div className="winget-results">
+            {wingetSearch.results.map((result) => (
+              <div className="winget-row" key={result.id}>
+                <div className="winget-copy">
+                  <strong>{result.name}</strong>
+                  <span className="mono">{result.id}{result.version ? ` · ${result.version}` : ''}</span>
+                  {result.match && <span className="winget-match">{result.match}</span>}
+                </div>
+                <button
+                  className={`btn btn-small ${wingetConfirm === result.id ? 'btn-primary' : 'btn-secondary'}`}
+                  type="button"
+                  onClick={() => void installWinget(result.id, result.name)}
+                  disabled={wingetInstalling !== null}
+                >
+                  {wingetInstalling === result.id ? <Spinner size={13}/> : null}
+                  {wingetConfirm === result.id ? t('cat.winget.confirm') : t('cat.winget.install')}
+                </button>
+              </div>
+            ))}
+          </div>
+        )}
+        {wingetSearch && wingetSearch.results.length === 0 && !wingetSearch.error && (
+          <div className="empty-inline">{t('cat.winget.empty')}</div>
+        )}
+      </section>
     </div>
   )
 }

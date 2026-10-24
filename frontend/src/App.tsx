@@ -27,6 +27,7 @@ import {IconCheck, IconDownload, IconInfo, IconX} from './uiIcons'
 import {Overview} from './pages/Overview'
 import {Catalog as CatalogPage} from './pages/Catalog'
 import {SystemPage} from './pages/System'
+import {SettingsPage} from './pages/Settings'
 import {HealthPage} from './pages/Health'
 import {HistoryPage} from './pages/History'
 
@@ -654,10 +655,7 @@ function App() {
           totalCount={catalog.items.length}
           queueCount={queue.length}
           onOpenQueue={() => setDrawerOpen(true)}
-          theme={theme}
-          onToggleTheme={() => setTheme((value) => (value === 'light' ? 'dark' : 'light'))}
           version={version}
-          onOpenDataFolder={openDataFolder}
         />
 
         <main className="main" ref={mainRef}>
@@ -696,6 +694,7 @@ function App() {
               onOpenItem={setSelected}
               searchRef={searchRef}
               scanning={scanning}
+              onToast={showToast}
             />
           )}
           {page === 'health' && (
@@ -712,21 +711,6 @@ function App() {
               queue={queue}
               catalogStatus={catalogStatus}
               catalogRefreshing={catalogRefreshing}
-              appUpdate={appUpdate}
-              appUpdateLoading={appUpdateLoading}
-              appUpdateDownload={appUpdateDownload}
-              appUpdateProgress={appUpdateProgress}
-              appUpdateDownloading={appUpdateDownloading}
-              applyingUpdate={applyingUpdate}
-              updateSettings={updateSettings}
-              updateSkipped={Boolean(appUpdate?.latestVersion && appUpdate.latestVersion === skippedVersion)}
-              onCheckAppUpdate={() => void checkAppUpdate(true)}
-              onOpenAppUpdate={() => void openAppUpdate()}
-              onRunAppUpdate={() => void runAppUpdate()}
-              onChangeUpdateSettings={(autoCheck, autoDownload) => void changeUpdateSettings(autoCheck, autoDownload)}
-              onOpenUpdatesFolder={() => void bridge.openUpdatesFolder()}
-              onSkipAppUpdate={skipAppUpdate}
-              onUnskipAppUpdate={unskipAppUpdate}
               onScan={refreshScan}
               onAdd={addToQueue}
               onToast={showToast}
@@ -736,6 +720,29 @@ function App() {
               onImportProfile={() => void importProfile()}
               onExportWinget={() => void exportWinget()}
               onImportWinget={() => void importWinget()}
+            />
+          )}
+          {page === 'settings' && (
+            <SettingsPage
+              version={version}
+              theme={theme}
+              appUpdate={appUpdate}
+              appUpdateLoading={appUpdateLoading}
+              appUpdateDownload={appUpdateDownload}
+              appUpdateProgress={appUpdateProgress}
+              appUpdateDownloading={appUpdateDownloading}
+              applyingUpdate={applyingUpdate}
+              updateSettings={updateSettings}
+              updateSkipped={Boolean(appUpdate?.latestVersion && appUpdate.latestVersion === skippedVersion)}
+              onToggleTheme={() => setTheme((value) => (value === 'light' ? 'dark' : 'light'))}
+              onCheckAppUpdate={() => void checkAppUpdate(true)}
+              onOpenAppUpdate={() => void openAppUpdate()}
+              onRunAppUpdate={() => void runAppUpdate()}
+              onChangeUpdateSettings={(autoCheck, autoDownload) => void changeUpdateSettings(autoCheck, autoDownload)}
+              onOpenUpdatesFolder={() => void bridge.openUpdatesFolder()}
+              onSkipAppUpdate={skipAppUpdate}
+              onUnskipAppUpdate={unskipAppUpdate}
+              onOpenDataFolder={openDataFolder}
             />
           )}
           {page === 'history' && (

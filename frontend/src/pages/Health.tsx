@@ -1,5 +1,16 @@
 import {useCallback, useEffect, useState} from 'react'
-import type {DiskHealth, HealthItem, HealthReport, ScanResult, StartupEntry, StartupReport} from '../types'
+import type {
+  BatteryHealth,
+  DiskHealth,
+  DiskUsageReport,
+  EventLogReport,
+  HealthItem,
+  HealthReport,
+  ScanResult,
+  StartupEntry,
+  StartupReport,
+  WindowsUpdateState,
+} from '../types'
 import {bridge} from '../bridge'
 import {formatDateTime} from '../format'
 import {useI18n} from '../i18n'
@@ -10,6 +21,7 @@ import {
   IconCircleX,
   IconRefresh,
   IconShield,
+  IconTrash,
   Spinner,
 } from '../uiIcons'
 import {SectionHeader} from '../components/Primitives'
@@ -76,6 +88,18 @@ function DiskCard({disk}: {disk: DiskHealth}) {
   )
 }
 
+function formatBytes(bytes: number): string {
+  if (!Number.isFinite(bytes) || bytes <= 0) return '0 B'
+  const units = ['B', 'KB', 'MB', 'GB', 'TB']
+  let value = bytes
+  let unit = 0
+  while (value >= 1024 && unit < units.length - 1) {
+    value /= 1024
+    unit++
+  }
+  return `${value >= 10 || unit === 0 ? Math.round(value) : value.toFixed(1)} ${units[unit]}`
+}
+
 type StartupFilter = 'all' | 'enabled' | 'disabled'
 
 export function HealthPage({scan, onToast}: {scan: ScanResult | null; onToast: (message: string) => void}) {
@@ -87,6 +111,16 @@ export function HealthPage({scan, onToast}: {scan: ScanResult | null; onToast: (
   const [toggling, setToggling] = useState<string | null>(null)
   const [startupFilter, setStartupFilter] = useState<StartupFilter>('all')
   const [elevatedLoading, setElevatedLoading] = useState(false)
+  const [battery, setBattery] = useState<BatteryHealth | null>(null)
+  const [eventLog, setEventLog] = useState<EventLogReport | null>(null)
+  const [diskUsage, setDiskUsage] = useState<DiskUsageReport | null>(null)
+  const [diskLoading, setDiskLoading] = useState(false)
+  const [windowsUpdate, setWindowsUpdate] = useState<WindowsUpdateState | null>(null)
+  const [extrasLoading, setExtrasLoading] = useState(false)
+  const [diskSelection, setDiskSelection] = useState<string[]>([])
+  const [cleanConfirm, setCleanConfirm] = useState(false)
+  const [cleaning, setCleaning] = useState(false)
+  const [pausing, setPausing] = useState<number | 'resume' | null>(null)
 
   const load = useCallback(async (force: boolean) => {
     setLoading(true)
@@ -121,6 +155,25 @@ export function HealthPage({scan, onToast}: {scan: ScanResult | null; onToast: (
   useEffect(() => {
     void load(false)
   }, [load])
+
+  const loadExtras = useCallback(async (force: boolean) => {
+    setExtrasLoading(true)
+    const [batteryResult, eventsResult, diskResult, updateResult] = await Promise.allSettled([
+      bridge.getBatteryHealth(force),
+      bridge.getEventLog(force),
+      bridge.getDiskUsage(force),
+      bridge.getWindowsUpdate(force),
+    ])
+    if (batteryResult.status === 'fulfilled') setBattery(batteryResult.value)
+    if (eventsResult.status === 'fulfilled') setEventLog(eventsResult.value)
+    if (diskResult.status === 'fulfilled') setDiskUsage(diskResult.value)
+    if (updateResult.status === 'fulfilled') setWindowsUpdate(updateResult.value)
+    setExtrasLoading(false)
+  }, [])
+
+  useEffect(() => {
+    void loadExtras(false)
+  }, [loadExtras])
 
   const loadElevated = async () => {
     setElevatedLoading(true)
@@ -157,6 +210,55 @@ export function HealthPage({scan, onToast}: {scan: ScanResult | null; onToast: (
     }
   }
 
+  const pauseUpdates = async (days: number) => {
+    setPausing(days)
+    try {
+      setWindowsUpdate(await bridge.pauseWindowsUpdates(days))
+      onToast(t('toast.updatesPaused', {days}))
+    } catch {
+      onToast(t('toast.updatesPauseFail'))
+    } finally {
+      setPausing(null)
+    }
+  }
+
+  const resumeUpdates = async () => {
+    setPausing('resume')
+    try {
+      setWindowsUpdate(await bridge.resumeWindowsUpdates())
+      onToast(t('toast.updatesResumed'))
+    } catch {
+      onToast(t('toast.updatesResumeFail'))
+    } finally {
+      setPausing(null)
+    }
+  }
+
+  const toggleDiskTarget = (id: string) => {
+    setCleanConfirm(false)
+    setDiskSelection((current) => (current.includes(id) ? current.filter((item) => item !== id) : [...current, id]))
+  }
+
+  const cleanDisk = async () => {
+    if (!cleanConfirm) {
+      setCleanConfirm(true)
+      return
+    }
+    setCleaning(true)
+    try {
+      const result = await bridge.cleanDisk(diskSelection)
+      onToast(t('toast.diskCleaned', {size: formatBytes(result.freedBytes), count: result.removed}))
+      setDiskSelection([])
+      setCleanConfirm(false)
+      setDiskLoading(true)
+      setDiskUsage(await bridge.getDiskUsage(true))
+    } catch {
+      onToast(t('toast.diskCleanFail'))
+    } finally {
+      setCleaning(false)
+      setDiskLoading(false)
+    }
+  }
   const items = health?.items ?? []
   const itemMap = new Map(items.map((item) => [item.id, item]))
   const okCount = items.filter((item) => item.status === 'ok').length
@@ -329,6 +431,235 @@ export function HealthPage({scan, onToast}: {scan: ScanResult | null; onToast: (
           </div>
         </section>
       )}
+
+      <section className="section">
+        <SectionHeader
+          title={t('health.batteryDetails.title')}
+          meta={battery?.present ? t('health.batteryDetails.meta') : undefined}
+          action={
+            <button className="text-button" type="button" onClick={() => void loadExtras(true)} disabled={extrasLoading}>
+              {extrasLoading ? <Spinner size={14}/> : <IconRefresh size={14}/>}
+              {t('health.refresh')}
+            </button>
+          }
+        />
+        {battery?.present ? (
+          <div className="diag-grid">
+            <article className="diag-card">
+              <div className="diag-head">
+                <HealthMark status={(battery.healthPct ?? 100) < 50 ? 'bad' : (battery.healthPct ?? 100) < 70 ? 'warn' : 'ok'} size={17}/>
+                <strong>{t('health.batteryDetails.health')}</strong>
+              </div>
+              <span className="diag-big mono">{battery.healthPct ?? '—'}%</span>
+              <div className="diag-bar" aria-hidden="true">
+                <span style={{width: `${Math.min(100, battery.healthPct ?? 0)}%`}}/>
+              </div>
+              <span className="diag-note">
+                {t('health.batteryDetails.capacity', {
+                  full: battery.fullMah ?? 0,
+                  design: battery.designMah ?? 0,
+                })}
+              </span>
+            </article>
+            <article className="diag-card">
+              <div className="diag-head">
+                <HealthMark status="info" size={17}/>
+                <strong>{t('health.batteryDetails.charge')}</strong>
+              </div>
+              <span className="diag-big mono">{battery.charge ?? '—'}%</span>
+              <span className="diag-note">
+                {t(`health.batteryDetails.status.${battery.status ?? 'unknown'}` as TranslationKey)}
+              </span>
+              {typeof battery.runtimeMin === 'number' && battery.runtimeMin > 0 && (
+                <span className="diag-note">{t('health.batteryDetails.runtime', {time: `${Math.floor(battery.runtimeMin / 60)}h ${battery.runtimeMin % 60}m`})}</span>
+              )}
+            </article>
+            <article className="diag-card">
+              <div className="diag-head">
+                <HealthMark status="info" size={17}/>
+                <strong>{t('health.batteryDetails.cells')}</strong>
+              </div>
+              <span className="diag-note">{t('health.batteryDetails.cycles', {count: battery.cycles ?? 0})}</span>
+              {battery.chemistry && <span className="diag-note mono">{battery.chemistry}</span>}
+              {battery.manufacturer && <span className="diag-note">{battery.manufacturer}</span>}
+            </article>
+          </div>
+        ) : (
+          !extrasLoading && <div className="empty-inline">{t('health.battery.desktop')}</div>
+        )}
+      </section>
+
+      <section className="section">
+        <SectionHeader
+          title={t('health.windowsUpdate.title')}
+          meta={windowsUpdate?.edition}
+          action={
+            <button className="text-button" type="button" onClick={() => void loadExtras(true)} disabled={extrasLoading}>
+              {extrasLoading ? <Spinner size={14}/> : <IconRefresh size={14}/>}
+              {t('health.refresh')}
+            </button>
+          }
+        />
+        {windowsUpdate ? (
+          <>
+            <div className="diag-info-grid">
+              <div><span>{t('health.windowsUpdate.edition')}</span><strong>{windowsUpdate.edition ?? '—'}</strong></div>
+              <div><span>{t('health.windowsUpdate.build')}</span><strong className="mono">{windowsUpdate.displayVersion ?? ''} {windowsUpdate.build ?? ''}</strong></div>
+              <div><span>{t('health.windowsUpdate.activation')}</span><strong>{windowsUpdate.activation ? t(`health.value.activation.${windowsUpdate.activation}` as TranslationKey) : '—'}</strong></div>
+              <div><span>{t('health.windowsUpdate.license')}</span><strong>{windowsUpdate.licenseKind || windowsUpdate.licenseName || '—'}</strong></div>
+              <div><span>{t('health.windowsUpdate.hotfix')}</span><strong className="mono">{windowsUpdate.latestHotfix ?? '—'}</strong></div>
+              <div><span>{t('health.windowsUpdate.hotfixDate')}</span><strong>{windowsUpdate.hotfixDate ? formatDateTime(windowsUpdate.hotfixDate) : '—'}</strong></div>
+            </div>
+            <div className={`update-pause ${windowsUpdate.paused ? 'is-paused' : ''}`}>
+              <div>
+                <strong>{windowsUpdate.paused ? t('health.windowsUpdate.paused') : t('health.windowsUpdate.active')}</strong>
+                <span>
+                  {windowsUpdate.paused && windowsUpdate.pausedUntil
+                    ? t('health.windowsUpdate.pausedUntil', {date: formatDateTime(windowsUpdate.pausedUntil)})
+                    : t('health.windowsUpdate.pauseNote')}
+                </span>
+              </div>
+              <div className="update-pause-actions">
+                {windowsUpdate.paused ? (
+                  <button className="btn btn-secondary btn-small" type="button" onClick={() => void resumeUpdates()} disabled={pausing !== null}>
+                    {pausing === 'resume' ? <Spinner size={13}/> : null}
+                    {t('health.windowsUpdate.resume')}
+                  </button>
+                ) : (
+                  [7, 14, 35].map((days) => (
+                    <button
+                      className="btn btn-secondary btn-small"
+                      type="button"
+                      key={days}
+                      onClick={() => void pauseUpdates(days)}
+                      disabled={pausing !== null}
+                    >
+                      {pausing === days ? <Spinner size={13}/> : null}
+                      {t('health.windowsUpdate.pause', {days})}
+                    </button>
+                  ))
+                )}
+              </div>
+            </div>
+          </>
+        ) : (
+          !extrasLoading && <div className="empty-inline">{t('empty.scanPending')}</div>
+        )}
+      </section>
+
+      <section className="section">
+        <SectionHeader
+          title={t('health.diskUsage.title')}
+          meta={diskUsage ? t('health.diskUsage.meta', {free: formatBytes(diskUsage.diskFreeGb * 1024 ** 3), total: formatBytes(diskUsage.diskTotalGb * 1024 ** 3)}) : undefined}
+          action={
+            <button
+              className="text-button"
+              type="button"
+              onClick={async () => {
+                setDiskLoading(true)
+                try {
+                  setDiskUsage(await bridge.getDiskUsage(true))
+                } finally {
+                  setDiskLoading(false)
+                }
+              }}
+              disabled={diskLoading}
+            >
+              {diskLoading ? <Spinner size={14}/> : <IconRefresh size={14}/>}
+              {t('health.diskUsage.analyze')}
+            </button>
+          }
+        />
+        {diskUsage ? (
+          <>
+            <div className="disk-clean-list">
+              {diskUsage.entries.filter((entry) => entry.exists).map((entry) => (
+                <div key={entry.id} className={`disk-clean-row ${entry.safe ? '' : 'is-readonly'}`}>
+                  <div className="disk-clean-main">
+                    {entry.safe && (
+                      <input
+                        type="checkbox"
+                        checked={diskSelection.includes(entry.id)}
+                        onChange={() => toggleDiskTarget(entry.id)}
+                        aria-label={entry.label}
+                      />
+                    )}
+                    <div>
+                      <strong>{t(`health.diskUsage.target.${entry.id}` as TranslationKey)}</strong>
+                      <span className="mono" title={entry.path}>{entry.path}</span>
+                      {entry.children && entry.children.length > 0 && (
+                        <span className="disk-children">
+                          {entry.children.map((child) => `${child.name} ${formatBytes(child.bytes)}`).join(' · ')}
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                  <div className="disk-clean-size">
+                    <strong className="mono">{formatBytes(entry.bytes)}</strong>
+                    <span>{t('health.diskUsage.files', {count: entry.files})}</span>
+                  </div>
+                </div>
+              ))}
+            </div>
+            <div className="disk-clean-actions">
+              <span className="catalog-note">{t('health.diskUsage.note')}</span>
+              <button
+                className="btn btn-secondary"
+                type="button"
+                onClick={() => void cleanDisk()}
+                disabled={diskSelection.length === 0 || cleaning}
+              >
+                {cleaning ? <Spinner size={14}/> : <IconTrash size={14}/>}
+                {cleanConfirm
+                  ? t('health.diskUsage.confirm', {count: diskSelection.length})
+                  : t('health.diskUsage.clean', {count: diskSelection.length})}
+              </button>
+            </div>
+          </>
+        ) : (
+          !extrasLoading && <div className="empty-inline">{t('health.diskUsage.empty')}</div>
+        )}
+      </section>
+
+      <section className="section">
+        <SectionHeader
+          title={t('health.eventLog.title')}
+          meta={eventLog ? t('health.eventLog.meta', {count: eventLog.total, days: eventLog.days}) : undefined}
+          action={
+            <button className="text-button" type="button" onClick={() => void loadExtras(true)} disabled={extrasLoading}>
+              {extrasLoading ? <Spinner size={14}/> : <IconRefresh size={14}/>}
+              {t('health.refresh')}
+            </button>
+          }
+        />
+        {eventLog ? (
+          <>
+            {eventLog.error && <div className="health-inline-error">{eventLog.error}</div>}
+            {eventLog.groups.length > 0 ? (
+              <div className="event-list">
+                {eventLog.groups.map((group) => (
+                  <article className="event-row" key={`${group.source}-${group.id}`}>
+                    <div className="event-count mono">{group.count}×</div>
+                    <div className="event-body">
+                      <div className="event-head">
+                        <strong>{group.source || '—'}</strong>
+                        <span className="mono">{group.id}</span>
+                        <span>{formatDateTime(group.last)}</span>
+                      </div>
+                      <p>{group.message || t('health.eventLog.noMessage')}</p>
+                    </div>
+                  </article>
+                ))}
+              </div>
+            ) : (
+              <div className="empty-inline">{t('health.eventLog.empty')}</div>
+            )}
+            <div className="health-note">{t('health.eventLog.note')}</div>
+          </>
+        ) : (
+          !extrasLoading && <div className="empty-inline">{t('empty.scanPending')}</div>
+        )}
+      </section>
 
       <section className="section">
         <SectionHeader

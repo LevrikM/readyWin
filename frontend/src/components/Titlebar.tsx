@@ -15,6 +15,7 @@ const pageLabels: Record<Page, TranslationKey> = {
   health: 'nav.health',
   system: 'nav.system',
   history: 'nav.history',
+  settings: 'nav.settings',
 }
 
 export function Titlebar({

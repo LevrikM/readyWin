@@ -312,4 +312,107 @@ export type ImportResult = {
   settings?: Record<string, string>
 }
 
-export type Page = 'overview' | 'catalog' | 'health' | 'system' | 'history'
+export type Page = 'overview' | 'catalog' | 'health' | 'system' | 'history' | 'settings'
+
+export type BatteryHealth = {
+  present: boolean
+  charge?: number
+  /** 'discharging' | 'ac' | 'charging' | 'full' | 'partial' | 'unknown' */
+  status?: string
+  designMah?: number
+  fullMah?: number
+  healthPct?: number
+  cycles?: number
+  chemistry?: string
+  runtimeMin?: number
+  manufacturer?: string
+  serial?: string
+  message?: string
+}
+
+export type EventLogGroup = {
+  source: string
+  id: number
+  level: number
+  count: number
+  last: string
+  message: string
+}
+
+export type EventLogReport = {
+  checkedAt: string
+  days: number
+  total: number
+  groups: EventLogGroup[]
+  error?: string
+}
+
+export type DiskChild = {
+  name: string
+  path: string
+  dir: boolean
+  bytes: number
+}
+
+export type DiskUsageEntry = {
+  id: string
+  label: string
+  path: string
+  safe: boolean
+  exists: boolean
+  bytes: number
+  files: number
+  children?: DiskChild[]
+  truncated?: boolean
+  error?: string
+}
+
+export type DiskUsageReport = {
+  checkedAt: string
+  diskTotalGb: number
+  diskFreeGb: number
+  entries: DiskUsageEntry[]
+  scanMs: number
+  error?: string
+}
+
+export type DiskCleanResult = {
+  freedBytes: number
+  removed: number
+  failed: number
+  needsAdmin: boolean
+  errors?: string[]
+}
+
+export type WindowsUpdateState = {
+  checkedAt: string
+  edition?: string
+  displayVersion?: string
+  build?: string
+  /** 'licensed' | 'unlicensed' */
+  activation?: string
+  licenseName?: string
+  licenseKind?: string
+  licenseDays?: number
+  latestHotfix?: string
+  hotfixDate?: string
+  paused: boolean
+  pausedUntil?: string
+  pauseDays?: number
+  error?: string
+}
+
+export type WingetResult = {
+  id: string
+  name: string
+  version: string
+  match?: string
+  source?: string
+}
+
+export type WingetSearchResult = {
+  query: string
+  checkedAt: string
+  results: WingetResult[]
+  error?: string
+}

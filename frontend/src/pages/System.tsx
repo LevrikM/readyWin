@@ -1,8 +1,4 @@
-import type {
-  AppUpdateDownload,
-  AppUpdateInfo,
-  AppUpdateProgress,
-  AppUpdateSettings,
+﻿import type {
   Catalog,
   CatalogStatus,
   ScanResult,
@@ -13,7 +9,6 @@ import {checkDetail, checkLabel} from '../checks'
 import {
   IconCheck,
   IconCopy,
-  IconDownload,
   IconExternal,
   IconRefresh,
   IconShield,
@@ -29,21 +24,6 @@ export function SystemPage({
   queue,
   catalogStatus,
   catalogRefreshing,
-  appUpdate,
-  appUpdateLoading,
-  appUpdateDownload,
-  appUpdateProgress,
-  appUpdateDownloading,
-  applyingUpdate,
-  updateSettings,
-  updateSkipped,
-  onCheckAppUpdate,
-  onOpenAppUpdate,
-  onRunAppUpdate,
-  onChangeUpdateSettings,
-  onOpenUpdatesFolder,
-  onSkipAppUpdate,
-  onUnskipAppUpdate,
   onScan,
   onAdd,
   onToast,
@@ -60,21 +40,6 @@ export function SystemPage({
   queue: string[]
   catalogStatus: CatalogStatus | null
   catalogRefreshing: boolean
-  appUpdate: AppUpdateInfo | null
-  appUpdateLoading: boolean
-  appUpdateDownload: AppUpdateDownload | null
-  appUpdateProgress: AppUpdateProgress | null
-  appUpdateDownloading: boolean
-  applyingUpdate: boolean
-  updateSettings: AppUpdateSettings
-  updateSkipped: boolean
-  onCheckAppUpdate: () => void
-  onOpenAppUpdate: () => void
-  onRunAppUpdate: () => void
-  onChangeUpdateSettings: (autoCheck: boolean, autoDownload: boolean) => void
-  onOpenUpdatesFolder: () => void
-  onSkipAppUpdate: () => void
-  onUnskipAppUpdate: () => void
   onScan: () => void
   onAdd: (id: string) => void
   onToast: (message: string) => void
@@ -127,8 +92,8 @@ export function SystemPage({
       t('rpt.arch', {value: system.arch}),
       t('rpt.device', {value: system.hostname}),
       t('rpt.user', {value: system.username}),
-      t('rpt.cpu', {value: `${system.cpu} · ${tc('noun.threads', system.cores)}`}),
-      t('rpt.gpu', {value: system.gpu.join(', ') || '—'}),
+      t('rpt.cpu', {value: `${system.cpu} В· ${tc('noun.threads', system.cores)}`}),
+      t('rpt.gpu', {value: system.gpu.join(', ') || 'вЂ”'}),
       t('rpt.memory', {value: `${formatRam(system.ramTotalGb)} (${t('strip.free', {value: formatRam(system.ramFreeGb)})})`}),
       t('rpt.disk', {letter: system.diskLetter, value: `${formatRam(system.diskFreeGb)} / ${formatRam(system.diskTotalGb)}`}),
       t('rpt.rights', {value: system.elevated ? t('rpt.rightsAdmin') : t('rpt.rightsUser')}),
@@ -138,7 +103,7 @@ export function SystemPage({
         const status = check.status === 'ok' ? t('rpt.ok') : check.status === 'warn' ? t('rpt.warn') : t('rpt.missing')
         const label = checkLabel(check, t, itemsById.get(check.id)?.name)
         const detail = checkDetail(check, t, {system, version: scan?.installed[check.id]?.version})
-        return `- ${label}: ${status} — ${detail}`
+        return `- ${label}: ${status} вЂ” ${detail}`
       }),
     ]
     void copyText(lines.join('\r\n'))
@@ -175,11 +140,11 @@ export function SystemPage({
               meta={scan ? t('sys.updated', {date: formatDateTime(scan.scannedAt)}) : t('strip.awaiting')}
             />
             <div className="info-table">
-              <InfoRow label={t('row.device')} value={system?.hostname ?? '—'}/>
-              <InfoRow label={t('row.version')} value={system ? `${system.osName} ${system.version}` : '—'}/>
-              <InfoRow label={t('row.build')} value={system?.build ?? '—'} mono/>
-              <InfoRow label={t('row.arch')} value={system?.arch ?? '—'} mono/>
-              <InfoRow label={t('row.user')} value={system?.username ?? '—'}/>
+              <InfoRow label={t('row.device')} value={system?.hostname ?? 'вЂ”'}/>
+              <InfoRow label={t('row.version')} value={system ? `${system.osName} ${system.version}` : 'вЂ”'}/>
+              <InfoRow label={t('row.build')} value={system?.build ?? 'вЂ”'} mono/>
+              <InfoRow label={t('row.arch')} value={system?.arch ?? 'вЂ”'} mono/>
+              <InfoRow label={t('row.user')} value={system?.username ?? 'вЂ”'}/>
               <InfoRow
                 label={t('row.rights')}
                 value={system?.elevated ? t('row.rightsElevated') : t('row.rightsNormal')}
@@ -190,16 +155,16 @@ export function SystemPage({
           <section className="panel">
             <SectionHeader index="02" title={t('sys.hw.title')}/>
             <div className="info-table">
-              <InfoRow label={t('strip.cpu')} value={system?.cpu ?? '—'}/>
-              <InfoRow label={t('row.threads')} value={system ? `${system.cores}` : '—'} mono/>
-              <InfoRow label={t('row.gpu')} value={system?.gpu.length ? system.gpu.join(' · ') : '—'}/>
+              <InfoRow label={t('strip.cpu')} value={system?.cpu ?? 'вЂ”'}/>
+              <InfoRow label={t('row.threads')} value={system ? `${system.cores}` : 'вЂ”'} mono/>
+              <InfoRow label={t('row.gpu')} value={system?.gpu.length ? system.gpu.join(' В· ') : 'вЂ”'}/>
               <InfoRow
                 label={t('strip.memory')}
-                value={system ? t('row.memoryValue', {total: formatRam(system.ramTotalGb), free: formatRam(system.ramFreeGb)}) : '—'}
+                value={system ? t('row.memoryValue', {total: formatRam(system.ramTotalGb), free: formatRam(system.ramFreeGb)}) : 'вЂ”'}
               />
               <InfoRow
                 label={t('row.sysDisk')}
-                value={system ? t('row.diskValue', {letter: system.diskLetter, free: formatRam(system.diskFreeGb), total: formatRam(system.diskTotalGb)}) : '—'}
+                value={system ? t('row.diskValue', {letter: system.diskLetter, free: formatRam(system.diskFreeGb), total: formatRam(system.diskTotalGb)}) : 'вЂ”'}
               />
             </div>
           </section>
@@ -271,9 +236,9 @@ export function SystemPage({
               {t('sys.report.text')}
             </p>
             <div className="report-lines mono">
-              <span>{system ? `${system.cpu} · ${tc('noun.threads', system.cores)}` : `${t('strip.cpu')} —`}</span>
-              <span>{system ? `${formatRam(system.ramTotalGb)} RAM · ${t('strip.free', {value: formatRam(system.diskFreeGb)})}` : `${t('strip.memory')} —`}</span>
-              <span>{system ? `${system.osName} ${system.version} · ${system.build}` : 'Windows —'}</span>
+              <span>{system ? `${system.cpu} В· ${tc('noun.threads', system.cores)}` : `${t('strip.cpu')} вЂ”`}</span>
+              <span>{system ? `${formatRam(system.ramTotalGb)} RAM В· ${t('strip.free', {value: formatRam(system.diskFreeGb)})}` : `${t('strip.memory')} вЂ”`}</span>
+              <span>{system ? `${system.osName} ${system.version} В· ${system.build}` : 'Windows вЂ”'}</span>
             </div>
             <button className="btn btn-paper report-button" type="button" onClick={copyReport} disabled={!scan}>
               <IconCopy size={16}/>
@@ -331,148 +296,6 @@ export function SystemPage({
             <p className="catalog-note">{t('sys.catalog.note')}</p>
           </section>
 
-          <section className="panel side-panel app-update-panel">
-            <SectionHeader
-              title={t('update.app.title')}
-              meta={appUpdate?.available && appUpdate.latestVersion ? t('update.app.latest', {version: appUpdate.latestVersion}) : undefined}
-            />
-            <div className="catalog-status">
-              <span className="mono">
-                {t('update.app.currentVersion', {version: appUpdate?.currentVersion ?? '—'})}
-              </span>
-              {appUpdate?.checkedAt && (
-                <span>{t('update.app.checked', {date: formatDateTime(appUpdate.checkedAt)})}</span>
-              )}
-            </div>
-            {appUpdate?.error && (
-              <div className="health-inline-error">
-                {t('update.app.error')} <span className="mono">{appUpdate.error}</span>
-              </div>
-            )}
-            {appUpdate && !appUpdate.available && !appUpdate.error && (
-              <p className="catalog-note">{t('update.app.current')}</p>
-            )}
-            {appUpdate?.available && appUpdate.notes && (
-              <details className="app-update-notes">
-                <summary>{t('update.app.notes')}</summary>
-                <div>{appUpdate.notes}</div>
-              </details>
-            )}
-            {appUpdate?.available && appUpdate.checksum && (
-              <div className="app-update-checksum">
-                <span>{t('update.app.checksum')}</span>
-                <code title={appUpdate.checksum}>{appUpdate.checksum.slice(0, 16)}…</code>
-              </div>
-            )}
-            {appUpdateDownloading && appUpdateProgress && (
-              <div className="app-update-download">
-                <div className="app-update-progress" aria-hidden="true">
-                  <span style={{width: `${appUpdateProgress.percent}%`}}/>
-                </div>
-                <span className="mono">
-                  {t('update.app.downloading', {percent: appUpdateProgress.percent})}
-                </span>
-              </div>
-            )}
-            {appUpdateDownload && (
-              <div className="app-update-verified">
-                <IconCheck size={14}/>
-                <span>{t('update.app.verified')}</span>
-                <code title={appUpdateDownload.sha256}>{appUpdateDownload.sha256.slice(0, 12)}…</code>
-              </div>
-            )}
-            {appUpdate?.available && (
-              <>
-                <button
-                  className="btn btn-primary btn-block"
-                  type="button"
-                  onClick={onRunAppUpdate}
-                  disabled={applyingUpdate || appUpdateDownloading}
-                >
-                  <IconCheck size={15}/>
-                  {applyingUpdate ? t('update.app.installing') : t('update.app.install')}
-                </button>
-                {appUpdateDownload ? (
-                  <button className="btn btn-secondary btn-block" type="button" onClick={onOpenUpdatesFolder}>
-                    <IconDownload size={15}/>
-                    {t('update.app.openFolder')}
-                  </button>
-                ) : (
-                  <button className="btn btn-secondary btn-block" type="button" onClick={onOpenAppUpdate}>
-                    <IconExternal size={15}/>
-                    {t('update.app.releasePage')}
-                  </button>
-                )}
-                {updateSkipped ? (
-                  <button className="text-button app-update-skip" type="button" onClick={onUnskipAppUpdate}>
-                    {t('update.app.unskip')}
-                  </button>
-                ) : (
-                  <button className="text-button app-update-skip" type="button" onClick={onSkipAppUpdate}>
-                    {t('update.app.skip')}
-                  </button>
-                )}
-              </>
-            )}
-            <div className="switch-list">
-              <label className="switch-row">
-                <input
-                  type="checkbox"
-                  checked={updateSettings.autoCheck}
-                  onChange={(event) =>
-                    onChangeUpdateSettings(event.target.checked, updateSettings.autoDownload)
-                  }
-                />
-                <span className="switch-track" aria-hidden="true">
-                  <span className="switch-thumb"/>
-                </span>
-                <span>{t('update.app.autoCheck')}</span>
-              </label>
-              <label className={`switch-row${updateSettings.autoCheck ? '' : ' is-disabled'}`}>
-                <input
-                  type="checkbox"
-                  checked={updateSettings.autoDownload}
-                  disabled={!updateSettings.autoCheck}
-                  onChange={(event) =>
-                    onChangeUpdateSettings(updateSettings.autoCheck, event.target.checked)
-                  }
-                />
-                <span className="switch-track" aria-hidden="true">
-                  <span className="switch-thumb"/>
-                </span>
-                <span>{t('update.app.autoDownload')}</span>
-              </label>
-            </div>
-            <p className="catalog-note">{t('update.app.autoNote')}</p>
-            {updateSettings.lastResult && updateSettings.lastResult.status !== 'applying' && (
-              <div className="update-result">
-                <StatusMark status={updateSettings.lastResult.status === 'installed' ? 'ok' : 'warn'}/>
-                <div>
-                  <strong>
-                    {updateSettings.lastResult.status === 'installed'
-                      ? t('update.app.installed', {version: updateSettings.lastResult.version ?? ''})
-                      : t('update.app.failed')}
-                  </strong>
-                  {updateSettings.lastResult.message && <span>{updateSettings.lastResult.message}</span>}
-                  <small>
-                    {t('update.app.lastResult')}
-                    {updateSettings.lastResult.at ? ` · ${formatDateTime(updateSettings.lastResult.at)}` : ''}
-                    {updateSettings.lastResult.elevated ? ` · ${t('update.app.elevated')}` : ''}
-                  </small>
-                </div>
-              </div>
-            )}
-            <button
-              className="btn btn-secondary btn-block"
-              type="button"
-              onClick={onCheckAppUpdate}
-              disabled={appUpdateLoading}
-            >
-              {appUpdateLoading ? <Spinner size={15}/> : <IconRefresh size={15}/>}
-              {appUpdateLoading ? t('update.app.checking') : t('update.app.check')}
-            </button>
-            <p className="catalog-note">{t('update.app.note')}</p>
-          </section>
 
           <div className="local-note side-note">
             <IconCheck size={16}/>
@@ -482,7 +305,7 @@ export function SystemPage({
       </div>
 
       <div className="system-footnote">
-        <span className="mono">{t('sys.footScan', {ms: scan ? scan.durationMs : '—'})}</span>
+        <span className="mono">{t('sys.footScan', {ms: scan ? scan.durationMs : 'вЂ”'})}</span>
         <span>{scan ? t('sys.footLast', {date: formatDateTime(scan.scannedAt)}) : t('sys.footNever')}</span>
       </div>
     </div>
