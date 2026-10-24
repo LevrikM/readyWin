@@ -73,6 +73,14 @@ type installRun struct {
 	Command         string
 	Baseline        map[string]InstalledApp
 	Restart         map[string]bool
+	// AdHoc marks packages that came from a free-form winget search instead of
+	// the curated catalog. They have no catalog entry to verify results against.
+	AdHoc map[string]bool
+}
+
+type installTarget struct {
+	id   string
+	name string
 }
 
 const (
@@ -115,7 +123,7 @@ func (a *App) startQueue(command string, ids []string) (InstallState, error) {
 	}
 
 	seen := make(map[string]bool)
-	queue := make([]InstallItem, 0, len(ids))
+	targets := make([]installTarget, 0, len(ids))
 	for _, id := range ids {
 		id = strings.TrimSpace(id)
 		if id == "" || seen[id] {
@@ -129,7 +137,35 @@ func (a *App) startQueue(command string, ids []string) (InstallState, error) {
 			return InstallState{}, fmt.Errorf("пакет відсутній у каталозі: %s", id)
 		}
 		seen[id] = true
-		queue = append(queue, InstallItem{ID: id, Name: item.Name, Status: "pending"})
+		targets = append(targets, installTarget{id: id, name: item.Name})
+	}
+	return a.startTargets(command, targets, cat)
+}
+
+// startTargets builds and runs the winget queue. Catalog packages arrive here
+// through startQueue; free-form winget search results come through
+// InstallWingetPackage and are marked as ad-hoc for result recovery.
+func (a *App) startTargets(command string, targets []installTarget, cat Catalog) (InstallState, error) {
+	seen := make(map[string]bool)
+	queue := make([]InstallItem, 0, len(targets))
+	adHoc := make(map[string]bool)
+	for _, target := range targets {
+		id := strings.TrimSpace(target.id)
+		if id == "" || seen[id] {
+			continue
+		}
+		if !wingetIDPattern.MatchString(id) {
+			return InstallState{}, fmt.Errorf("некоректний ідентифікатор пакета: %s", id)
+		}
+		name := strings.TrimSpace(target.name)
+		if name == "" {
+			name = id
+		}
+		if _, ok := catalogItem(cat.Items, id); !ok {
+			adHoc[id] = true
+		}
+		seen[id] = true
+		queue = append(queue, InstallItem{ID: id, Name: name, Status: "pending"})
 	}
 	if len(queue) == 0 {
 		return InstallState{}, errors.New("черга порожня")
@@ -157,6 +193,7 @@ func (a *App) startQueue(command string, ids []string) (InstallState, error) {
 		Command:         command,
 		Baseline:        a.detectInstalled(cat),
 		Restart:         map[string]bool{},
+		AdHoc:           adHoc,
 	}
 
 	// The launcher lives in its own file: passing a multi-line script through
@@ -706,6 +743,25 @@ func (a *App) finishInstall(run *installRun, processErr error, endSeen bool, boo
 		}
 	}
 
+	// Free-form winget packages are not in the catalog, so ask winget directly
+	// whether a package whose success marker was lost ended up installed.
+	adHocInstalled := map[string]bool{}
+	if len(run.AdHoc) > 0 && after != nil {
+		a.mu.Lock()
+		var pending []string
+		for _, item := range a.install.Items {
+			if item.Status == "pending" && run.AdHoc[item.ID] {
+				pending = append(pending, item.ID)
+			}
+		}
+		a.mu.Unlock()
+		for _, id := range pending {
+			if wingetPackageInstalled(id) {
+				adHocInstalled[id] = true
+			}
+		}
+	}
+
 	a.mu.Lock()
 	a.install.Active = false
 	a.install.Finished = true
@@ -744,7 +800,7 @@ func (a *App) finishInstall(run *installRun, processErr error, endSeen bool, boo
 						continue
 					}
 				default:
-					if exists {
+					if exists || adHocInstalled[item.ID] {
 						item.Status = "ok"
 						item.Message = "Уже встановлено"
 						item.Note = "already"
