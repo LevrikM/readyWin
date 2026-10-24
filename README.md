@@ -1,473 +1,152 @@
 # ReadyWin
 
-Десктопний застосунок для чистого старту Windows. Відкриваєте його одразу після
-перевстановлення системи: він сканує комп'ютер, показує, що вже встановлено, чого
-бракує (зокрема компонентів на кшталт DirectX, редистрибутивів Visual C++ і .NET),
-і дозволяє поставити потрібні програми одним пакетом.
+ReadyWin is a Windows desktop app for setting up a fresh system. It scans what is
+already installed, shows what is missing, and installs the rest through winget.
+No account, no telemetry, no background services.
 
-Інтерфейс стриманий і плаский: без градієнтів, «скла», свічень та емодзі.
-Іконки — власні SVG плюс брендові гліфи.
+Built with Go and Wails v2. The frontend is React and TypeScript.
 
-Мова інтерфейсу — українська, англійська, німецька або російська. За першого
-запуску застосунок бере її із системної мови (uk/en/de/ru), а якщо відповідника
-немає — англійську. Вибір зберігається локально в `localStorage` під ключем
-`readywin.lang` і змінюється перемикачем у футері бічного меню, поруч із темою.
-Перекладається лише інтерфейс: назви й описи програм для не-українських мов
-беруться англійською з полів `descriptionEn`/`nameEn` каталогу, тому сам каталог
-не дублюється на de/ru.
+## What it does
 
-## Можливості
+- **System scan.** Reads the uninstall keys in HKLM, WOW6432Node and HKCU, plus
+  Microsoft Store and MSIX packages. Matches results against the catalog. Takes
+  about a second.
+- **Runtime checks.** DirectX, Visual C++ x64/x86, .NET Desktop Runtime, WebView2,
+  Windows Terminal, PowerShell 7 and WSL are detected by files, registry keys and
+  versions.
+- **Catalog.** 201 apps in 12 groups. Search by name, publisher, description or
+  tag, filter by group and by state (all, missing, installed, updates).
+- **Presets.** Five ready sets: Base, Development, Games, Creative, AI.
+- **Install queue.** One UAC prompt for the whole queue, per-package progress, live
+  log, cancel between items, then a before/after diff with the apps that appeared
+  or disappeared.
+- **Uninstall and repair.** Same queue, same log, same single UAC prompt.
+- **History.** Recent install, upgrade, uninstall and repair runs with duration and
+  result.
+- **Health page.** Read-only checks: pending reboot, Defender, firewall, BitLocker,
+  Secure Boot, activation, SMART wear, free memory and disk, uptime, latest update,
+  restore point.
+- **Battery report.** Reads `powercfg /batteryreport` plus WMI: health percentage,
+  design and full capacity, cycle count, chemistry, charge and estimated runtime.
+  Hidden on desktops.
+- **Event log digest.** Top error and critical events from System and Application
+  logs over the last seven days, grouped by source and event ID. Read-only by
+  design.
+- **Disk space.** Measures temp folders, Windows Update cache, Delivery Optimization
+  cache, crash dumps and thumbnail cache, then deletes only the ones you select.
+  Downloads, Desktop, Documents, Videos and Pictures are shown for reference and
+  cannot be cleaned from the app.
+- **Windows Update.** Shows edition, build, activation state, license channel and
+  the latest hotfix. Pause updates for 7, 14 or 35 days by writing the same
+  registry values Windows Settings uses. Resume removes them.
+- **Startup entries.** Run and RunOnce keys, Startup folder shortcuts and scheduled
+  tasks with logon or boot triggers. Entries can be disabled and enabled without
+  deleting them.
+- **App updates.** Checks `winget upgrade`, then upgrades through the same queue.
+- **ReadyWin updates.** Checks GitHub Releases at startup and on demand, downloads
+  with progress, verifies SHA256, and installs in place through a detached helper.
+  Restarts the app when done. Falls back to a UAC prompt if the install folder is
+  read-only, and rolls back to the previous binary on failure.
+- **Signed catalog.** The catalog is fetched over HTTPS from GitHub or Vercel and
+  verified with an Ed25519 signature. ETag support, six hour cache, embedded
+  fallback for offline use.
+- **winget search.** The curated catalog stays the default. A separate search panel
+  queries the public winget repository for anything else, with a confirmation step
+  before install. winget verifies the installer hash against its signed manifest.
+- **Transfer.** Export selected apps, theme and language to one ReadyWin file, or
+  use standard `winget export`. Import adds found apps to the queue for review; it
+  never installs silently.
+- **Settings page.** Theme, language, ReadyWin updates, data folder and version.
+- **Theme and language.** Paper light and dark themes, following the system
+  preference. Interface in Ukrainian, English, German and Russian.
 
-- **Сканування системи** — читає реєстр Windows (HKLM, HKLM\WOW6432Node і HKCU),
-  а також пакети Microsoft Store / MSIX, визначає встановлені програми та
-  зіставляє їх з каталогом. Займає близько секунди.
-- **Компоненти середовища** — окремо перевіряється DirectX, Visual C++
-  Redistributable (x64/x86), .NET Desktop Runtime, WebView2, Windows Terminal,
-  PowerShell 7, WSL, а також стани Secure Boot і Захисника Windows.
-- **Каталог програм** — 201 позиція у 12 групах: системні компоненти, браузери,
-  комунікації, медіа, ігри, розробка, консоль (CLI), ШІ, офіс, утиліти,
-  творчість, безпека.
-- **Пошук і фільтри** — глобальний пошук по назві, видавцю, опису й теґах,
-  перемикачі груп і станів (усі / відсутні / встановлені).
-- **Пресети** — 5 наборів: «База», «Розробка», «Ігри», «Творчість», «ШІ» з
-  рекомендованим набором.
-- **Черга встановлення** — один запит UAC на всю чергу, прогрес по кожному пакету,
-  журнал виводу, скасування між пунктами, а після завершення — повторне сканування
-  й диф «до/після» з новими та зниклими програмами.
-- **Історія** — останні запуски встановлення, оновлення, видалення та
-  відновлення з тривалістю й результатом.
-- **Здоров'я системи** — окрема сторінка з перевірками без внесення змін:
-  очікуваний перезапуск, Захисник Windows, брандмауер, BitLocker, Secure Boot,
-  активація, батарея, SMART і знос дисків, вільна пам'ять і місце, uptime,
-  останнє оновлення Windows та точка відновлення. Результати кешуються на 30 с.
-- **Автозапуск** — перегляд записів Run/RunOnce у HKCU та HKLM, ярликів у теках
-  Startup і запланованих завдань із тригерами входу або завантаження. Записи
-  можна вимкнути й увімкнути без видалення; для системних записів і завдань
-  використовується один запит UAC. Фільтр показує всі записи, лише увімкнені або
-  лише вимкнені.
-- **Видалення та відновлення** — для встановлених програм доступні `winget
-  uninstall` і `winget repair` через ту саму чергу, журнал і один запит UAC.
-- **Перенесення** — експорт вибраних програм, теми й мови в один файл ReadyWin
-  або стандартний `winget export`; імпорт ReadyWin чи winget додає знайдені
-  програми до черги для перевірки, але не встановлює їх автоматично.
-- **Оновлення програм** — перевірка нових версій через `winget upgrade` (кеш 90 с)
-  з кнопками «Перевірити» та «Оновити все»; оновлення йдуть тією ж чергою в режимі
-  `upgrade`.
-- **Оновлення ReadyWin** — перевірка останнього релізу на GitHub під час запуску
-  та за кнопкою на сторінці «Система». Оновлення завантажується прямо в застосунку
-  з прогресом, перевіряється за SHA256, показує примітки до релізу і дає змогу
-  пропустити конкретну версію.
-- **Підписаний каталог** — каталог програм оновлюється по HTTPS із GitHub/Vercel,
-  перевіряється Ed25519-підписом, підтримує ETag/304, локальний кеш на 6 годин і
-  вбудований запасний варіант для роботи офлайн.
-- **Звіт про систему** — копіювання зведення (ОС, залізо, запущені компоненти)
-  одним натисканням.
-- **Теми** — світла «паперова» та темна, з поваги до системного вибору.
-- **Мови інтерфейсу** — українська, англійська, німецька, російська. Типова
-  мова береться із системної (uk/en/de/ru, інакше англійська), вибір зберігається
-  локально в `localStorage` під ключем `readywin.lang` і змінюється в футері
-  бічного меню.
+## Requirements
 
-## Вимоги
+- Windows 10 1809 or newer, or Windows 11.
+- [winget](https://learn.microsoft.com/windows/package-manager/winget/) (App
+  Installer). Included in Windows 11; on Windows 10 update App Installer from the
+  Microsoft Store.
+- [WebView2 Runtime](https://developer.microsoft.com/microsoft-edge/webview2/).
+  Included in Windows 11; the Wails installer adds it on Windows 10 when needed.
+- Internet access for downloads.
 
-- Windows 10 (1809+) або Windows 11.
-- [winget](https://learn.microsoft.com/windows/package-manager/winget/) (App Installer).
-  У Windows 11 входить у систему; для Windows 10 оновіть App Installer з Microsoft Store.
-- [WebView2 Runtime](https://developer.microsoft.com/microsoft-edge/webview2/) —
-  у Windows 11 уже наявний; для Windows 10 інсталятор Wails додасть його за потреби.
-- Інтернет для завантаження пакетів.
-
-Для збірки з коду: Go 1.21+, Node.js 18+ і
+To build from source: Go 1.21+, Node.js 18+ and the
 [Wails CLI](https://wails.io/docs/gettingstarted/installation) v2.
 
-## Розробка
+## Install
+
+Download `ReadyWin.exe` from the latest release. It is a single file with the
+frontend embedded, so there is nothing to install. The zip archive is the portable
+package. Both come with SHA256 checksums.
+
+Verify a download:
 
 ```powershell
-# одноразово
+Get-FileHash .\ReadyWin.exe -Algorithm SHA256
+Get-Content .\ReadyWin.exe.sha256
+```
+
+## Build
+
+```powershell
 go install github.com/wailsapp/wails/v2/cmd/wails@latest
-
-# запуск із гарячим перезавантаженням фронтенду
-wails dev
-```
-
-`wails dev` піднімає Vite-сервер і сам застосунок. Окремі сторінки можна
-переглядати у браузері — `frontend/src/bridge.ts` перемикається на макетні дані,
-коли застосунок відкрито поза Wails (у правому нижньому куті з'явиться позначка DEMO).
-
-```powershell
-# лише фронтенд
-cd frontend
-npm install
-npm run build        # tsc + vite build
-```
-
-## Збірка
-
-```powershell
 wails build
 ```
 
-Готовий файл: `build/bin/ReadyWin.exe`. Це самодостатній виконуваний файл із
-вбудованим фронтендом (режим `embed`). Для стиснення можна додати
-`wails build -upx` (потрібен UPX).
+The result is `build/bin/ReadyWin.exe`. Use `wails build -upx` for a smaller binary
+if UPX is installed.
 
-## Реліз
-
-Збірка для Windows виконується в GitHub Actions
-(`.github/workflows/release.yml`):
-
-- пуш тега `v*` (наприклад `v1.2.0`) збирає застосунок, вставляє версію через
-  `-ldflags "-X main.appVersion=<версія>"`, оновлює `wails.json` і додає до
-  релізу `ReadyWin.exe`, `ReadyWin.exe.sha256`,
-  `ReadyWin-<версія>-windows-amd64.zip`, його `.sha256` та автоматичні примітки
-  до змін;
-- якщо налаштовано SignPath, EXE підписується Authenticode перед пакуванням і
-  перевіряється на валідний підпис; без налаштування збірка залишається
-  непідписаною, але контрольні суми створюються завжди;
-- ручний запуск (workflow_dispatch) збирає те саме й кладе результат в артефакти
-  збірки, без створення релізу.
-
-Підпис налаштовується через `SIGNPATH_API_TOKEN` (секрет) і змінні
-`SIGNPATH_ORGANIZATION_ID`, `SIGNPATH_PROJECT_SLUG`,
-`SIGNPATH_SIGNING_POLICY_SLUG`. Деталі та політика підпису — у
-[`CODE_SIGNING.md`](CODE_SIGNING.md).
-
-Окремий `.github/workflows/ci.yml` на кожен push/PR запускає `go test ./...`,
-`go vet ./...` і `npm run build` у `frontend/`, щоб зламані зміни не потрапили в
-реліз.
-
-Воркфлоу використовує Go з `go.mod`, Node.js 22 і Wails v2.17.0, тож локальна
-версія інструментів не впливає на результат.
-
-## Сайт
-
-Презентаційний сайт застосунку лежить у теці `site/` — це статичні
-`index.html`, `styles.css`, `app.js` і `shots/`, без фреймворків і кроку збірки.
-Він відкривається подвійним кліком (`index.html`) і має ті самі чотири мови, що й
-застосунок, з тією ж логікою вибору: `localStorage` → мова системи → англійська.
-
-Локальний перегляд у режимі, наближеному до хостингу:
+Development with frontend hot reload:
 
 ```powershell
-npx --yes serve site
+wails dev
 ```
 
-### Vercel
-
-Репозиторій готовий до імпорту на Vercel без правок у налаштуваннях:
-
-1. На Vercel: **Add New → Project**, виберіть цей репозиторій із GitHub.
-2. Нічого не змінюйте в кроці налаштувань — кореневий `vercel.json` уже вказує
-   `outputDirectory: site`, вимикає команди встановлення та збірки і додає
-   заголовки кешування для `shots/`.
-3. **Deploy**. Framework Preset залишиться `Other`, це правильно для статичного
-   сайту.
-
-Якщо замість цього виставити **Root Directory = `site`**, спрацює `site/vercel.json`
-з тими самими заголовками. Кожен пуш у головну гілку оновлює продакшн-деплой,
-решта гілок отримують preview-адреси.
-
-### SEO
-
-У `site/` лежать також `robots.txt`, `sitemap.xml`, `og-image.png` і `icon.png`,
-а в `<head>` сторінки — описи, canonical, Open Graph, Twitter-картка, hreflang
-для чотирьох мов і структуровані дані JSON-LD.
-
-Адреса сайту задана в одному місці — константа `SITE_URL` у `site/app.js` (і
-однойменні `<link>`/`<meta>` у `site/index.html`). Якщо домен відрізняється від
-`https://readywin.vercel.app`, замініть його там — оновляться canonical,
-`og:url`, `og:image`, `sitemap.xml` і `robots.txt`.
-
-## Як працює сканування
-
-Сканування виконується в Go, без зовнішніх скриптів, тому швидке й не залежить від
-локалі системи.
-
-1. Читаються ключі деінсталяції:
-   `HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall`,
-   `HKLM\SOFTWARE\WOW6432Node\...\Uninstall`,
-   `HKCU\SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall`.
-2. Додатково читаються пакети Microsoft Store / MSIX із
-   `HKCU\Software\Classes\Local Settings\Software\Microsoft\Windows\CurrentVersion\AppModel\Repository\Packages`
-   — тому застосунки, встановлені зі Store (наприклад Telegram Desktop),
-   визначаються правильно.
-3. Відкидаються оновлення, патчі та системні компоненти (`SystemComponent`,
-   `ParentKeyName`, `ReleaseType = Update/Hotfix`, назви з `KB...`), дублікати
-   згортаються за назвою й версією.
-4. Назви нормалізуються та зіставляються з полем `match` каталогу (а також назвою
-   й короткою назвою), з порогом схожості, щоб уникнути хибних збігів.
-5. Окремі компоненти (DirectX, VC++, .NET, WebView2, Terminal, PowerShell, WSL)
-   визначаються власними перевірками — за файлами, ключами реєстру та версіями.
-6. Інформація про систему (ОС, CPU, GPU, RAM, диски, права адміністратора,
-   Secure Boot, Захисник) збирається напряму через реєстр і Win32 API.
-
-Для кожного знайденого застосунку поле `source` набуває значень `registry`
-(класичні ключі деінсталяції), `store` (пакети Microsoft Store / MSIX) або
-`runtime` (компоненти середовища).
-
-## Як працює встановлення
-
-1. Ви додаєте програми до черги й натискаєте «Встановити».
-2. Застосунок генерує скрипт `install.ps1` із командами `winget install`
-   (`--silent --no-upgrade`, з підтвердженням угод і без взаємодії) та окремий
-   файл-лаунчер `launcher.ps1`, який запускає його підвищено через
-   `powershell -File`. Один запит UAC покриває всю чергу.
-3. Прогрес читається з журналу: рядки-маркери `::FW_BOOT`, `::FW_ITEM_START`,
-   `::FW_ITEM_OK`, `::FW_ITEM_FAIL`, `::FW_LOG`, `::FW_FATAL`, `::FW_CANCELLED`
-   і `::FW_END` перетворюються на події, які оновлюють вікно в реальному часі.
-4. Скасування створює файл `cancel.flag`, який перевіряється між пунктами —
-   поточний пакет завершується, наступні позначаються як скасовані.
-5. stdout/stderr лаунчера пишуться у `launcher.log` у теці запуску — це допомагає,
-   якщо основний журнал не створився.
-6. Після завершення виконується повторне сканування й показується диф «до/після»:
-   базовий розмір каталогу, нові програми (`added`) та зниклі (`removed`) у блоці
-   «Нові програми в системі» — у черзі й у журналі.
-7. Ідентифікатори пакетів перевіряються маскою перед генерацією скрипта, тож
-   ін'єкція команд виключена.
-
-Результат подається локалізовано за кодом (`done`, `withErrors`, `noResult`,
-`noLog`, `uacCancelled`, `cancelled`) і лічильниками `okCount`/`failCount`/
-`skippedCount`; у журналі для кожного запуску зберігаються `before`, `after` і
-`newApps`.
-
-Тека запуску — `%LOCALAPPDATA%\ReadyWin\runs\<мітка>` з файлами `install.ps1`,
-`launcher.ps1`, `install.log`, `launcher.log` та `exit.txt`.
-
-Застосунок сам працює без прав адміністратора; підвищення запитується лише для
-черги встановлення.
-
-## Оновлення програм
-
-Застосунок перевіряє, чи мають уже встановлені програми з каталогу новіші версії.
-Для цього виконується `winget upgrade`, а результат кешується на 90 секунд, щоб
-не смикати мережу на кожен запуск.
-
-- Кнопка **«Перевірити»** на сторінці огляду оновлює звіт примусово.
-- Кнопка **«Оновити все»** ставить усі знайдені оновлення в чергу й запускає її в
-  режимі `upgrade` — той самий один запит UAC, журнал і прогрес, лише з командою
-  `winget upgrade`.
-- Оновлення можна запускати й по одному — кнопка біля конкретної програми в огляді
-  чи каталозі.
-
-Після завершення черги кеш скидається й виконується повторне сканування, тож
-списки оновлень і встановлених програм одразу актуальні.
-
-## Здоров'я системи
-
-Сторінка **«Здоров'я»** лише читає стан системи й нічого не змінює. Перевірки
-виконуються паралельно: частина — нативно через Win32 API та реєстр, решта —
-прихованими запитами PowerShell/WMI з тайм-аутом. Звіт кешується на 30 секунд,
-кнопка оновлення скидає кеш.
-
-Показуються: очікуваний перезапуск (CBS, Windows Update, відкладені
-перейменування файлів), Захисник Windows і вік підписів, профілі брандмауера,
-BitLocker, Secure Boot, активація, батарея та її знос, SMART-стан і знос
-фізичних дисків, вільна пам'ять, місце на системному диску, uptime, останнє
-оновлення Windows і остання точка відновлення.
-
-Кожен рядок має нейтральний статус `ok`, `warn`, `bad`, `unknown`, `info` або
-`na`; інтерфейс перекладає його поточною мовою. Відсутність прав, WMI або
-обладнання не вважається помилкою застосунку — рядок просто отримує статус
-`unknown`/`na`.
-
-Кнопка **«Розширена перевірка»** один раз запитує UAC і додатково читає
-SMART-знос, температуру дисків і стан BitLocker, які зазвичай недоступні
-звичайному користувачу. Без підтвердження UAC основні перевірки залишаються
-доступними.
-
-## Автозапуск
-
-Вкладка автозапуску на тій самій сторінці збирає:
-
-- значення `Run` і `RunOnce` у HKCU та HKLM (включно з `WOW6432Node`);
-- ярлики з папок Startup користувача й системи;
-- заплановані завдання з тригерами входу або завантаження.
-
-Записи `Run` і ярлики вимикаються не руйнівно — через стан Windows
-`StartupApproved`, тому команда й файл залишаються на місці. Для системних
-записів і завдань застосунок один раз запитує UAC і викликає
-`Enable-ScheduledTask`/`Disable-ScheduledTask`. Записи `RunOnce` доступні лише
-для перегляду, бо Windows не має для них окремого стану увімкнення.
-
-## Видалення та відновлення
-
-Для встановленої програми в діалозі доступні **«Видалити»** й **«Відновити»**.
-Обидві дії створюють ту саму чергу, що й встановлення, з режимами `uninstall`
-або `repair`, одним запитом UAC, потоковим журналом, скасуванням між пунктами й
-записом у історію. Видалення виконується через `winget uninstall`, відновлення —
-через `winget repair`.
-
-## Перенесення
-
-На сторінці **«Система»** можна:
-
-- зберегти профіль ReadyWin (вибрані програми, тема, мова) у JSON;
-- експортувати встановлені програми у формат `winget export`;
-- імпортувати профіль ReadyWin або файл `winget export`.
-
-Імпорт лише зіставляє пакети з каталогом і додає їх до черги. Перед
-встановленням користувач бачить список і може зняти зайве; автоматичного
-встановлення після імпорту немає.
-
-## Дані застосунку
-
-- `%LOCALAPPDATA%\ReadyWin\history.json` — історія запусків.
-- `%LOCALAPPDATA%\ReadyWin\runs\<мітка часу>\` — тека окремого запуску з файлами
-  `install.ps1`, `launcher.ps1`, `install.log`, `launcher.log` та `exit.txt`.
-- `%LOCALAPPDATA%\ReadyWin\elevated\` — тимчасові скрипти для підвищених дій
-  (автозапуск, розширена діагностика); успішні файли видаляються, невдалі
-  залишаються для діагностики.
-- `%LOCALAPPDATA%\ReadyWin\updates\` — завантажені оновлення ReadyWin із
-  перевіреною SHA256-сумою.
-- `%LOCALAPPDATA%\ReadyWin\catalog.cache.json`, `catalog.cache.sig` і
-  `catalog.etag` — перевірений підписом кеш каталогу та його ETag.
-- Налаштування теми — у `localStorage` WebView2 (ключ `readywin.theme`).
-- Мова інтерфейсу — у `localStorage` WebView2 (ключ `readywin.lang`). За першого
-  запуску мова визначається із системної.
-- `%LOCALAPPDATA%\ReadyWin\language.txt` — копія вибраної мови для системних
-  діалогів, які показуються до завантаження інтерфейсу (наприклад, «уже запущено»).
-
-Старі теки запусків обмежуються за кількістю та сумарним розміром; історія
-зберігає останні записи й очищується атомарно.
-
-Відкрити теку можна з інтерфейсу (кнопка в лівому нижньому куті).
-
-## Каталог програм
-
-Увесь список лежить в одному файлі — `shared/catalog.json`, який вбудовується у
-виконуваний файл під час збірки. Структура:
-
-```jsonc
-{
-  "version": "1.0",
-  "updated": "2026-10-21",
-  "groups":  [ { "id": "utilities", "name": "Утиліти", "description": "...", "index": 9,
-                "nameEn": "Utilities", "descriptionEn": "..." } ],
-  "presets": [ { "id": "base", "name": "База", "description": "...", "items": ["7zip.7zip"],
-                "nameEn": "Base", "descriptionEn": "..." } ],
-  "items": [
-    {
-      "id": "7zip.7zip",          // ідентифікатор winget
-      "name": "7-Zip",
-      "shortName": "7-Zip",
-      "publisher": "Igor Pavlov",
-      "description": "Архіватор ...",
-      "descriptionEn": "Archiver ...",   // англійський опис із `winget show`
-      "homepage": "https://www.7-zip.org/", // сайт розробника (кнопка в діалозі)
-      "group": "utilities",       // посилання на groups[].id
-      "icon": "sevenzip",         // ключ іконки у frontend/src/brandIcons.tsx
-      "tags": ["архів", "zip"],
-      "sizeMb": 5,
-      "recommended": true,        // показується в рекомендованих і в пресеті «База»
-      "note": "необов'язково",     // (не обов'язкове) підказка в діалозі
-      "match": ["7-zip", "7zip"]  // (не обов'язкове) рядки для зіставлення при скануванні
-    }
-  ]
-}
-```
-
-Каталог збагачується скриптами: `scripts/enrich-catalog.mjs` тягне англійські
-описи й сайти розробників через `winget show --id <id> --exact` (поля
-`descriptionEn` та `homepage`), а `scripts/translate-groups.mjs` додає англійські
-назви й описи груп і пресетів (`nameEn`/`descriptionEn`). Обидва скрипти
-ідемпотентні — повторний запуск не дублює й не перезаписує наявні дані.
-
-Щоб додати програму:
-
-1. Знайдіть її ідентифікатор: `winget search <назва>`.
-2. Перевірте, що пакет існує: `winget show --id <id> --exact`.
-3. Додайте об'єкт у `items` з наявним `group` та іконкою.
-4. Якщо сканування не розпізнає встановлену програму — додайте кілька варіантів
-   назви в `match`.
-
-Іконки: брендові беруться з [Simple Icons](https://simpleicons.org) і
-Font Awesome Brands; для решти намальовані власні гліфи в
-`frontend/src/brandIcons.tsx`. Ключ `icon` мусить існувати в цьому файлі, інакше
-буде показано нейтральне вікно.
-
-## Оновлення каталогу (OTA)
-
-Вбудований `shared/catalog.json` є запасним варіантом. Під час роботи застосунок
-раз на 6 годин (або за кнопкою на сторінці «Система») звертається до
-`https://readywin.vercel.app/catalog.json`, потім до
-`https://raw.githubusercontent.com/LevrikM/readyWin/main/site/catalog.json`.
-Відповідь приймається лише разом із чинним Ed25519-підписом `catalog.sig`; крім
-того, каталог має пройти валідацію, містити щонайменше половину вбудованих
-позицій і бути не старішим за вбудований. ETag використовується для дешевого
-HTTP 304, а перевірений кеш лежить у `%LOCALAPPDATA%\ReadyWin`.
-
-Після зміни `shared/catalog.json` опублікуйте підписану копію:
+The frontend can also run alone in a browser:
 
 ```powershell
-node scripts/sign-catalog.mjs
-git add shared/catalog.json site/catalog.json site/catalog.sig
+cd frontend
+npm install
+npm run dev
 ```
 
-Приватний ключ лежить у `.keys/catalog-signing-key.pem`, ігнорується git і
-**мусить бути збережений у безпечному місці**. Якщо його втрачено, доведеться
-випустити нову версію застосунку з новим відкритим ключем
-(`catalogPublicKey` у `catalog.go`). Для ротації ключа використовуйте
-`node scripts/generate-catalog-key.mjs` лише після видалення старого файлу.
+`frontend/src/bridge.ts` switches to mock data when the app is not running inside
+Wails. A DEMO badge appears in the corner.
 
-Публічний ключ (base64url):
-`h4JBc7W_oxj5IRFCRqGpoyVYatE4qU5AdvqZxvZVRls`.
+Checks:
 
-## Оновлення застосунку
-
-Застосунок звертається до GitHub Releases API
-(`LevrikM/readyWin/releases/latest`) під час запуску (далі раз на 6 годин у фоні),
-а також за кнопкою «Перевірити оновлення» на сторінці «Система». Успішний результат
-кешується на 6 годин, помилка — на 15 хвилин. Якщо останній реліз новіший за поточний,
-з'являється банер.
-
-Кнопка «Оновити й перезапустити» завантажує `ReadyWin.exe` у
-`%LOCALAPPDATA%\ReadyWin\updates`, звіряє SHA256 із `ReadyWin.exe.sha256` (або `digest`
-GitHub), закриває застосунок і запускає прихований PowerShell-хелпер. Хелпер чекає
-завершення процесу, копіює новий файл у теку застосунку, ще раз перевіряє хеш копії,
-перейменовує старий файл у `.ReadyWin.previous.exe`, ставить новий на його місце і
-запускає ReadyWin. Якщо теку захищено (наприклад, `Program Files`), Windows одноразово
-попросить права адміністратора. Якщо заміна не вдалася, старий файл повертається на
-місце, а причина потрапляє в `updates\update.log` і на сторінку «Система».
-
-Результат оновлення зберігається в `app-update.json` і показується після перезапуску.
-Перемикачі «Перевіряти автоматично» і «Завантажувати у фоні» керують лише фоновими
-діями — ручна кнопка працює завжди. «Пропустити цю версію» ховає банер для конкретної
-версії, а примітки до релізу доступні на сторінці «Система».
-
-Для перевірки потрібен хоча б один опублікований реліз із тегом у форматі
-`v1.2.0`.
-
-## Структура проєкту
-
-```
-main.go                 точка входу Wails (вікно, вбудований фронтенд)
-app.go                  App: версія, відкриття посилань, тека даних, закриття
-appupdate.go            перевірка нових релізів ReadyWin на GitHub
-selfupdate.go           заміна власного EXE, журнал, відкат і результат оновлення
-catalog.go              вбудований і підписаний OTA-каталог, ETag і кеш
-scan.go                 сканування реєстру, Store/MSIX, компонентів і системи
-health.go               перевірки здоров'я системи без внесення змін
-startup.go              автозапуск: реєстр, теки Startup, заплановані завдання
-installer.go            черга winget, журнал, скасування, диф «до/після»
-transfer.go             експорт та імпорт профілю/winget
-history.go              збереження історії запусків
-retention.go            очищення старих тек запусків
-ps.go                   прихований PowerShell і підвищені дії через UAC
-fileutil.go             атомарний запис файлів
-shared/catalog.json     єдине джерело каталогу програм
-site/catalog.json       підписана копія каталогу для OTA
-site/catalog.sig        Ed25519-підпис каталогу
-scripts/                збагачення, підпис і ключі каталогу
-frontend/src/           React-інтерфейс (сторінки, компоненти, стилі)
-frontend/src/i18n.tsx   словники та перемикач мов (uk/en/de/ru)
-frontend/src/bridge.ts  місток до Go або макетні дані для браузера
-build/                  іконки, маніфест, метадані для Windows
-site/                   презентаційний сайт застосунку (статичний, 4 мови)
-.github/workflows/      CI, збірка та реліз у GitHub Actions
+```powershell
+go vet ./...
+go test ./...
+cd frontend; npx tsc --noEmit; npm run build
 ```
 
-## Скорочення клавіатури
+## Release
 
-- `Ctrl/Cmd + K` або `/` — пошук у каталозі.
-- `Ctrl/Cmd + R` — повторне сканування.
-- `Esc` — закрити діалог або чергу.
+Pushing a `v*` tag runs `.github/workflows/release.yml`. The workflow builds the
+app, injects the version with `-ldflags "-X main.appVersion=<version>"`, and
+publishes `ReadyWin.exe`, the portable zip and their `.sha256` files. If SignPath is
+configured, the executable is signed with Authenticode before packaging.
+
+Signing needs the `SIGNPATH_API_TOKEN` secret and the
+`SIGNPATH_ORGANIZATION_ID`, `SIGNPATH_PROJECT_SLUG` and
+`SIGNPATH_SIGNING_POLICY_SLUG` variables. Without them the build is unsigned but
+checksums are still published. See [CODE_SIGNING.md](CODE_SIGNING.md).
+
+`.github/workflows/ci.yml` runs `go test ./...`, `go vet ./...` and the frontend
+build on every push and pull request.
+
+## Data and privacy
+
+Settings, logs, install runs, the catalog cache and downloaded updates live under
+`%LOCALAPPDATA%\ReadyWin`. The Settings page opens that folder.
+
+No telemetry and no analytics. Network requests go to the project site and GitHub
+for the catalog, the GitHub Releases API for update checks, and winget for package
+operations.
+
+## Website
+
+The static site in `site/` has the same four languages as the app. Root
+`vercel.json` points Vercel at that directory, so the repository deploys without
+changes.
