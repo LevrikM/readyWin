@@ -2,22 +2,97 @@ name: Build and release
 
 on:
   push:
-    tags:
-      - 'v*'
+    branches: [main]
+    tags: ['v*']
   workflow_dispatch:
     inputs:
       version:
-        description: 'Version used in the file name (for example 1.2.0)'
+        description: 'Version (empty uses wails.json, "dev" builds without publishing)'
         required: false
-        default: 'dev'
+        default: ''
 
 permissions:
   actions: read
   contents: write
 
+concurrency:
+  group: release-${{ github.ref }}
+  cancel-in-progress: false
+
 jobs:
+  prepare:
+    name: Resolve version and tag
+    runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.meta.outputs.version }}
+      tag: ${{ steps.meta.outputs.tag }}
+      build: ${{ steps.meta.outputs.build }}
+      release: ${{ steps.meta.outputs.release }}
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Work out the version
+        id: meta
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          version=""
+          if [ "${GITHUB_REF_TYPE}" = "tag" ]; then
+            version="${GITHUB_REF_NAME#v}"
+          elif [ "${GITHUB_EVENT_NAME}" = "workflow_dispatch" ]; then
+            version="${{ github.event.inputs.version }}"
+          fi
+          if [ -z "$version" ]; then
+            version=$(jq -r '.info.productVersion' wails.json)
+          fi
+          version="${version#v}"
+
+          tag="v${version}"
+          build=true
+          release=true
+          if [ "$version" = "dev" ]; then
+            release=false
+          fi
+
+          # A normal push to main only releases when the version in wails.json is
+          # new. Bumping the version is the one deliberate step; the tag and the
+          # release are created here.
+          if [ "${GITHUB_EVENT_NAME}" = "push" ] && [ "${GITHUB_REF_TYPE}" = "branch" ]; then
+            if git ls-remote --exit-code --tags origin "refs/tags/${tag}" >/dev/null 2>&1; then
+              echo "Tag ${tag} already exists, nothing to release."
+              build=false
+              release=false
+            fi
+          fi
+
+          echo "version=${version}" >> "$GITHUB_OUTPUT"
+          echo "tag=${tag}" >> "$GITHUB_OUTPUT"
+          echo "build=${build}" >> "$GITHUB_OUTPUT"
+          echo "release=${release}" >> "$GITHUB_OUTPUT"
+
+      - name: Create the tag
+        if: steps.meta.outputs.release == 'true' && github.ref_type == 'branch'
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name 'github-actions[bot]'
+          git config user.email 'github-actions[bot]@users.noreply.github.com'
+          tag='${{ steps.meta.outputs.tag }}'
+          if git rev-parse "$tag" >/dev/null 2>&1; then
+            echo "Tag $tag already exists locally."
+          else
+            git tag "$tag"
+            git push origin "$tag"
+          fi
+
   windows:
     name: Windows x64
+    needs: prepare
+    if: needs.prepare.outputs.build == 'true'
     runs-on: windows-latest
     env:
       SIGNPATH_API_TOKEN: ${{ secrets.SIGNPATH_API_TOKEN }}
@@ -44,21 +119,16 @@ jobs:
       - name: Install Wails
         run: go install github.com/wailsapp/wails/v2/cmd/wails@v2.17.0
 
-      - name: Resolve version
-        id: meta
+      - name: Apply version
         shell: pwsh
         run: |
-          $version = '${{ github.event.inputs.version }}'
-          if ('${{ github.ref_type }}' -eq 'tag') { $version = '${{ github.ref_name }}' -replace '^v', '' }
-          if ([string]::IsNullOrWhiteSpace($version)) { $version = 'dev' }
-          "version=$version" >> $env:GITHUB_OUTPUT
           $config = Get-Content wails.json -Raw | ConvertFrom-Json
-          $config.info.productVersion = $version
+          $config.info.productVersion = '${{ needs.prepare.outputs.version }}'
           $config | ConvertTo-Json -Depth 10 | Set-Content wails.json -Encoding utf8
 
       - name: Build
         shell: pwsh
-        run: wails build -clean -platform windows/amd64 -ldflags "-X main.appVersion=${{ steps.meta.outputs.version }}"
+        run: wails build -clean -platform windows/amd64 -ldflags "-X main.appVersion=${{ needs.prepare.outputs.version }}"
 
       - name: Copy executable
         shell: pwsh
@@ -69,7 +139,7 @@ jobs:
         if: env.SIGNPATH_API_TOKEN != '' && env.SIGNPATH_ORGANIZATION_ID != '' && env.SIGNPATH_PROJECT_SLUG != '' && env.SIGNPATH_SIGNING_POLICY_SLUG != ''
         uses: actions/upload-artifact@v4
         with:
-          name: ReadyWin-${{ steps.meta.outputs.version }}-unsigned
+          name: ReadyWin-${{ needs.prepare.outputs.version }}-unsigned
           path: ReadyWin.exe
           archive: false
           if-no-files-found: error
@@ -102,7 +172,7 @@ jobs:
       - name: Package and checksums
         shell: pwsh
         run: |
-          $version = '${{ steps.meta.outputs.version }}'
+          $version = '${{ needs.prepare.outputs.version }}'
           $zip = "ReadyWin-$version-windows-amd64.zip"
           $exeHash = (Get-FileHash 'ReadyWin.exe' -Algorithm SHA256).Hash.ToLowerInvariant()
           "$exeHash  ReadyWin.exe" | Set-Content 'ReadyWin.exe.sha256' -Encoding ascii
@@ -123,12 +193,15 @@ jobs:
           if-no-files-found: error
 
       - name: Publish release
-        if: github.ref_type == 'tag'
+        if: needs.prepare.outputs.release == 'true'
         uses: softprops/action-gh-release@v2
         with:
+          tag_name: ${{ needs.prepare.outputs.tag }}
+          name: ${{ needs.prepare.outputs.tag }}
           files: |
             ReadyWin.exe
             ReadyWin.exe.sha256
             ReadyWin-*-windows-amd64.zip
             ReadyWin-*-windows-amd64.zip.sha256
           generate_release_notes: true
+          make_latest: true

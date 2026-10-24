@@ -30,6 +30,17 @@ jobs:
           cache: npm
           cache-dependency-path: frontend/package-lock.json
 
+      - name: Перевірити узгодженість версії
+        shell: pwsh
+        run: |
+          $app = (Select-String -Path app.go -Pattern 'var appVersion = "([^"]+)"' | Select-Object -First 1).Matches[0].Groups[1].Value
+          $wails = (Get-Content wails.json -Raw | ConvertFrom-Json).info.productVersion
+          $package = (Get-Content frontend/package.json -Raw | ConvertFrom-Json).version
+          if ($app -ne $wails -or $wails -ne $package) {
+            throw "Версії не збігаються: app.go=$app wails.json=$wails frontend/package.json=$package"
+          }
+          Write-Output "Version $app"
+
       - name: Залежності та збірка фронтенду
         working-directory: frontend
         run: |

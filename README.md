@@ -123,18 +123,27 @@ cd frontend; npx tsc --noEmit; npm run build
 
 ## Release
 
-Pushing a `v*` tag runs `.github/workflows/release.yml`. The workflow builds the
-app, injects the version with `-ldflags "-X main.appVersion=<version>"`, and
-publishes `ReadyWin.exe`, the portable zip and their `.sha256` files. If SignPath is
-configured, the executable is signed with Authenticode before packaging.
+Releases are automatic. Bump the version in `app.go`, `wails.json` and
+`frontend/package.json`, then push to `main`. The CI workflow rejects a push where
+those three do not match.
+
+`.github/workflows/release.yml` reads the version from `wails.json`. If the tag
+`v<version>` does not exist yet, it creates the tag, builds the app with
+`-ldflags "-X main.appVersion=<version>"` and publishes `ReadyWin.exe`, the
+portable zip and their `.sha256` files. If the tag already exists, the run does
+nothing, so ordinary commits do not create releases.
+
+Pushing a `v*` tag by hand still works and republishes that version.
+`workflow_dispatch` rebuilds the version from `wails.json`, or takes a version
+from the input. Use `dev` there to build without publishing.
 
 Signing needs the `SIGNPATH_API_TOKEN` secret and the
 `SIGNPATH_ORGANIZATION_ID`, `SIGNPATH_PROJECT_SLUG` and
 `SIGNPATH_SIGNING_POLICY_SLUG` variables. Without them the build is unsigned but
 checksums are still published. See [CODE_SIGNING.md](CODE_SIGNING.md).
 
-`.github/workflows/ci.yml` runs `go test ./...`, `go vet ./...` and the frontend
-build on every push and pull request.
+`.github/workflows/ci.yml` runs `go test ./...`, `go vet ./...`, the frontend
+build and the version check on every push and pull request.
 
 ## Data and privacy
 
