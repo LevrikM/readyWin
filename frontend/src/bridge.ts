@@ -3,6 +3,8 @@ import type {
   AppUpdateDownload,
   AppUpdateInfo,
   AppUpdateProgress,
+  AppUpdateResult,
+  AppUpdateSettings,
   Catalog,
   CatalogRefreshResult,
   CatalogStatus,
@@ -50,7 +52,10 @@ type WailsApp = {
   GetVersion: () => Promise<string>
   GetAppUpdate: (force: boolean) => Promise<AppUpdateInfo>
   DownloadAppUpdate: () => Promise<AppUpdateDownload>
-  LaunchAppUpdate: (path: string) => Promise<void>
+  RunAppUpdate: () => Promise<AppUpdateResult>
+  InstallAppUpdate: (path: string) => Promise<AppUpdateResult>
+  GetAppUpdateSettings: () => Promise<AppUpdateSettings>
+  SetAppUpdateSettings: (autoCheck: boolean, autoDownload: boolean) => Promise<AppUpdateSettings>
   OpenUpdatesFolder: () => Promise<void>
   SetLanguage: (lang: string) => void
   Minimise: () => void
@@ -654,9 +659,25 @@ export const bridge = {
     if (app) return app.DownloadAppUpdate()
     throw new Error('demo')
   },
-  launchAppUpdate: async (path: string): Promise<void> => {
+  runAppUpdate: async (): Promise<AppUpdateResult> => {
     const app = wailsApp()
-    if (app) await app.LaunchAppUpdate(path)
+    if (app) return app.RunAppUpdate()
+    throw new Error('demo')
+  },
+  installAppUpdate: async (path: string): Promise<AppUpdateResult> => {
+    const app = wailsApp()
+    if (app) return app.InstallAppUpdate(path)
+    throw new Error('demo')
+  },
+  getAppUpdateSettings: async (): Promise<AppUpdateSettings> => {
+    const app = wailsApp()
+    if (app) return app.GetAppUpdateSettings()
+    return {autoCheck: true, autoDownload: true}
+  },
+  setAppUpdateSettings: async (autoCheck: boolean, autoDownload: boolean): Promise<AppUpdateSettings> => {
+    const app = wailsApp()
+    if (app) return app.SetAppUpdateSettings(autoCheck, autoDownload)
+    return {autoCheck, autoDownload}
   },
   openUpdatesFolder: async (): Promise<void> => {
     const app = wailsApp()
@@ -664,6 +685,18 @@ export const bridge = {
   },
   onAppUpdateProgress: (callback: (progress: AppUpdateProgress) => void): (() => void) => {
     if (window.runtime) return window.runtime.EventsOn('appupdate:progress', callback)
+    return () => undefined
+  },
+  onAppUpdateAvailable: (callback: (info: AppUpdateInfo) => void): (() => void) => {
+    if (window.runtime) return window.runtime.EventsOn('appupdate:available', callback)
+    return () => undefined
+  },
+  onAppUpdateReady: (callback: (download: AppUpdateDownload) => void): (() => void) => {
+    if (window.runtime) return window.runtime.EventsOn('appupdate:ready', callback)
+    return () => undefined
+  },
+  onAppUpdateDownloadError: (callback: (message: string) => void): (() => void) => {
+    if (window.runtime) return window.runtime.EventsOn('appupdate:downloadError', callback)
     return () => undefined
   },
   setLanguage: (lang: string) => {

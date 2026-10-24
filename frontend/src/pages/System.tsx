@@ -2,6 +2,7 @@ import type {
   AppUpdateDownload,
   AppUpdateInfo,
   AppUpdateProgress,
+  AppUpdateSettings,
   Catalog,
   CatalogStatus,
   ScanResult,
@@ -33,11 +34,13 @@ export function SystemPage({
   appUpdateDownload,
   appUpdateProgress,
   appUpdateDownloading,
+  applyingUpdate,
+  updateSettings,
   updateSkipped,
   onCheckAppUpdate,
   onOpenAppUpdate,
-  onDownloadAppUpdate,
-  onLaunchAppUpdate,
+  onRunAppUpdate,
+  onChangeUpdateSettings,
   onOpenUpdatesFolder,
   onSkipAppUpdate,
   onUnskipAppUpdate,
@@ -62,11 +65,13 @@ export function SystemPage({
   appUpdateDownload: AppUpdateDownload | null
   appUpdateProgress: AppUpdateProgress | null
   appUpdateDownloading: boolean
+  applyingUpdate: boolean
+  updateSettings: AppUpdateSettings
   updateSkipped: boolean
   onCheckAppUpdate: () => void
   onOpenAppUpdate: () => void
-  onDownloadAppUpdate: () => void
-  onLaunchAppUpdate: () => void
+  onRunAppUpdate: () => void
+  onChangeUpdateSettings: (autoCheck: boolean, autoDownload: boolean) => void
   onOpenUpdatesFolder: () => void
   onSkipAppUpdate: () => void
   onUnskipAppUpdate: () => void
@@ -378,24 +383,15 @@ export function SystemPage({
             )}
             {appUpdate?.available && (
               <>
-                {appUpdateDownload ? (
-                  <button className="btn btn-primary btn-block" type="button" onClick={onLaunchAppUpdate}>
-                    <IconCheck size={15}/>
-                    {t('update.app.install')}
-                  </button>
-                ) : (
-                  <button
-                    className="btn btn-primary btn-block"
-                    type="button"
-                    onClick={onDownloadAppUpdate}
-                    disabled={appUpdateDownloading}
-                  >
-                    <IconDownload size={15}/>
-                    {appUpdateDownloading
-                      ? t('update.app.downloading', {percent: appUpdateProgress?.percent ?? 0})
-                      : t('update.app.download')}
-                  </button>
-                )}
+                <button
+                  className="btn btn-primary btn-block"
+                  type="button"
+                  onClick={onRunAppUpdate}
+                  disabled={applyingUpdate || appUpdateDownloading}
+                >
+                  <IconCheck size={15}/>
+                  {applyingUpdate ? t('update.app.installing') : t('update.app.install')}
+                </button>
                 {appUpdateDownload ? (
                   <button className="btn btn-secondary btn-block" type="button" onClick={onOpenUpdatesFolder}>
                     <IconDownload size={15}/>
@@ -417,6 +413,54 @@ export function SystemPage({
                   </button>
                 )}
               </>
+            )}
+            <div className="switch-list">
+              <label className="switch-row">
+                <input
+                  type="checkbox"
+                  checked={updateSettings.autoCheck}
+                  onChange={(event) =>
+                    onChangeUpdateSettings(event.target.checked, updateSettings.autoDownload)
+                  }
+                />
+                <span className="switch-track" aria-hidden="true">
+                  <span className="switch-thumb"/>
+                </span>
+                <span>{t('update.app.autoCheck')}</span>
+              </label>
+              <label className={`switch-row${updateSettings.autoCheck ? '' : ' is-disabled'}`}>
+                <input
+                  type="checkbox"
+                  checked={updateSettings.autoDownload}
+                  disabled={!updateSettings.autoCheck}
+                  onChange={(event) =>
+                    onChangeUpdateSettings(updateSettings.autoCheck, event.target.checked)
+                  }
+                />
+                <span className="switch-track" aria-hidden="true">
+                  <span className="switch-thumb"/>
+                </span>
+                <span>{t('update.app.autoDownload')}</span>
+              </label>
+            </div>
+            <p className="catalog-note">{t('update.app.autoNote')}</p>
+            {updateSettings.lastResult && updateSettings.lastResult.status !== 'applying' && (
+              <div className="update-result">
+                <StatusMark status={updateSettings.lastResult.status === 'installed' ? 'ok' : 'warn'}/>
+                <div>
+                  <strong>
+                    {updateSettings.lastResult.status === 'installed'
+                      ? t('update.app.installed', {version: updateSettings.lastResult.version ?? ''})
+                      : t('update.app.failed')}
+                  </strong>
+                  {updateSettings.lastResult.message && <span>{updateSettings.lastResult.message}</span>}
+                  <small>
+                    {t('update.app.lastResult')}
+                    {updateSettings.lastResult.at ? ` · ${formatDateTime(updateSettings.lastResult.at)}` : ''}
+                    {updateSettings.lastResult.elevated ? ` · ${t('update.app.elevated')}` : ''}
+                  </small>
+                </div>
+              </div>
             )}
             <button
               className="btn btn-secondary btn-block"

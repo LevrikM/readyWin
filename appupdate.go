@@ -350,42 +350,6 @@ func (a *App) DownloadAppUpdate() (AppUpdateDownload, error) {
 	return AppUpdateDownload{Path: target, SHA256: sum, Size: written}, nil
 }
 
-func (a *App) LaunchAppUpdate(path string) error {
-	abs, err := filepath.Abs(path)
-	if err != nil {
-		return err
-	}
-	baseDir, err := dataDir()
-	if err != nil {
-		return err
-	}
-	updatesDir, err := filepath.Abs(filepath.Join(baseDir, "updates"))
-	if err != nil {
-		return err
-	}
-	relative, err := filepath.Rel(updatesDir, abs)
-	if err != nil || relative == ".." || strings.HasPrefix(relative, ".."+string(os.PathSeparator)) {
-		return errors.New("некоректний шлях до оновлення")
-	}
-	if !strings.EqualFold(filepath.Ext(abs), ".exe") {
-		return errors.New("оновлення має бути EXE")
-	}
-	if info, err := os.Stat(abs); err != nil || !info.Mode().IsRegular() {
-		return errors.New("файл оновлення не знайдено")
-	}
-
-	command := fmt.Sprintf("Start-Sleep -Seconds 2; Start-Process -FilePath %s", psQuote(abs))
-	cmd := exec.Command("powershell.exe", "-NoProfile", "-NonInteractive", "-WindowStyle", "Hidden", "-Command", command)
-	cmd.SysProcAttr = hiddenProcess()
-	if err := cmd.Start(); err != nil {
-		return err
-	}
-	if a.ctx != nil {
-		wruntime.Quit(a.ctx)
-	}
-	return nil
-}
-
 func (a *App) OpenUpdatesFolder() error {
 	baseDir, err := dataDir()
 	if err != nil {

@@ -159,6 +159,22 @@ export type AppUpdateProgress = {
   error?: string
 }
 
+export type AppUpdateResult = {
+  status: 'applying' | 'installed' | 'failed'
+  version?: string
+  previous?: string
+  message?: string
+  at?: string
+  elevated?: boolean
+}
+
+export type AppUpdateSettings = {
+  autoCheck: boolean
+  autoDownload: boolean
+  lastCheck?: string
+  lastResult?: AppUpdateResult
+}
+
 export type InstalledChange = {
   id: string
   name: string

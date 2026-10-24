@@ -19,10 +19,12 @@ var appVersion = "1.2.0"
 type App struct {
 	ctx context.Context
 
-	mu      sync.Mutex
-	install InstallState
-	run     *installRun
-	lang    string
+	mu             sync.Mutex
+	install        InstallState
+	run            *installRun
+	lang           string
+	updateSettings AppUpdateSettings
+	updateApplying bool
 }
 
 func NewApp() *App {
@@ -81,8 +83,10 @@ var closeBlockedMessages = map[string]string{
 
 func (a *App) startup(ctx context.Context) {
 	a.ctx = ctx
+	a.reconcileAppUpdate()
 	go cleanupStorage()
 	go func() { _, _ = loadCatalog() }()
+	go a.autoCheckAppUpdate()
 }
 
 // beforeClose keeps the window open while winget is still working, so a

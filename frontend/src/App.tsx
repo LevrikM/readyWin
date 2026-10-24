@@ -5,6 +5,7 @@ import type {
   AppUpdateDownload,
   AppUpdateInfo,
   AppUpdateProgress,
+  AppUpdateSettings,
   Catalog,
   CatalogStatus,
   HistoryEntry,
@@ -72,6 +73,8 @@ function App() {
   const [appUpdateDownload, setAppUpdateDownload] = useState<AppUpdateDownload | null>(null)
   const [appUpdateProgress, setAppUpdateProgress] = useState<AppUpdateProgress | null>(null)
   const [appUpdateDownloading, setAppUpdateDownloading] = useState(false)
+  const [applyingUpdate, setApplyingUpdate] = useState(false)
+  const [updateSettings, setUpdateSettings] = useState<AppUpdateSettings>({autoCheck: true, autoDownload: true})
   const [skippedVersion, setSkippedVersion] = useState(() => localStorage.getItem(SKIP_UPDATE_KEY) ?? '')
 
   const searchRef = useRef<HTMLInputElement>(null)
@@ -178,39 +181,28 @@ function App() {
     }
   }
 
-  const downloadAppUpdate = async () => {
-    if (!appUpdate?.available) return
+  const runAppUpdate = async () => {
+    if (!appUpdate?.available || applyingUpdate) return
+    setApplyingUpdate(true)
     setAppUpdateDownloading(true)
-    setAppUpdateDownload(null)
-    setAppUpdateProgress({
-      downloaded: 0,
-      total: appUpdate.downloadSize ?? 0,
-      percent: 0,
-      done: false,
-    })
+    setAppUpdateProgress({downloaded: 0, total: appUpdate.downloadSize ?? 0, percent: 0, done: false})
     try {
-      const result = await bridge.downloadAppUpdate()
-      setAppUpdateDownload(result)
-      setAppUpdateProgress({
-        downloaded: result.size,
-        total: result.size,
-        percent: 100,
-        done: true,
-      })
-      showToast(t('toast.updateDownloaded'))
-    } catch {
-      showToast(t('toast.updateDownloadFail'))
+      await bridge.runAppUpdate()
+      showToast(t('toast.updateRestarting'))
+    } catch (err) {
+      const message = err instanceof Error && err.message ? err.message : t('toast.updateInstallFail')
+      showToast(t('toast.updateFailed', {message}))
+      setApplyingUpdate(false)
     } finally {
       setAppUpdateDownloading(false)
     }
   }
 
-  const launchAppUpdate = async () => {
-    if (!appUpdateDownload) return
+  const changeUpdateSettings = async (autoCheck: boolean, autoDownload: boolean) => {
     try {
-      await bridge.launchAppUpdate(appUpdateDownload.path)
+      setUpdateSettings(await bridge.setAppUpdateSettings(autoCheck, autoDownload))
     } catch {
-      showToast(t('toast.updateInstallFail'))
+      showToast(t('toast.appUpdateFail'))
     }
   }
 
@@ -230,6 +222,45 @@ function App() {
   }
 
   useEffect(() => bridge.onAppUpdateProgress((progress) => setAppUpdateProgress(progress)), [])
+
+  useEffect(() => {
+    let alive = true
+    void bridge
+      .getAppUpdateSettings()
+      .then((value) => {
+        if (!alive) return
+        setUpdateSettings(value)
+        const result = value.lastResult
+        if (!result?.at || result.status === 'applying') return
+        if (localStorage.getItem('readywin.updateResultSeen') === result.at) return
+        localStorage.setItem('readywin.updateResultSeen', result.at)
+        const at = new Date(result.at).getTime()
+        if (!Number.isFinite(at) || Date.now() - at > 24 * 3600 * 1000) return
+        if (result.status === 'installed') {
+          showToast(t('toast.updateInstalled', {version: result.version ?? ''}))
+        } else {
+          showToast(t('toast.updateFailed', {message: result.message ?? ''}))
+        }
+      })
+      .catch(() => undefined)
+    return () => {
+      alive = false
+    }
+  }, [showToast, t])
+
+  useEffect(() => {
+    const offAvailable = bridge.onAppUpdateAvailable((info) => {
+      setAppUpdate(info)
+      if (info.available) setAppUpdateDismissed(false)
+    })
+    const offReady = bridge.onAppUpdateReady((download) => setAppUpdateDownload(download))
+    const offError = bridge.onAppUpdateDownloadError(() => undefined)
+    return () => {
+      offAvailable()
+      offReady()
+      offError()
+    }
+  }, [])
 
   useEffect(() => {
     document.documentElement.dataset.theme = theme
@@ -587,24 +618,15 @@ function App() {
             {t('update.app.available', {version: appUpdate.latestVersion ?? ''})}
             {appUpdateDownload && <small className="app-update-banner-note">{t('update.app.ready')}</small>}
           </span>
-          {appUpdateDownload ? (
-            <button className="btn btn-small btn-primary" type="button" onClick={() => void launchAppUpdate()}>
-              <IconCheck size={14}/>
-              {t('update.app.install')}
-            </button>
-          ) : (
-            <button
-              className="btn btn-small btn-primary"
-              type="button"
-              onClick={() => void downloadAppUpdate()}
-              disabled={appUpdateDownloading}
-            >
-              <IconDownload size={14}/>
-              {appUpdateDownloading
-                ? t('update.app.downloading', {percent: appUpdateProgress?.percent ?? 0})
-                : t('update.app.download')}
-            </button>
-          )}
+          <button
+            className="btn btn-small btn-primary"
+            type="button"
+            onClick={() => void runAppUpdate()}
+            disabled={applyingUpdate}
+          >
+            <IconCheck size={14}/>
+            {applyingUpdate ? t('update.app.installing') : t('update.app.install')}
+          </button>
           <button className="btn btn-small btn-secondary" type="button" onClick={() => void openAppUpdate()}>
             {t('update.app.notes')}
           </button>
@@ -695,11 +717,13 @@ function App() {
               appUpdateDownload={appUpdateDownload}
               appUpdateProgress={appUpdateProgress}
               appUpdateDownloading={appUpdateDownloading}
+              applyingUpdate={applyingUpdate}
+              updateSettings={updateSettings}
               updateSkipped={Boolean(appUpdate?.latestVersion && appUpdate.latestVersion === skippedVersion)}
               onCheckAppUpdate={() => void checkAppUpdate(true)}
               onOpenAppUpdate={() => void openAppUpdate()}
-              onDownloadAppUpdate={() => void downloadAppUpdate()}
-              onLaunchAppUpdate={() => void launchAppUpdate()}
+              onRunAppUpdate={() => void runAppUpdate()}
+              onChangeUpdateSettings={(autoCheck, autoDownload) => void changeUpdateSettings(autoCheck, autoDownload)}
               onOpenUpdatesFolder={() => void bridge.openUpdatesFolder()}
               onSkipAppUpdate={skipAppUpdate}
               onUnskipAppUpdate={unskipAppUpdate}
