@@ -31,8 +31,11 @@ func TestParseBatteryReport(t *testing.T) {
 	if !health.Present {
 		t.Fatal("battery should be present")
 	}
-	if health.DesignMah != 50000 || health.FullMah != 42500 || health.Cycles != 321 {
+	if health.DesignMah != 50000 || health.FullMah != 42500 {
 		t.Fatalf("unexpected capacities: %+v", health)
+	}
+	if health.Cycles == nil || *health.Cycles != 321 {
+		t.Fatalf("unexpected cycles: %+v", health.Cycles)
 	}
 	if health.HealthPct != 85 {
 		t.Fatalf("health = %d, want 85", health.HealthPct)

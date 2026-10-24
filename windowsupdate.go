@@ -72,22 +72,12 @@ func collectWindowsUpdate() WindowsUpdateState {
 	wg.Add(2)
 	go func() {
 		defer wg.Done()
-		out, err := runPowerShell(`try {
-  $p = Get-CimInstance -ClassName SoftwareLicensingProduct -Filter "PartialProductKey IS NOT NULL AND ApplicationId='55c92734-d682-4d71-983e-d6ec3f16059f'" -ErrorAction Stop | Select-Object -First 1
-  if ($p) {
-    [pscustomobject]@{status=[int]$p.LicenseStatus; name=[string]$p.Name; kind=[string]$p.ProductKeyChannel; days=[int]$p.GracePeriodRemaining} | ConvertTo-Json -Compress
-  } else { '{}' }
-} catch { '{}' }`, 10*time.Second)
+		license, err := readActivationPowerShell(15 * time.Second)
 		if err != nil {
-			return
+			license, err = readActivationPowerShell(15 * time.Second)
 		}
-		var license struct {
-			Status int    `json:"status"`
-			Name   string `json:"name"`
-			Kind   string `json:"kind"`
-			Days   int    `json:"days"`
-		}
-		if decodeJSONObject(out, &license) != nil {
+		if err != nil {
+			state.Error = err.Error()
 			return
 		}
 		state.LicenseName = license.Name

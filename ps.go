@@ -75,8 +75,8 @@ func runElevatedPowerShell(name, script string, timeout time.Duration) error {
 		return err
 	}
 	launcher := fmt.Sprintf(`$ErrorActionPreference = 'Stop'
-$script = '%s'
-$exit = '%s'
+$script = %s
+$exit = %s
 try {
   $p = Start-Process -FilePath 'powershell.exe' -ArgumentList @('-NoProfile','-ExecutionPolicy','Bypass','-WindowStyle','Hidden','-File',$script) -Verb RunAs -WindowStyle Hidden -PassThru
   if ($p) {
@@ -127,6 +127,24 @@ try {
 	}
 	_ = os.RemoveAll(runDir)
 	return nil
+}
+
+// readActivationPowerShell reads the Windows licence state. Windows occasionally
+// returns no rows on the first query after boot, so callers retry once when the
+// result is empty.
+func readActivationPowerShell(timeout time.Duration) (psActivation, error) {
+	var activation psActivation
+	out, err := runPowerShell(`try { $p = Get-CimInstance -ClassName SoftwareLicensingProduct -Filter "PartialProductKey IS NOT NULL AND ApplicationId='55c92734-d682-4d71-983e-d6ec3f16059f'" -ErrorAction Stop | Select-Object -First 1; if ($p) { [pscustomobject]@{status=[int]$p.LicenseStatus; name=[string]$p.Name; kind=[string]$p.ProductKeyChannel; days=[int]$p.GracePeriodRemaining} | ConvertTo-Json -Compress } else { '{}' } } catch { '{}' }`, timeout)
+	if err != nil {
+		return activation, err
+	}
+	if err := decodeJSONObject(out, &activation); err != nil {
+		return activation, err
+	}
+	if activation.Status == 0 && activation.Name == "" {
+		return activation, errors.New("стан активації недоступний")
+	}
+	return activation, nil
 }
 
 func sanitizeFileName(value string) string {

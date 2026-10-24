@@ -814,14 +814,14 @@ export const bridge = {
   },
   getVersion: async (): Promise<string> => {
     const app = wailsApp()
-    return app ? app.GetVersion() : '1.2.0'
+    return app ? app.GetVersion() : '1.3.0'
   },
   getAppUpdate: async (force: boolean): Promise<AppUpdateInfo> => {
     const app = wailsApp()
     if (app) return app.GetAppUpdate(force)
     return {
-      currentVersion: '1.2.0',
-      latestVersion: '1.2.0',
+      currentVersion: '1.3.0',
+      latestVersion: '1.3.0',
       available: false,
       checkedAt: new Date().toISOString(),
     }

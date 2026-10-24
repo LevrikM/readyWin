@@ -14,7 +14,7 @@ import (
 )
 
 // appVersion is overridden at build time with -ldflags "-X main.appVersion=...".
-var appVersion = "1.2.0"
+var appVersion = "1.3.0"
 
 type App struct {
 	ctx context.Context

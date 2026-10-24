@@ -20,7 +20,7 @@ type BatteryHealth struct {
 	DesignMah    int    `json:"designMah,omitempty"`
 	FullMah      int    `json:"fullMah,omitempty"`
 	HealthPct    int    `json:"healthPct,omitempty"`
-	Cycles       int    `json:"cycles,omitempty"`
+	Cycles       *int   `json:"cycles,omitempty"`
 	Chemistry    string `json:"chemistry,omitempty"`
 	RuntimeMin   int    `json:"runtimeMin,omitempty"`
 	Manufacturer string `json:"manufacturer,omitempty"`
@@ -69,8 +69,10 @@ type psBatteryState struct {
 	Runtime   int  `json:"runtime"`
 	Full      int  `json:"full"`
 	Design    int  `json:"design"`
+	Cycles    int  `json:"cycles"`
 	FullSet   bool `json:"fullSet"`
 	DesignSet bool `json:"designSet"`
+	CyclesSet bool `json:"cyclesSet"`
 }
 
 func collectBatteryHealth() BatteryHealth {
@@ -101,10 +103,17 @@ func collectBatteryHealth() BatteryHealth {
 		battery := source.Batteries.Battery[0]
 		report.DesignMah = battery.Design
 		report.FullMah = battery.Full
-		report.Cycles = battery.Cycles
+		if battery.Cycles > 0 {
+			cycles := battery.Cycles
+			report.Cycles = &cycles
+		}
 		report.Chemistry = strings.TrimSpace(battery.Chemistry)
 		report.Manufacturer = strings.TrimSpace(battery.Manufacturer)
 		report.Serial = strings.TrimSpace(battery.Serial)
+	}
+	if report.Cycles == nil && state.CyclesSet && state.Cycles > 0 {
+		cycles := state.Cycles
+		report.Cycles = &cycles
 	}
 	if report.DesignMah == 0 && state.DesignSet {
 		report.DesignMah = state.Design
@@ -133,10 +142,11 @@ func readBatteryState() psBatteryState {
 	out, err := runPowerShell(`try {
   $b = Get-CimInstance Win32_Battery -ErrorAction Stop | Select-Object -First 1
   if ($b) {
-    $full = $null; $design = $null
+    $full = $null; $design = $null; $cycles = $null
     try { $full = (Get-CimInstance -Namespace root\wmi -ClassName BatteryFullChargedCapacity -ErrorAction Stop | Select-Object -First 1).FullChargedCapacity } catch {}
     try { $design = (Get-CimInstance -Namespace root\wmi -ClassName BatteryStaticData -ErrorAction Stop | Select-Object -First 1).DesignedCapacity } catch {}
-    [pscustomobject]@{present=$true; charge=[int]$b.EstimatedChargeRemaining; status=[int]$b.BatteryStatus; runtime=[int]$b.EstimatedRunTime; full=[int]$full; design=[int]$design; fullSet=($null -ne $full); designSet=($null -ne $design)} | ConvertTo-Json -Compress
+    try { $cycles = (Get-CimInstance -Namespace root\wmi -ClassName BatteryCycleCount -ErrorAction Stop | Select-Object -First 1).CycleCount } catch {}
+    [pscustomobject]@{present=$true; charge=[int]$b.EstimatedChargeRemaining; status=[int]$b.BatteryStatus; runtime=[int]$b.EstimatedRunTime; full=[int]$full; design=[int]$design; cycles=[int]$cycles; fullSet=($null -ne $full); designSet=($null -ne $design); cyclesSet=($null -ne $cycles)} | ConvertTo-Json -Compress
   } else { '{"present":false}' }
 } catch { '{"present":false}' }`, 10*time.Second)
 	if err != nil {
@@ -203,10 +213,13 @@ func parseBatteryReport(data []byte) (BatteryHealth, error) {
 		Present:      true,
 		DesignMah:    battery.Design,
 		FullMah:      battery.Full,
-		Cycles:       battery.Cycles,
 		Chemistry:    strings.TrimSpace(battery.Chemistry),
 		Manufacturer: strings.TrimSpace(battery.Manufacturer),
 		Serial:       strings.TrimSpace(battery.Serial),
+	}
+	if battery.Cycles > 0 {
+		cycles := battery.Cycles
+		result.Cycles = &cycles
 	}
 	if result.DesignMah > 0 && result.FullMah > 0 {
 		result.HealthPct = clampInt(result.FullMah*100/result.DesignMah, 0, 100)

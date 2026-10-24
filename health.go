@@ -224,6 +224,7 @@ type psBitLocker struct {
 type psActivation struct {
 	Status int    `json:"status"`
 	Name   string `json:"name"`
+	Kind   string `json:"kind"`
 	Days   int    `json:"days"`
 }
 
@@ -304,11 +305,9 @@ ConvertTo-Json -InputObject $rows -Compress -Depth 3`, 9*time.Second)
 	}()
 	go func() {
 		defer wg.Done()
-		out, err := runPowerShell(`try { $p = Get-CimInstance -ClassName SoftwareLicensingProduct -Filter "PartialProductKey IS NOT NULL AND ApplicationId='55c92734-d682-4d71-983e-d6ec3f16059f'" -ErrorAction Stop | Select-Object -First 1; if ($p) { [pscustomobject]@{status=[int]$p.LicenseStatus; name=[string]$p.Name; days=[int]$p.GracePeriodRemaining} | ConvertTo-Json -Compress } else { '{}' } } catch { '{}' }`, 9*time.Second)
-		if err == nil {
-			actErr = decodeJSONObject(out, &activation)
-		} else {
-			actErr = err
+		activation, actErr = readActivationPowerShell(15 * time.Second)
+		if actErr != nil {
+			activation, actErr = readActivationPowerShell(15 * time.Second)
 		}
 	}()
 	go func() {

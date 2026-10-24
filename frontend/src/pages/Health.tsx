@@ -479,7 +479,11 @@ export function HealthPage({scan, onToast}: {scan: ScanResult | null; onToast: (
                 <HealthMark status="info" size={17}/>
                 <strong>{t('health.batteryDetails.cells')}</strong>
               </div>
-              <span className="diag-note">{t('health.batteryDetails.cycles', {count: battery.cycles ?? 0})}</span>
+              <span className="diag-note">
+                {typeof battery.cycles === 'number' && battery.cycles > 0
+                  ? t('health.batteryDetails.cycles', {count: battery.cycles})
+                  : t('health.batteryDetails.cyclesUnknown')}
+              </span>
               {battery.chemistry && <span className="diag-note mono">{battery.chemistry}</span>}
               {battery.manufacturer && <span className="diag-note">{battery.manufacturer}</span>}
             </article>
